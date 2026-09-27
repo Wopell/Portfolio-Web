@@ -1,0 +1,2 @@
+# This file exists to ensure the logos directory is tracked and visible in the explorer.
+# You can delete it after uploading your logos.
