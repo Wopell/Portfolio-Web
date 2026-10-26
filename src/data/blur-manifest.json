@@ -1,0 +1,22 @@
+{
+  "april": {
+    "file": "/landscapes/april-blur.webp",
+    "dataUri": "data:image/webp;base64,UklGRtIAAABXRUJQVlA4IMYAAAAwBwCdASowACAAPq1EnkmmI6MhNVgIAMAViWgAsR8OQsjtgcAiMbuonI9axHFa7RtJNwt/2LwqLvZGEV9nViU9dAAA/u/IbXW2YUV2z88V3NoBjSAUwTQ7uqcgqjglM8oPSGNe30D3QHMsnqaJmb3SOtPHdxK6W5Js1tRHdVFlSZ0WkdM1VKuP/JEmpLi1YnOSZ03E0O2s+j1DTd5rpq4tYBtnNzKP6EDSu/yfsI1/2wCH/FAkazHvg89yKwa+pXn68VQIAAA=",
+    "sizeBytes": 218
+  },
+  "june": {
+    "file": "/landscapes/june-blur.webp",
+    "dataUri": "data:image/webp;base64,UklGRpQAAABXRUJQVlA4IIgAAACwBgCdASowABsAPrVSnUwnJKKiKrgKAOAWiWkAAR/rYNmO8brZVOhqcSroX6FzF69Z8ys9lzMkHhXr4OrHgAD+/ds5uvhOEwysaxUtQQH71lHFAlvPZF+8J7cdeFt1a9DfqazoZorrtd4RyTbDUiYpRR7j1jagL156yG5wo8zQISOraPpvEAAA",
+    "sizeBytes": 156
+  },
+  "march": {
+    "file": "/landscapes/march-blur.webp",
+    "dataUri": "data:image/webp;base64,UklGRtIAAABXRUJQVlA4IMYAAABQBwCdASowACAAPrVKnkunJCKhqrgN+OAWiWQ7gBjHqrwBBfUpKFSoSa4WussUOsq17IQLz+xZEDc0gGmxp5G0im3QAP7b5n4CcjZGps92mVlrk27qrExOMMNCdONExg9X7jGKyuUUg/L8S3D+WYqeEc90Eg9BqQlenZ5c2lpngA/I8lk7dsMKYEShuGOgm36tqP9cYJscT556C+YleTpZAiMa11jnBEePby/BfGBXhhH9VzrcB33qrxm8Vr+PrfPIlr8AAAA=",
+    "sizeBytes": 218
+  },
+  "may": {
+    "file": "/landscapes/may-blur.webp",
+    "dataUri": "data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAABwBQCdASowAEgAPrVSm0qnJSIhrvtpAOAWiWkAzQwePcF6xgPiP9z+AVF/5qAxcvfUgjMAAP7yWThHA65N9DhzlZ5SSYESnUzHMVBpcHbCsJY82UXFFbmQIc2WAkiEW0Cp8y5oT8gXMeP6POYB0W0G/wItAWJxUlyFMgm+l8OQgAAA",
+    "sizeBytes": 150
+  }
+}

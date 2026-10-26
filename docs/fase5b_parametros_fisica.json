@@ -1,0 +1,191 @@
+[
+  {
+    "componente": "Imán Estático (Hover)",
+    "parametro": "staticRadius",
+    "valorOriginal": "65.0 * dpr px",
+    "formula": "dist = length(p - mouse)",
+    "descripcion": "Radio de influencia de atracción cuando el cursor está quieto o lento."
+  },
+  {
+    "componente": "Imán Estático (Hover)",
+    "parametro": "pullStrength",
+    "valorOriginal": "7.5 * dpr px (máx)",
+    "formula": "smoothstep(staticRadius, 0.0, dist) * 7.5 * dpr",
+    "descripcion": "Magnitud del desplazamiento hacia el cursor. Cae suavemente a 0 en el borde."
+  },
+  {
+    "componente": "Imán Estático (Hover)",
+    "parametro": "pullDir",
+    "valorOriginal": "Vector unitario",
+    "formula": "normalize(mouse - p)",
+    "descripcion": "Dirección hacia donde son atraídos los centros de los puntos."
+  },
+  {
+    "componente": "Imán Estático (Hover)",
+    "parametro": "pulledCenter",
+    "valorOriginal": "Coordenada 2D",
+    "formula": "p + pullDir * pullStrength",
+    "descripcion": "Desplaza físicamente la posición de cada punto hacia el puntero."
+  },
+  {
+    "componente": "Imán Estático (Hover)",
+    "parametro": "staticSwell",
+    "valorOriginal": "0.06 (relativo)",
+    "formula": "smoothstep(staticRadius, 0.0, dist) * 0.06",
+    "descripcion": "Incremento sutil del radio en reposo (evita empastes negros)."
+  },
+  {
+    "componente": "Imán Estático (Hover)",
+    "parametro": "staticOpacity",
+    "valorOriginal": "0.0 a 1.0",
+    "formula": "smoothstep(staticRadius, 0.0, dist)",
+    "descripcion": "Factor que intensifica el tono/opacidad del punto hacia el 100%."
+  },
+  {
+    "componente": "Cola de Trazos (CPU)",
+    "parametro": "maxSegments",
+    "valorOriginal": "8 segmentos",
+    "formula": "FIFO (shift al superar 8)",
+    "descripcion": "Cola de segmentos del trazo del puntero para el cálculo de la onda continua."
+  },
+  {
+    "componente": "Cola de Trazos (CPU)",
+    "parametro": "minSegmentDist",
+    "valorOriginal": "15.0 * dpr px",
+    "formula": "sqrt(dx*dx + dy*dy) > 15 * dpr",
+    "descripcion": "Distancia mínima euclidiana para registrar un nuevo segmento."
+  },
+  {
+    "componente": "Cola de Trazos (CPU)",
+    "parametro": "segmentInterval",
+    "valorOriginal": "60 ms",
+    "formula": "now - lastSpawnTime > 60",
+    "descripcion": "Tiempo mínimo entre adición de segmentos para evitar sobremuestreo."
+  },
+  {
+    "componente": "Cola de Trazos (CPU)",
+    "parametro": "restThreshold",
+    "valorOriginal": "120 ms",
+    "formula": "now - lastMoveTime > 120",
+    "descripcion": "Umbral de inactividad: si no hay movimiento en > 120 ms pasa a reposo."
+  },
+  {
+    "componente": "Cola de Trazos (CPU)",
+    "parametro": "mouseLerp",
+    "valorOriginal": "0.08",
+    "formula": "pos += (target - pos) * 0.08",
+    "descripcion": "Suavizado orgánico de la posición estática del cursor."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "minDist (Cápsula)",
+    "valorOriginal": "Ortogonal mínima",
+    "formula": "ba = end - start; pa = p - start; h = clamp(dot(pa,ba)/dot(ba,ba), 0, 1); dist = length(p - (start + ba*h))",
+    "descripcion": "Distancia ortogonal más cercana al segmento cilíndrico/cápsula."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "waveSpeed (Base)",
+    "valorOriginal": "110 * dpr px/s",
+    "formula": "speed = 110 * dpr",
+    "descripcion": "Velocidad base de propagación radial del frente de onda."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "waveSpeed (Boost)",
+    "valorOriginal": "380 * dpr px/s (máx)",
+    "formula": "baseSpeed + proximity * (maxSpeed - baseSpeed)",
+    "descripcion": "Acelera la onda si el cursor se desplaza con rapidez cerca del frente."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "waveLifetime",
+    "valorOriginal": "2400 ms",
+    "formula": "progress = (now - stopTime) / 2400",
+    "descripcion": "Duración total del ciclo de desvanecimiento de la onda histórica (Wave 2)."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "waveStrength",
+    "valorOriginal": "1.0 a 0.0",
+    "formula": "Activa: min(1.0, 1.0 + prox * 0.45); Histórica: max(0, 1 - progress)",
+    "descripcion": "Fuerza global de la onda a lo largo de su ciclo de vida."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "waveWidth",
+    "valorOriginal": "6 a 35 * dpr px",
+    "formula": "min(35 * dpr, radius * 0.8 + 6 * dpr)",
+    "descripcion": "Ancho de la cresta de onda; se expande proporcionalmente con el radio."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "waveIntensity",
+    "valorOriginal": "0.0 a 1.0",
+    "formula": "x = clamp(waveDist / waveWidth, 0, 1); factor = (1 - x^2)^3 * strength * dirScale",
+    "descripcion": "Caída cúbica de la campana de intensidad en el frente de onda."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "directionScale",
+    "valorOriginal": "0.07 a 1.0",
+    "formula": "smoothstep(-0.3, 0.3, dot(dirNorm, velDir)) * 0.93 + 0.07",
+    "descripcion": "Asimetría direccional: la onda es más fuerte hacia donde viaja el cursor."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "centerFade",
+    "valorOriginal": "45 * dpr px",
+    "formula": "smoothstep(0.0, 45.0 * dpr, minDist)",
+    "descripcion": "Atenúa el centro del canal de trazo para que no quede saturado."
+  },
+  {
+    "componente": "Ondas por Cápsula",
+    "parametro": "warp (Refracción)",
+    "valorOriginal": "Vector 2D",
+    "formula": "normalize(toCell) * sin(minDist * 0.08 - radius * 0.15) * intensity * 1.5 * dpr",
+    "descripcion": "Deformación oscilatoria perpendicular al trazo tipo onda de agua."
+  },
+  {
+    "componente": "Turbulencia Procedural",
+    "parametro": "fbm (3 octavas)",
+    "valorOriginal": "Freqs: 1, 2, 4; Pesos: 0.5, 0.25, 0.125",
+    "formula": "Oct1: 0.5*noise(p+(0,-0.8t)); Oct2: 0.25*noise(2p+(-0.5t,0.7t)); Oct3: 0.125*noise(4p+(0.9t,-0.4t))",
+    "descripcion": "Ruido Value continuo con desplazamiento temporal multifrecuencia."
+  },
+  {
+    "componente": "Turbulencia Procedural",
+    "parametro": "radiusOffset",
+    "valorOriginal": "+/- 22.5 * dpr px",
+    "formula": "(fbm(coords * 0.045, t * 0.6) - 0.5) * 45.0 * dpr",
+    "descripcion": "Rizado orgánico irregular en el radio del frente de onda."
+  },
+  {
+    "componente": "Turbulencia Procedural",
+    "parametro": "noiseCoords",
+    "valorOriginal": "Coordenadas 2D",
+    "formula": "coords * 0.07 - totalWarp * 0.2",
+    "descripcion": "Coordenadas de ruido perturbadas por el vector warp de refracción."
+  },
+  {
+    "componente": "Radio Final y Tono",
+    "parametro": "swell",
+    "valorOriginal": "0.0 a 0.16",
+    "formula": "max(staticSwell, totalWave * 0.10)",
+    "descripcion": "Incremento de tamaño combinado (imán estático + ondas dinámicas)."
+  },
+  {
+    "componente": "Radio Final y Tono",
+    "parametro": "dotRadius",
+    "valorOriginal": "Relativo al punto",
+    "formula": "baseRadius * (1.0 + swell)",
+    "descripcion": "Suma acotada sin empastes ni manchas negras en el centro."
+  },
+  {
+    "componente": "Radio Final y Tono",
+    "parametro": "finalOpacity",
+    "valorOriginal": "0.0 a 1.0",
+    "formula": "mix(baseOpacity, 1.0, max(staticOpacity, totalWave))",
+    "descripcion": "Enciende los puntos iluminados/atraídos al 100% de intensidad."
+  }
+]

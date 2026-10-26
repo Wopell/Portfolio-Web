@@ -1,30 +1,86 @@
-import { motion, useMotionValue, useTransform, useScroll } from "motion/react";
+import { motion, useTransform, useScroll, useSpring, useMotionValueEvent } from "motion/react";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Scrollytelling from "./Scrollytelling";
-import Works from "./Works";
+import About from "./About";
+import { useProgressiveMagneticScroll } from "../hooks/useProgressiveMagneticScroll";
 
-export default function Home() {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+import { useWorksState } from "../context/WorksStateContext";
 
-  // Parallax transforms for foreground (moves in opposite direction for depth)
-  const fgX = useTransform(mouseX, [-0.5, 0.5], ["10px", "-10px"]);
-  const fgY = useTransform(mouseY, [-0.5, 0.5], ["10px", "-10px"]);
+interface HomeProps {
+  activeTab?: "works" | "about";
+}
 
-  // Scroll animations for camera moving forward effect
-  const { scrollY } = useScroll();
-  const [showOverlay, setShowOverlay] = useState(true);
+export default function Home({ activeTab = "works" }: HomeProps) {
+  const navigate = useNavigate();
+  const { setIsWorksActive } = useWorksState();
+  const isAbout = activeTab === "about";
 
-  // Create a discrete frame index (0 to 99) that matches Scrollytelling.tsx
-  const frameIndex = useTransform(scrollY, (y) => {
-    const zoomScrollRange = window.innerHeight * 4;
-    const progress = Math.max(0, Math.min(1, y / zoomScrollRange));
-    return Math.floor(progress * 99);
+  // Activate Progressive Real-Time Magnetic Gravity Pull ONLY in "works" mode
+  useProgressiveMagneticScroll({
+    totalFrames: 100,
+    activationFrame: 2,
+    targetFrame: 99,
+    exponent: 2.0,
+    maxPullSpeed: 4.5,
+    scrollytellingRangeVh: 4,
+    enabled: !isAbout,
   });
 
-  // Scale and fade the UI in discrete steps so it stutters synchronously with the images
-  const scale = useTransform(frameIndex, [0, 20], [1, 2.5]);
-  const scrollOpacity = useTransform(frameIndex, [0, 15], [1, 0]);
+  // Raw scroll position from document
+  const { scrollY } = useScroll();
+
+  // Scroll source for works mode: feeds raw scrollY ONLY when activeTab is "works", otherwise stays at 0
+  const worksScrollY = useTransform(scrollY, (y) => {
+    return isAbout ? 0 : y;
+  });
+
+  // Apply custom spring physics (damping: 30, stiffness: 160, mass: 0.8) ONLY to works scroll
+  const smoothScrollY = useSpring(worksScrollY, {
+    damping: 30,
+    stiffness: 160,
+    mass: 0.8
+  });
+
+  // Calculate smooth progress (0.0 to 1.0) over the 400vh active zoom range
+  const smoothProgress = useTransform(smoothScrollY, (y) => {
+    if (isAbout) return 0;
+    const zoomScrollRange = window.innerHeight * 4;
+    return Math.max(0, Math.min(1, y / zoomScrollRange));
+  });
+
+  // Hero UI elements stay statically positioned on the white frame at scroll 0
+  // and gracefully slide & fade out when the white stepped mask expands & contracts to 0 (or scroll up with document in About mode)
+  const heroOpacity = useTransform(smoothProgress, (p) => {
+    if (isAbout) return 1;
+    if (p <= 0.05) return 1;
+    if (p >= 0.16) return 0;
+    return 1 - (p - 0.05) / 0.11;
+  });
+
+  const heroY = useTransform(scrollY, (y) => {
+    if (isAbout) return -y;
+    return 0;
+  });
+
+  const [showOverlay, setShowOverlay] = useState(true);
+
+  // Sync spring physics and state when activeTab changes
+  useEffect(() => {
+    if (isAbout) {
+      smoothScrollY.jump(0);
+    } else {
+      smoothScrollY.jump(window.scrollY);
+    }
+  }, [activeTab, isAbout, smoothScrollY]);
+
+  // Monitor progress when in landing mode: when smoothProgress hits 0.99 (reaching frame 99), activate works state and navigate!
+  useMotionValueEvent(smoothProgress, "change", (latestProgress) => {
+    if (!isAbout && latestProgress >= 0.99) {
+      setIsWorksActive(true);
+      navigate("/works");
+    }
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,80 +92,71 @@ export default function Home() {
       }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      // Normalize values from -0.5 to 0.5
-      mouseX.set((e.clientX / window.innerWidth) - 0.5);
-      mouseY.set((e.clientY / window.innerHeight) - 0.5);
-    };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("mousemove", handleMouseMove);
-    
-    // Initial check
     handleScroll();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [mouseX, mouseY]);
+  }, []);
 
   return (
-    <div className="bg-black w-full min-h-screen text-white relative">
-      {/* Scrollytelling Canvas Section (500vh scroll container inside) */}
-      <Scrollytelling />
+    <div className={`w-full min-h-screen relative ${isAbout ? 'bg-[#e8e9eb] text-black' : 'bg-black text-white'}`}>
+      {/* Scrollytelling Canvas Section with Spring Physics and Dynamic Stepped Rounded Mask */}
+      <Scrollytelling 
+        scrollY={scrollY}
+        smoothScrollY={smoothScrollY} 
+        smoothProgress={smoothProgress} 
+        isZoomDisabled={isAbout}
+      />
 
-      {/* Cinematic Hero UI Overlay */}
+      {/* Hero UI Overlay: Enmasked literally by the shrinking white frame mask as it contracts */}
       {showOverlay && (
         <motion.div 
-          className="fixed inset-0 w-full h-full flex flex-col justify-end p-8 md:p-16 lg:px-24 lg:pb-24 pointer-events-none z-10 origin-center"
+          className="fixed top-0 left-0 w-full h-screen pointer-events-none z-20"
           style={{ 
-            opacity: scrollOpacity, 
-            scale: scale,
+            clipPath: "url(#hero-text-cutout-mask)",
+            opacity: heroOpacity,
+            y: heroY,
           }}
         >
-          {/* Grain/Noise Overlay */}
-          <div className="noise-overlay" />
-
-          {/* Content */}
-          <motion.div 
-            className="relative z-10 w-full max-w-4xl pointer-events-auto"
-            style={{ x: fgX, y: fgY }}
-          >
-            <div className="text-reveal mb-6">
-              <h1 className="text-[7vw] md:text-[5vw] leading-none select-none tracking-tight inline-flex items-baseline">
-                <span className="font-futura font-black uppercase tracking-[-0.05em] text-white">port</span>
-                <span className="font-didot font-normal uppercase ml-2.5 text-white/80">folio</span>
+          {/* Hero Content vertically and horizontally centered inside the bottom-left white cutout square */}
+          <div className="absolute top-[68vh] bottom-[11vh] left-[4vw] md:left-[5vw] w-[21vw] md:w-[21vw] flex flex-col justify-center z-30 pointer-events-auto">
+            <div className="text-reveal mb-2">
+              <h1 className="text-[5.8vw] md:text-[4vw] lg:text-[3.4vw] leading-[0.85] select-none tracking-tight inline-flex items-baseline text-zinc-950 font-black">
+                <span className="font-futura uppercase tracking-[-0.04em]">port</span>
+                <span className="font-serif font-normal uppercase ml-1.5 text-zinc-900">folio</span>
               </h1>
             </div>
 
-            <div className="pl-2">
-              <div className="text-xs md:text-sm font-sans tracking-wide space-y-0.5 leading-tight">
-                <p className="opacity-70">trabajos seleccionados de</p>
-                <p className="text-white font-medium uppercase">motion graphics</p>
-                <p className="text-white font-medium uppercase">modelado 3D</p>
-                <p className="text-white font-medium uppercase">&amp; diseño</p>
+            <div className="pl-0.5">
+              <div className="text-[10px] md:text-[11px] lg:text-xs font-sans tracking-wide space-y-0.5 leading-tight text-zinc-800 font-semibold">
+                <p className="opacity-70 font-normal">trabajos seleccionados de</p>
+                <p className="uppercase tracking-wider">ANIMATION</p>
+                <p className="uppercase tracking-wider">3D ART</p>
+                <p className="uppercase tracking-wider">IA &amp; POST PRODUCTION</p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* Language Switcher */}
-          <div className="absolute bottom-8 right-8 md:bottom-12 md:right-16 z-20 flex gap-2 text-sm md:text-base font-sans tracking-widest uppercase opacity-100">
+          {/* Language Switcher anchored in the bottom white strip, aligned with the right mask edge */}
+          <div className="absolute top-[89vh] bottom-0 right-[4vw] md:right-[5vw] flex items-center gap-2 z-40 text-xs md:text-sm font-sans tracking-widest uppercase font-bold text-zinc-900 pointer-events-auto">
             <span className="opacity-50">EN</span>
             <span className="opacity-30">-</span>
-            <span className="text-white opacity-100 font-medium">ES</span>
+            <span className="opacity-100">ES</span>
           </div>
 
           {/* Vignette effect */}
-          <div className="absolute inset-0 pointer-events-none bg-radial-gradient from-transparent to-black/30" />
+          <div className="absolute inset-0 pointer-events-none bg-radial-gradient from-transparent to-black/20" />
         </motion.div>
       )}
 
-      {/* Works Page Content Section */}
-      {/* Positioned relatively to start right below the 500vh Scrollytelling canvas */}
-      <div className="relative z-20 bg-black">
-        <Works />
-      </div>
+      {/* Mode "about": Render About section directly below landing frame */}
+      {isAbout && (
+        <div className="relative z-20 bg-[#e8e9eb] text-black min-h-screen">
+          <About />
+        </div>
+      )}
     </div>
   );
 }

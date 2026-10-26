@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="100%" height="100%">
+  <!-- Placeholder 001 // ANIMATION - Textura neutra slate/nubes con cuadrícula de papel (sin texto) -->
+  <defs>
+    <pattern id="grid-paper-1" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#2d3748" stroke-width="0.8" stroke-opacity="0.3"/>
+    </pattern>
+    <linearGradient id="sky-gradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#404e5d"/>
+      <stop offset="100%" stop-color="#2d3748"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#sky-gradient)"/>
+  <rect width="1200" height="600" fill="url(#grid-paper-1)"/>
+</svg>

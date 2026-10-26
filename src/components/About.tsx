@@ -44,7 +44,7 @@ export default function About() {
   };
 
   return (
-    <section id="about" className="bg-white text-black min-h-screen relative">
+    <section id="about" className="bg-[#e8e9eb] text-black min-h-screen relative">
       {/* Structural Grid Overlay (Subtle) */}
       <div className="absolute inset-0 pointer-events-none border-x border-black/5 max-w-[1600px] mx-auto" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-full bg-black/5 hidden md:block" />
@@ -93,7 +93,7 @@ export default function About() {
         {/* Detailed Info Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-black/10 border-y border-black/10 mb-32">
           {/* Column 1: Studies */}
-          <motion.div variants={item} className="bg-white p-8 md:p-12 space-y-6">
+          <motion.div variants={item} className="bg-[#e8e9eb] p-8 md:p-12 space-y-6">
             <GraduationCap size={20} strokeWidth={1.5} />
             <h3 className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold opacity-60">Education</h3>
             <div className="space-y-4">
@@ -105,7 +105,7 @@ export default function About() {
           </motion.div>
 
           {/* Column 2: Industry */}
-          <motion.div variants={item} className="bg-white p-8 md:p-12 space-y-6 border-x border-black/10">
+          <motion.div variants={item} className="bg-[#e8e9eb] p-8 md:p-12 space-y-6 border-x border-black/10">
             <Briefcase size={20} strokeWidth={1.5} />
             <h3 className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold opacity-60">Experience</h3>
             <div className="space-y-4">
@@ -117,7 +117,7 @@ export default function About() {
           </motion.div>
 
           {/* Column 3: Contact */}
-          <motion.div variants={item} className="bg-white p-8 md:p-12 space-y-6">
+          <motion.div variants={item} className="bg-[#e8e9eb] p-8 md:p-12 space-y-6">
             <MapPin size={20} strokeWidth={1.5} />
             <h3 className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold opacity-60">Contact</h3>
             <div className="flex flex-col gap-4">

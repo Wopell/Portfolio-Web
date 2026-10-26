@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" width="100%" height="100%">
+  <!-- Placeholder 002 // 3D ART - Textura neutra crema cálido con cuadrícula de papel (sin texto) -->
+  <defs>
+    <pattern id="grid-paper-2" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#4A4036" stroke-width="0.8" stroke-opacity="0.18"/>
+    </pattern>
+    <linearGradient id="cream-gradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#dad4c3"/>
+      <stop offset="100%" stop-color="#cec7b3"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#cream-gradient)"/>
+  <rect width="1200" height="600" fill="url(#grid-paper-2)"/>
+</svg>

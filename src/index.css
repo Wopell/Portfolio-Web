@@ -1,5 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=GFS+Didot&family=Instrument+Serif:ital@1&family=Playfair+Display:ital,wght@1,400..900&family=Jost:wght@100..900&family=Inter:wght@100..900;400;700;900&family=Outfit:wght@700;900&family=JetBrains+Mono:wght@100..800;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=GFS+Didot&family=Instrument+Serif:ital@1&family=Playfair+Display:ital,wght@1,400..900&family=Jost:wght@100..900&family=Inter:wght@100..900;400;700;900&family=Outfit:wght@700;900&family=JetBrains+Mono:wght@100..800;400;700&family=Caveat:wght@400..700&family=Silkscreen:wght@400;700&family=Press+Start+2P&family=Permanent+Marker&display=swap');
 @import "tailwindcss";
+
+:root {
+  --z-orbit-back: 5;
+  --z-planet: 10;
+  --z-orbit-front: 20;
+  --z-title: 50;
+  --z-category-overlay: 70;
+  --z-nav: 100;
+}
 
 @theme {
   --font-didot: "GFS Didot", serif;
@@ -10,6 +19,9 @@
   --font-display: "Outfit", sans-serif;
   --font-serif: "Bodoni Moda", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-handwritten: "Caveat", cursive;
+  --font-pixel: "Press Start 2P", monospace;
+  --font-marker: "Permanent Marker", cursive;
   
   --color-app-bg: #0a0a0a;
   --color-app-card: #141414;
@@ -24,16 +36,7 @@
 }
 
 .noise-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.12;
-  z-index: 50;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
+  display: none !important;
 }
 
 .fuzzy-glow {
@@ -140,3 +143,115 @@
   font-family: var(--font-serif);
   @apply italic font-medium;
 }
+
+.glass-pill-badge {
+  background-color: rgba(20, 20, 24, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Glass Typography: Pure letters lens (blur, grain, crystal highlight, no rectangular box) */
+.glass-text-lens {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(24px) brightness(1.22) contrast(1.18) saturate(1.25);
+  -webkit-backdrop-filter: blur(24px) brightness(1.22) contrast(1.18) saturate(1.25);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.28'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 50%, rgba(255, 255, 255, 0.12) 100%);
+  background-size: 140px 140px, 100% 100%;
+  pointer-events: none;
+}
+
+.glass-text-stroke {
+  color: transparent !important;
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.95);
+  text-shadow: 
+    0 2px 4px rgba(255, 255, 255, 0.5),
+    0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* Handwritten & Pixel Typography */
+.font-handwritten {
+  font-family: var(--font-handwritten);
+}
+
+.font-pixel {
+  font-family: var(--font-pixel), "JetBrains Mono", monospace;
+}
+
+.font-marker {
+  font-family: var(--font-marker), "Caveat", cursive;
+}
+
+/* Desk, Paper, and Collage Board Styles */
+.paper-grid {
+  background-size: 28px 28px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.065) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.065) 1px, transparent 1px);
+}
+
+.paper-lines {
+  background-size: 100% 28px;
+  background-image: linear-gradient(to bottom, transparent 27px, rgba(0, 0, 0, 0.06) 1px);
+}
+
+/* Authentic Scotch / Washi Tape */
+.tape-strip {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+  border-left: 2px dashed rgba(255, 255, 255, 0.9);
+  border-right: 2px dashed rgba(255, 255, 255, 0.9);
+}
+
+.tape-strip-blue {
+  background: rgba(186, 215, 245, 0.65);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  border-left: 2px dashed rgba(255, 255, 255, 0.9);
+  border-right: 2px dashed rgba(255, 255, 255, 0.9);
+}
+
+.tape-strip-yellow {
+  background: rgba(254, 240, 138, 0.65);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  border-left: 2px dashed rgba(255, 255, 255, 0.9);
+  border-right: 2px dashed rgba(255, 255, 255, 0.9);
+}
+
+.tape-strip-mint {
+  background: rgba(167, 243, 208, 0.65);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  border-left: 2px dashed rgba(255, 255, 255, 0.9);
+  border-right: 2px dashed rgba(255, 255, 255, 0.9);
+}
+
+.polaroid-card {
+  background: #ffffff;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.12), 0 2px 6px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.post-it-note {
+  box-shadow: 2px 6px 18px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.stamp-badge {
+  border: 1.5px dashed rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Folder tab styling for project modules */
+.folder-tab-shape {
+  clip-path: polygon(0 0, 160px 0, 185px 100%, 100% 100%, 100% 100%, 0 100%);
+}
+

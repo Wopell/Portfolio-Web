@@ -1,0 +1,28 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Subtle Halftone Pattern -->
+    <pattern id="halftone-3" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="2.5" fill="#000000" opacity="0.16" />
+      <circle cx="0" cy="0" r="1.5" fill="#000000" opacity="0.11199999999999999" />
+      <circle cx="16" cy="0" r="1.5" fill="#000000" opacity="0.11199999999999999" />
+      <circle cx="0" cy="16" r="1.5" fill="#000000" opacity="0.11199999999999999" />
+      <circle cx="16" cy="16" r="1.5" fill="#000000" opacity="0.11199999999999999" />
+    </pattern>
+  </defs>
+
+  <!-- Base Accent Background -->
+  <rect width="400" height="400" fill="#818cf8" />
+
+  <!-- Halftone Pattern Overlay -->
+  <rect width="400" height="400" fill="url(#halftone-3)" />
+
+  <!-- Inner Edge Vignette for Depth -->
+  <circle cx="200" cy="200" r="198" fill="none" stroke="#000000" stroke-width="4" opacity="0.15" />
+
+  <!-- Main Centered Glyph (~50% of circle) -->
+  
+      <path d="M 200,90 Q 200,200 310,200 Q 200,200 200,310 Q 200,200 90,200 Q 200,200 200,90 Z" fill="#111111" />
+      <!-- Subtle center accent -->
+      <circle cx="200" cy="200" r="16" fill="#818cf8" opacity="0.3" />
+    
+</svg>
