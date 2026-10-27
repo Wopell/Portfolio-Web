@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowLeft, 
@@ -93,27 +93,109 @@ function ProjectSquareCard({ project, onClick }: ProjectSquareCardProps) {
 
 function ProjectModal({
   project,
+  category,
   onClose,
 }: {
   project: ProjectItem | null;
+  category: CategoryData | null;
   onClose: () => void;
 }) {
-  if (!project) return null;
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousActiveElementRef = useRef<HTMLElement | null>(null);
+  const previousScrollYRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!project) return;
+
+    // Guardar foco previo y posición de scroll
+    previousActiveElementRef.current = document.activeElement as HTMLElement;
+    previousScrollYRef.current = window.scrollY;
+
+    // FASE 4: Bloqueo de scroll de página (document.body.style.overflow = 'hidden')
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    // FASE 4: Sincronización URL Hash: #selected-projects/<slug>/<id> (con replaceState para evitar fugas de historial)
+    const categorySlug = category ? category.id.replace('category-', '') : 'selected-projects';
+    const newHash = `#selected-projects/${categorySlug}/${project.id}`;
+    if (window.location.hash !== newHash) {
+      window.history.replaceState(null, '', newHash);
+    }
+
+    // Foco inicial en botón de cierre
+    const closeBtn = modalRef.current?.querySelector<HTMLButtonElement>('button[aria-label="Cerrar modal"]');
+    closeBtn?.focus();
+
+    // Foco atrapado (Focus trap) y Escape
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusableElements.length === 0) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+
+      // FASE 5: Restaurar scroll y desbloquear body
+      document.body.style.overflow = originalOverflow;
+      window.scrollTo(0, previousScrollYRef.current);
+
+      // FASE 5: Revertir hash de URL limpiamente
+      if (window.location.hash.startsWith('#selected-projects/')) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+
+      // FASE 5: Devolver foco al elemento disparador
+      if (previousActiveElementRef.current) {
+        previousActiveElementRef.current.focus();
+      }
+    };
+  }, [project, category, onClose]);
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 bg-black/85 backdrop-blur-xl"
-        onClick={onClose}
-      >
+    <motion.div
+      ref={modalRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-project-title"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4 md:p-8 bg-black/85 backdrop-blur-xl"
+      onClick={onClose}
+    >
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.94, y: 20 }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           onClick={(e) => e.stopPropagation()}
           className="relative max-w-4xl w-full bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col"
         >
@@ -143,7 +225,7 @@ function ProjectModal({
               <span>•</span>
               <span>{project.year}</span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight text-white mb-3">
+            <h2 id="modal-project-title" className="text-2xl md:text-3xl font-display font-black tracking-tight text-white mb-3">
               {project.title}
             </h2>
             <p className="text-zinc-300 font-sans text-sm md:text-base leading-relaxed max-w-2xl">
@@ -152,7 +234,6 @@ function ProjectModal({
           </div>
         </motion.div>
       </motion.div>
-    </AnimatePresence>
   );
 }
 
@@ -403,21 +484,31 @@ function CommercialBrandsSection() {
 export default function Works() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
+  const [openedDirectlyFromFolders, setOpenedDirectlyFromFolders] = useState(false);
+
+  const handleCloseModal = () => {
+    setSelectedProject(null);
+    if (openedDirectlyFromFolders) {
+      setSelectedCategoryId(null);
+      setOpenedDirectlyFromFolders(false);
+    }
+  };
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (selectedProject) {
-          setSelectedProject(null);
+          handleCloseModal();
         } else if (selectedCategoryId) {
           setSelectedCategoryId(null);
+          setOpenedDirectlyFromFolders(false);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedCategoryId, selectedProject]);
+  }, [selectedCategoryId, selectedProject, openedDirectlyFromFolders]);
 
   const selectedCategory = CATEGORIES.find((c) => c.id === selectedCategoryId);
 
@@ -442,14 +533,17 @@ export default function Works() {
       <div className="w-full max-w-[860px] mx-auto px-3 sm:px-6">
         {/* 3. "LET'S WORK TOGETHER" (Instagram, Telegram, Email, Behance) */}
         <LetsWorkTogetherSection />
+      </div>
 
-        {/* 4. "SELECTED PROJECTS" (Carpetas 3D con Error Boundary de aislamiento) */}
+      {/* 4. "SELECTED PROJECTS" (Carpetas 3D con Error Boundary de aislamiento y escala completa 1200px) */}
+      <div className="w-full max-w-[1200px] mx-auto px-0">
         <FolderErrorBoundary>
           <ProjectFolders
             categories={CATEGORIES}
             isCategoryOpen={selectedCategoryId !== null}
             activeCategoryId={selectedCategoryId}
             onOpenProject={(catId, projId) => {
+              setOpenedDirectlyFromFolders(true);
               setSelectedCategoryId(catId);
               if (projId) {
                 const cat = CATEGORIES.find((c) => c.id === catId);
@@ -461,7 +555,9 @@ export default function Works() {
             }}
           />
         </FolderErrorBoundary>
+      </div>
 
+      <div className="w-full max-w-[860px] mx-auto px-3 sm:px-6">
         {/* 5. "MARCAS & CLIENTES COMERCIALES" (3-Column Table on Graph Paper) */}
         <CommercialBrandsSection />
 
@@ -543,7 +639,10 @@ export default function Works() {
                     <ProjectSquareCard
                       key={project.id}
                       project={project}
-                      onClick={() => setSelectedProject(project)}
+                      onClick={() => {
+                        setOpenedDirectlyFromFolders(false);
+                        setSelectedProject(project);
+                      }}
                     />
                   ))}
                 </div>
@@ -552,6 +651,8 @@ export default function Works() {
                   <button
                     onClick={() => {
                       setSelectedCategoryId(null);
+                      setSelectedProject(null);
+                      setOpenedDirectlyFromFolders(false);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                     className="px-6 py-3 rounded-full bg-zinc-900 text-white hover:bg-black font-mono text-xs uppercase tracking-widest font-bold transition-all shadow-md cursor-pointer flex items-center gap-2"
@@ -571,10 +672,15 @@ export default function Works() {
       </AnimatePresence>
 
       {/* Project Lightbox Modal */}
-      <ProjectModal
-        project={selectedProject}
-        onClose={() => setSelectedProject(null)}
-      />
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectModal
+            project={selectedProject}
+            category={selectedCategory || null}
+            onClose={handleCloseModal}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }
