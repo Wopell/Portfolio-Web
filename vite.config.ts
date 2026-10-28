@@ -17,8 +17,13 @@ export default defineConfig(({mode}) => {
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
+      // WSL only: enable fs polling so the watcher sees edits on /mnt/* drives.
+      watch: {
+        usePolling: process.env.WSL_WATCH === '1',
+        interval: 300,
+      },
     },
   };
 });

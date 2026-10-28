@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Works from './Works';
+import Works from './works/Works';
 
 export default function WorksPage() {
   useEffect(() => {

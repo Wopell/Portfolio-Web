@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import { ProjectItem } from './Works';
+import { ProjectItem } from '../data/projects';
 
 interface AsciiWorldProps {
   onSelectProject?: (project: ProjectItem) => void;
