@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-10-26T20:21:45.507Z",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "loadTimeMs": 1111,
+  "fpsIdle": 55.9,
+  "fpsMoving": 55.7,
+  "initialHeapMb": 9.06,
+  "postStressHeapMb": 11.46,
+  "memoryDeltaPercent": 26.5,
+  "bundleSizeMb": "15.09 MB"
+}

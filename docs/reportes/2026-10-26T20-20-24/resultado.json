@@ -1,0 +1,71 @@
+{
+  "timestamp": "2026-10-26T20:20:24.070Z",
+  "sectionArg": "carpetas",
+  "targetSelector": "#selected-projects",
+  "results": [
+    {
+      "width": 1920,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-20-24/full_1920px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": false,
+      "sectionScreenshot": null,
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null
+    },
+    {
+      "width": 1440,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-20-24/full_1440px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": false,
+      "sectionScreenshot": null,
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null
+    },
+    {
+      "width": 768,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-20-24/full_768px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": false,
+      "sectionScreenshot": null,
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null
+    },
+    {
+      "width": 390,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-20-24/full_390px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": false,
+      "sectionScreenshot": null,
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null
+    }
+  ]
+}

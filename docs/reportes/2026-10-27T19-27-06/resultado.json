@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-10-27T19:27:06.857Z",
+  "sectionArg": "carpetas",
+  "targetSelector": "#selected-projects",
+  "overflow360Ok": true,
+  "criteriaChecks": [
+    {
+      "criterio": "Consola limpia (0 errores/warnings)",
+      "estado": "PASA",
+      "evidencia": "0 errores en consola"
+    },
+    {
+      "criterio": "Scroll horizontal ausente (1920, 1440, 768, 390px + 360px)",
+      "estado": "PASA",
+      "evidencia": "Sin desborde horizontal (360px limpio)"
+    },
+    {
+      "criterio": "Sección detectada (#selected-projects)",
+      "estado": "PASA",
+      "evidencia": "Presente en 4/4 viewports"
+    },
+    {
+      "criterio": "Paridad visual 1920px contra referencia aprobada",
+      "estado": "FALLA",
+      "evidencia": "12.28% de diferencia (alineación milimétrica con referencia aprobada)"
+    }
+  ],
+  "results": [
+    {
+      "width": 1920,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "fullScreenshot": "docs/reportes/2026-10-27T19-27-06/full_1920px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-27T19-27-06/section_carpetas_1920px.png",
+      "pixelDiffPercent": 12.28,
+      "diffSignal": "DESVIACIÓN_DETECTADA (Señal informativa)",
+      "diffScreenshot": "docs/reportes/2026-10-27T19-27-06/diff_carpetas_1920px.png",
+      "specificChecks": {}
+    }
+  ]
+}

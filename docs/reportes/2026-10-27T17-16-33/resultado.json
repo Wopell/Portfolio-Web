@@ -1,0 +1,98 @@
+{
+  "timestamp": "2026-10-27T17:16:33.434Z",
+  "sectionArg": "selected-projects",
+  "targetSelector": "#selected-projects",
+  "overflow360Ok": true,
+  "criteriaChecks": [
+    {
+      "criterio": "Consola limpia (0 errores/warnings)",
+      "estado": "PASA",
+      "evidencia": "0 errores en consola"
+    },
+    {
+      "criterio": "Scroll horizontal ausente (1920, 1440, 768, 390px + 360px)",
+      "estado": "PASA",
+      "evidencia": "Sin desborde horizontal (360px limpio)"
+    },
+    {
+      "criterio": "Sección detectada (#selected-projects)",
+      "estado": "PASA",
+      "evidencia": "Presente en 4/4 viewports"
+    },
+    {
+      "criterio": "Paridad visual 1920px contra referencia aprobada",
+      "estado": "FALLA",
+      "evidencia": "Sin referencia base"
+    }
+  ],
+  "results": [
+    {
+      "width": 1920,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "fullScreenshot": "docs/reportes/2026-10-27T17-16-33/full_1920px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-27T17-16-33/section_selected-projects_1920px.png",
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null,
+      "specificChecks": {}
+    },
+    {
+      "width": 1440,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "fullScreenshot": "docs/reportes/2026-10-27T17-16-33/full_1440px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-27T17-16-33/section_selected-projects_1440px.png",
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null,
+      "specificChecks": {}
+    },
+    {
+      "width": 768,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "fullScreenshot": "docs/reportes/2026-10-27T17-16-33/full_768px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-27T17-16-33/section_selected-projects_768px.png",
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null,
+      "specificChecks": {}
+    },
+    {
+      "width": 390,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "fullScreenshot": "docs/reportes/2026-10-27T17-16-33/full_390px.png",
+      "sectionSelector": "#selected-projects",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-27T17-16-33/section_selected-projects_390px.png",
+      "pixelDiffPercent": null,
+      "diffSignal": "NO_BASELINE (Señal informativa)",
+      "diffScreenshot": null,
+      "specificChecks": {}
+    }
+  ]
+}

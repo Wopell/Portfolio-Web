@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-10-27T16:13:46.990Z",
+  "environmentNote": "En Chromium headless el virtual compositor clampa rAF a 60 FPS por defecto; en monitor real de 240Hz el refresco sincroniza con el display nativo. Por ello, la evaluación cinemática se mide contra la línea base de reposo de cada entorno.",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "loadTimeMs": 1360,
+  "fpsIdleBaseline": 60.4,
+  "fpsMoving": 119.9,
+  "fpsRetentionPercent": 198.5,
+  "fpsStatus": "PASA (Fluido, retiene ≥ 85% de la línea base)",
+  "initialHeapMb": 8.79,
+  "postStressHeapMb": 11.28,
+  "memoryDeltaPercent": 28.3,
+  "bundleSizeMb": "15.91 MB"
+}

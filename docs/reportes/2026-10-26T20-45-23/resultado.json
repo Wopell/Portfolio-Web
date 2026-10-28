@@ -1,0 +1,140 @@
+{
+  "timestamp": "2026-10-26T20:45:23.816Z",
+  "sectionArg": "planeta",
+  "targetSelector": "div[role=\"region\"][aria-label=\"Presentación interactiva del portafolio\"]",
+  "overflow360Ok": true,
+  "criteriaChecks": [
+    {
+      "criterio": "Consola limpia (0 errores/warnings)",
+      "estado": "PASA",
+      "evidencia": "0 errores en consola"
+    },
+    {
+      "criterio": "Scroll horizontal ausente (1920, 1440, 768, 390px + 360px)",
+      "estado": "PASA",
+      "evidencia": "Sin desborde horizontal (360px limpio)"
+    },
+    {
+      "criterio": "Sección detectada (div[role=\"region\"][aria-label=\"Presentación interactiva del portafolio\"])",
+      "estado": "PASA",
+      "evidencia": "Presente en 4/4 viewports"
+    },
+    {
+      "criterio": "Touch action en contenedor es pan-y (no bloquea scroll)",
+      "estado": "PASA",
+      "evidencia": "touch-action: pan-y activo"
+    },
+    {
+      "criterio": "Nav z-index superior a la Tierra",
+      "estado": "PASA",
+      "evidencia": "Nav (z:100) > Planet (z:10)"
+    },
+    {
+      "criterio": "Diff de píxeles (Señal visual; no determinista sin ?freeze=1)",
+      "estado": "SEÑAL_INFORMATIVA",
+      "evidencia": "9.2% de diferencia"
+    }
+  ],
+  "results": [
+    {
+      "width": 1920,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 1920,
+      "clientWidth": 1920,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-45-23/full_1920px.png",
+      "sectionSelector": "div[role=\"region\"][aria-label=\"Presentación interactiva del portafolio\"]",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-26T20-45-23/section_planeta_1920px.png",
+      "pixelDiffPercent": 9.2,
+      "diffSignal": "DESVIACIÓN_DETECTADA (Señal informativa)",
+      "diffScreenshot": "docs/reportes/2026-10-26T20-45-23/diff_planeta_1920px.png",
+      "specificChecks": {
+        "touchAction": "pan-y",
+        "hasPanY": true,
+        "navAbovePlanet": true,
+        "containerZIndex": 10,
+        "navZIndex": 100,
+        "hasCanvas": true,
+        "labelsFoundCount": 4
+      }
+    },
+    {
+      "width": 1440,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-45-23/full_1440px.png",
+      "sectionSelector": "div[role=\"region\"][aria-label=\"Presentación interactiva del portafolio\"]",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-26T20-45-23/section_planeta_1440px.png",
+      "pixelDiffPercent": 9.49,
+      "diffSignal": "DESVIACIÓN_DETECTADA (Señal informativa)",
+      "diffScreenshot": "docs/reportes/2026-10-26T20-45-23/diff_planeta_1440px.png",
+      "specificChecks": {
+        "touchAction": "pan-y",
+        "hasPanY": true,
+        "navAbovePlanet": true,
+        "containerZIndex": 10,
+        "navZIndex": 100,
+        "hasCanvas": true,
+        "labelsFoundCount": 4
+      }
+    },
+    {
+      "width": 768,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-45-23/full_768px.png",
+      "sectionSelector": "div[role=\"region\"][aria-label=\"Presentación interactiva del portafolio\"]",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-26T20-45-23/section_planeta_768px.png",
+      "pixelDiffPercent": 12.32,
+      "diffSignal": "DESVIACIÓN_DETECTADA (Señal informativa)",
+      "diffScreenshot": "docs/reportes/2026-10-26T20-45-23/diff_planeta_768px.png",
+      "specificChecks": {
+        "touchAction": "pan-y",
+        "hasPanY": true,
+        "navAbovePlanet": true,
+        "containerZIndex": 10,
+        "navZIndex": 100,
+        "hasCanvas": true,
+        "labelsFoundCount": 4
+      }
+    },
+    {
+      "width": 390,
+      "navigationOk": true,
+      "consoleErrorsCount": 0,
+      "consoleErrors": [],
+      "hasHorizontalScroll": false,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "fullScreenshot": "docs/reportes/2026-10-26T20-45-23/full_390px.png",
+      "sectionSelector": "div[role=\"region\"][aria-label=\"Presentación interactiva del portafolio\"]",
+      "sectionFound": true,
+      "sectionScreenshot": "docs/reportes/2026-10-26T20-45-23/section_planeta_390px.png",
+      "pixelDiffPercent": 11.94,
+      "diffSignal": "DESVIACIÓN_DETECTADA (Señal informativa)",
+      "diffScreenshot": "docs/reportes/2026-10-26T20-45-23/diff_planeta_390px.png",
+      "specificChecks": {
+        "touchAction": "pan-y",
+        "hasPanY": true,
+        "navAbovePlanet": true,
+        "containerZIndex": 10,
+        "navZIndex": 100,
+        "hasCanvas": true,
+        "labelsFoundCount": 4
+      }
+    }
+  ]
+}
