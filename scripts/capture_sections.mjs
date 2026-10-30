@@ -184,6 +184,13 @@ let runStep = async (step) => {
     case 'wait': await sleep(Number(value)); return 'waited';
     case 'eval': return String(await evalJs(value));
     case 'eval-file': return String(await evalJs(readFileSync(value, 'utf8')));
+    case 'hover': {
+      const r = await evalJs(`(() => { const el = document.querySelector('${value.replaceAll("'", "\\'")}'); if (!el) return JSON.stringify({ err: 'no-element' }); const b = el.getBoundingClientRect(); return JSON.stringify({ x: Math.round(b.left + b.width / 2), y: Math.round(b.top + b.height / 2) }); })()`);
+      const pos = JSON.parse(r);
+      if (pos.err) return pos.err;
+      await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: pos.x, y: pos.y });
+      return `hover@${pos.x},${pos.y}`;
+    }
     case 'full': return 'full-flag';
     default: console.warn(`unknown step "${step}"`); return '?';
   }

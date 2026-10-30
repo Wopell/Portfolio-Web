@@ -5,6 +5,8 @@ import { gsap, EASE, prefersReducedMotion } from '../../lib/gsap';
 /**
  * "LET'S WORK TOGETHER" — contact strip card (approved reference layout).
  * Semantic list of social links; email tile is a copy-to-clipboard action.
+ * Hover/focus expands the hovered tile (flexGrow) to reveal long handles,
+ * per senal_Redes_1920px.png.
  */
 const SOCIALS = [
   {
@@ -13,10 +15,10 @@ const SOCIALS = [
     handle: '@wopell',
     href: 'https://instagram.com/wopell',
     external: true,
-    bg: '#d82d6b',
-    dot: '#fb7185',
-    icon: <Instagram size={20} />,
-    iconChip: 'bg-white/20',
+    bg: '#e22b5c',
+    dot: '#2fbd6e',
+    icon: <Instagram size={22} />,
+    iconChip: { backgroundColor: '#ffd3e2', color: '#c31d55' },
     text: 'text-white',
     sub: 'text-white/90',
   },
@@ -26,10 +28,10 @@ const SOCIALS = [
     handle: '@wopell',
     href: 'https://t.me/wopell',
     external: true,
-    bg: '#229ed9',
-    dot: '#34d399',
-    icon: <Send size={18} />,
-    iconChip: 'bg-white/20',
+    bg: '#3360df',
+    dot: '#2fbd6e',
+    icon: <Send size={20} />,
+    iconChip: { backgroundColor: '#cfe0ff', color: '#2e57c9' },
     text: 'text-white',
     sub: 'text-white/90',
   },
@@ -39,10 +41,11 @@ const SOCIALS = [
     handle: 'tomy.wopell@gmail.com',
     href: 'mailto:tomy.wopell@gmail.com',
     external: false,
-    bg: '#f2b705',
-    dot: '#34d399',
-    icon: <Mail size={18} />,
-    iconChip: 'bg-black/10',
+    bg: '#edb71f',
+    dot: '#2fbd6e',
+    grow: 1.9,
+    icon: <Mail size={20} />,
+    iconChip: { backgroundColor: '#fff6dc', color: '#a57b08' },
     text: 'text-zinc-950',
     sub: 'text-zinc-900',
   },
@@ -52,10 +55,10 @@ const SOCIALS = [
     handle: 'Tomy Powell',
     href: 'https://www.behance.net/wopell',
     external: true,
-    bg: '#0fa8c8',
-    dot: '#34d399',
-    icon: <span className="font-display font-black text-[15px] leading-none">Bē</span>,
-    iconChip: 'bg-white/25',
+    bg: '#3561e1',
+    dot: '#2fbd6e',
+    icon: <span className="font-display font-black text-[17px] leading-none">Bē</span>,
+    iconChip: { backgroundColor: '#d6e3ff', color: '#2e57c9' },
     text: 'text-white',
     sub: 'text-white/90',
   },
@@ -91,12 +94,14 @@ export const WorkTogetherCard: React.FC = () => {
     return () => ctx.revert();
   }, []);
 
-  /* magnetic hover: each tile leans towards the cursor, springs back */
+  /* magnetic hover: each tile leans towards the cursor, springs back;
+     hover/focus expands the tile (flexGrow) so long handles get room */
   useEffect(() => {
-    if (prefersReducedMotion()) return;
     const tiles = gsap.utils.toArray<HTMLElement>('[data-social-tile]', rootRef.current);
     const cleanups: Array<() => void> = [];
+    const reduced = prefersReducedMotion();
     tiles.forEach((tile) => {
+      if (reduced) return;
       const qx = gsap.quickTo(tile, 'x', { duration: 0.4, ease: 'power3.out' });
       const qy = gsap.quickTo(tile, 'y', { duration: 0.4, ease: 'power3.out' });
       const qr = gsap.quickTo(tile, 'rotation', { duration: 0.5, ease: 'power3.out' });
@@ -113,11 +118,24 @@ export const WorkTogetherCard: React.FC = () => {
         qy(0);
         qr(0);
       };
+      const grow = () => {
+        const maxGrow = Number(tile.dataset.grow ?? '1.5');
+        tiles.forEach((t) => gsap.to(t, { flexGrow: t === tile ? maxGrow : 0.96, duration: 0.45, ease: 'power2.out', overwrite: 'auto' }));
+      };
+      const shrink = () => {
+        tiles.forEach((t) => gsap.to(t, { flexGrow: 1, duration: 0.45, ease: 'power2.out', overwrite: 'auto' }));
+      };
       tile.addEventListener('pointermove', move);
       tile.addEventListener('pointerleave', leave);
+      tile.addEventListener('pointerenter', grow);
+      tile.addEventListener('focus', grow);
+      tile.addEventListener('blur', shrink);
       cleanups.push(() => {
         tile.removeEventListener('pointermove', move);
         tile.removeEventListener('pointerleave', leave);
+        tile.removeEventListener('pointerenter', grow);
+        tile.removeEventListener('focus', grow);
+        tile.removeEventListener('blur', shrink);
       });
     });
     return () => cleanups.forEach((fn) => fn());
@@ -164,44 +182,54 @@ export const WorkTogetherCard: React.FC = () => {
           </div>
         </header>
 
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-3.5 w-full">
+        <ul className="flex flex-col sm:flex-row gap-3 sm:gap-3.5 w-full">
           {SOCIALS.map((s) => (
-            <li key={s.id}>
+            <li key={s.id} className="contents">
               <a
                 data-social-tile
+                data-grow={s.grow ? String(s.grow) : undefined}
                 href={s.href}
                 {...(s.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="group relative flex items-center justify-between p-3.5 sm:p-4 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 will-change-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
-                style={{ backgroundColor: s.bg }}
+                className='group relative flex min-w-0 items-center justify-between p-4 sm:p-[18px] rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 will-change-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900'
+                style={{ backgroundColor: s.bg, flexGrow: 1, flexBasis: 0 }}
               >
                 <span
-                  className="absolute -top-1.5 -right-1.5 w-3 h-3 rounded-full border-2 border-white shadow-sm"
+                  className="absolute -top-2 -right-2 w-3.5 h-3.5 rounded-full border-2 border-white shadow-sm"
                   style={{ backgroundColor: s.dot }}
                   aria-hidden="true"
                 />
                 <span className="flex items-center gap-3 min-w-0">
-                  <span className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${s.iconChip} ${s.text}`}>
+                  <span
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={s.iconChip}
+                  >
                     {s.icon}
                   </span>
                   <span className={`min-w-0 ${s.text}`}>
-                    <span className="block font-display font-black text-[11px] uppercase tracking-wider">{s.name}</span>
-                    <span className={`block font-mono text-[10px] truncate ${s.sub}`}>{s.handle}</span>
+                    <span className="block font-display font-black text-[11px] uppercase tracking-wide">{s.name}</span>
+                    <span className="flex items-baseline gap-2">
+                      <span className={`block font-mono text-[10px] truncate ${s.sub}`}>{s.handle}</span>
+                      <span
+                        className={`shrink-0 font-mono text-[13px] leading-none opacity-80 ${s.sub}`}
+                        aria-hidden="true"
+                      >
+                        ×
+                      </span>
+                    </span>
                   </span>
                 </span>
-                {s.id === 'email' ? (
+                {s.id === 'email' && (
                   <button
                     type="button"
                     onClick={handleCopyEmail}
                     title="Copiar email"
                     aria-label={copied ? 'Email copiado' : 'Copiar email al portapapeles'}
-                    className="ml-2 p-1.5 rounded-lg bg-black/10 hover:bg-black hover:text-white transition-colors cursor-pointer shrink-0 text-zinc-950 focus-visible:outline-2 focus-visible:outline-white"
+                    className="ml-auto p-2 rounded-xl bg-black/25 hover:bg-black hover:text-white text-[#fff6dc] transition-colors cursor-pointer shrink-0 focus-visible:outline-2 focus-visible:outline-white"
                   >
                     <span ref={copyIconRef} className="inline-flex">
-                      {copied ? <Check size={14} /> : <Copy size={14} />}
+                      {copied ? <Check size={15} /> : <Copy size={15} />}
                     </span>
                   </button>
-                ) : (
-                  <span className="text-xs text-white/70 font-mono" aria-hidden="true">×</span>
                 )}
               </a>
             </li>
