@@ -2,19 +2,15 @@ import React, { useEffect, useRef } from 'react';
 import { gsap, ScrollTrigger, EASE, prefersReducedMotion } from '../../lib/gsap';
 
 /**
- * "MARCAS & CLIENTES COMERCIALES" — 3 featured logos on a graph-paper band
- * plus a marquee whose speed reacts to scroll velocity (GSAP ScrollTrigger).
+ * "MARCAS & CLIENTES COMERCIALES" — one retro ruled band: graph-paper
+ * texture, top & bottom rules, every client logo drifting as a marquee
+ * whose speed reacts to scroll velocity (per senal_Clientes_1920px.png).
  */
 
-const FEATURED = [
-  { name: 'Diageo', logo: '/logos/Black/Diageo.webp' },
-  { name: 'Elemento', logo: '/logos/Black/Elemento.webp' },
-  { name: 'Footy', logo: '/logos/Black/Footy.webp' },
-];
-
-const EXTENDED = [
-  'Chevrolet', "L'Oreal", 'Guinness', 'Johnnie Walker', 'Puma Energy',
-  'Wegovy', 'Telecom', 'Amaze', 'Smirnoff', 'Balanz', 'Banco Macro',
+const CLIENTS = [
+  'Diageo', 'Elemento', 'Footy', 'Chevrolet', "L'Oreal", 'Guinness',
+  'Johnnie Walker', 'Puma Energy', 'Wegovy', 'Telecom', 'Amaze',
+  'Smirnoff', 'Balanz', 'Banco Macro',
 ].map((name) => ({ name, logo: `/logos/Black/${name}.webp` }));
 
 export const BrandsStrip: React.FC = () => {
@@ -23,12 +19,12 @@ export const BrandsStrip: React.FC = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from('[data-brands-cell]', {
+      gsap.from('[data-brands-logo]', {
         autoAlpha: 0,
-        y: 16,
+        y: 14,
         duration: 0.55,
         ease: EASE.settle,
-        stagger: 0.08,
+        stagger: 0.05,
         scrollTrigger: { trigger: rootRef.current, start: 'top 85%', once: true },
       });
 
@@ -87,35 +83,23 @@ export const BrandsStrip: React.FC = () => {
         MARCAS &amp; CLIENTES COMERCIALES
       </p>
 
-      <div className="w-full bg-[#fffdfa]/60 border border-black/30 rounded-xl overflow-hidden shadow-sm">
-        <ul className="grid grid-cols-3 divide-x divide-black/30">
-          {FEATURED.map((brand) => (
-            <li
-              key={brand.name}
-              data-brands-cell
-              className="brands-cell flex items-center justify-center p-4 sm:p-7 min-h-[85px] sm:min-h-[110px]"
-            >
+      <div
+        className="brands-band w-full mt-3 border-y-2 border-[#191510] overflow-hidden bg-[#f6f3e9]"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, rgba(25,21,16,0.13) 1px, transparent 1px), linear-gradient(to bottom, rgba(25,21,16,0.13) 1px, transparent 1px)',
+          backgroundSize: '26px 26px',
+        }}
+      >
+        <div ref={trackRef} className="flex whitespace-nowrap items-center w-max will-change-transform py-6 sm:py-8">
+          {[...CLIENTS, ...CLIENTS].map((brand, i) => (
+            <span key={`${brand.name}-${i}`} data-brands-logo className="flex items-center px-10 sm:px-16">
               <img
                 src={brand.logo}
-                alt={brand.name}
+                alt={i < CLIENTS.length ? brand.name : ''}
+                aria-hidden={i >= CLIENTS.length}
                 loading="lazy"
-                className="h-8 sm:h-11 w-auto max-w-[130px] object-contain brightness-0 opacity-90 transition-transform duration-300 hover:scale-105"
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="brands-marquee mt-3.5 pt-3.5 border-t border-black/15 overflow-hidden">
-        <div ref={trackRef} className="flex whitespace-nowrap items-center w-max will-change-transform">
-          {[...EXTENDED, ...EXTENDED].map((brand, i) => (
-            <span key={`${brand.name}-${i}`} className="flex items-center px-5 sm:px-7">
-              <img
-                src={brand.logo}
-                alt={i < EXTENDED.length ? brand.name : ''}
-                aria-hidden={i >= EXTENDED.length}
-                loading="lazy"
-                className="h-6 sm:h-7 w-auto max-w-[100px] object-contain brightness-0 opacity-60 hover:opacity-100 transition-opacity duration-300"
+                className="h-12 sm:h-[68px] w-auto max-w-[170px] object-contain brightness-0 mix-blend-multiply opacity-85 hover:opacity-100 hover:scale-[1.04] transition-transform duration-300"
               />
             </span>
           ))}
