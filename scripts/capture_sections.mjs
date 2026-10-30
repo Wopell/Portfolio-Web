@@ -13,7 +13,7 @@
  * Default shots cover the works page sections. Requires the dev server on :5173.
  */
 import { spawn } from 'node:child_process';
-import { mkdirSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, existsSync, writeFileSync, readFileSync } from 'node:fs';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -183,6 +183,7 @@ let runStep = async (step) => {
     }
     case 'wait': await sleep(Number(value)); return 'waited';
     case 'eval': return String(await evalJs(value));
+    case 'eval-file': return String(await evalJs(readFileSync(value, 'utf8')));
     case 'full': return 'full-flag';
     default: console.warn(`unknown step "${step}"`); return '?';
   }

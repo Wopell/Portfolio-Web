@@ -7,6 +7,7 @@ import { CategoryOverlay } from './CategoryOverlay';
 import { ProjectModal } from './ProjectModal';
 import { FolderErrorBoundary } from '../FolderErrorBoundary';
 import { PlanetHero } from '../PlanetHero';
+import { InkParticles } from './InkParticles';
 import { CATEGORIES, CategoryData, ProjectItem } from '../../data/projects';
 import './works-sections.css';
 
@@ -30,9 +31,12 @@ export default function Works() {
 
   return (
     <section id="works" className="w-full bg-transparent text-zinc-950 pb-20 overflow-visible relative">
+      {/* Ink particles over the paper field */}
+      <InkParticles />
+
       {/* 1. Hero header (approved) */}
       <div
-        className="relative pointer-events-none w-full max-w-[860px] mx-auto px-3 sm:px-6"
+        className="relative pointer-events-none w-full max-w-[1100px] mx-auto px-3 sm:px-6 mb-6 sm:mb-12"
         style={{ zIndex: 'var(--z-title, 50)' }}
       >
         <HeroHeader />

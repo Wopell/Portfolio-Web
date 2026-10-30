@@ -3,6 +3,22 @@
  * Approved sections (hero header, planet) are deliberately untouched.
  */
 
+/* ── Hero: striped pixel title (LED dot-matrix look, per approved title ref) ── */
+.works-stripe-title {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #17130f 0px,
+    #17130f 6px,
+    transparent 6px,
+    transparent 10px
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 2px 0 rgba(23, 19, 15, 0.14));
+}
+
 /* ── Folder deck ─────────────────────────────────────────────────────────── */
 
 /* Colored folder body with the reference's inner graph-paper texture */
