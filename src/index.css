@@ -8,6 +8,9 @@
   --z-title: 50;
   --z-category-overlay: 70;
   --z-nav: 100;
+
+  /* Warm paper tone sampled from the approved references (avg of 5 points) */
+  --color-paper: #efece1;
 }
 
 @theme {

@@ -77,7 +77,7 @@ export const CategoryOverlay: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-label={category ? `Catálogo de ${category.title}` : undefined}
-      className="fixed inset-0 z-[110] overflow-y-auto bg-[#f5f2eb] paper-grid text-zinc-950 opacity-0 invisible"
+      className="fixed inset-0 z-[110] overflow-y-auto bg-[var(--color-paper)] paper-grid text-zinc-950 opacity-0 invisible"
     >
       {category && (
         <div ref={contentRef}>

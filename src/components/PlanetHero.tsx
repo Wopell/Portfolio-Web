@@ -42,7 +42,7 @@ export const CONFIG = {
   jitter: 0.35,            // Jitter tangencial escalado con espaciado medio sqrt(4*PI/N) (aprobado: 0.35)
   backOpacity: 0.0,        // Opacidad del hemisferio trasero (0.0 = descartado)
   dotColor: '#111111',     // Color de los puntos de semitono
-  discColor: '#f5f2eb',    // Color crema opaco del disco para oclusión
+  discColor: '#efece1',    // Color crema opaco del disco para oclusión (== --color-paper)
   backgroundColor: 'transparent',
 
   // --- 4. ROTACIÓN Y TIEMPO ---
