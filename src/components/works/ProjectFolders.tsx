@@ -171,11 +171,11 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                   aria-hidden="true"
                 >
                   <path
-                    d={`M 0 ${TAB_HEIGHT} L 0 12 Q 0 0 12 0 L ${W - 10} 0 Q ${W} 0 ${W} 10 L ${W} 20 C ${W} 28 ${W + 8} ${TAB_HEIGHT} ${filletEnd} ${TAB_HEIGHT} L 0 ${TAB_HEIGHT} Z`}
+                    d={`M 0 ${TAB_HEIGHT} L 0 20 Q 0 0 20 0 L ${W - 10} 0 Q ${W} 0 ${W} 10 L ${W} 20 C ${W} 28 ${W + 8} ${TAB_HEIGHT} ${filletEnd} ${TAB_HEIGHT} L 0 ${TAB_HEIGHT} Z`}
                     fill={cfg.tabBg}
                   />
                   <path
-                    d={`M 0 ${TAB_HEIGHT} L 0 12 Q 0 0 12 0 L ${W - 10} 0 Q ${W} 0 ${W} 10 L ${W} 20 C ${W} 28 ${W + 8} ${TAB_HEIGHT} ${filletEnd} ${TAB_HEIGHT}`}
+                    d={`M 0 ${TAB_HEIGHT} L 0 20 Q 0 0 20 0 L ${W - 10} 0 Q ${W} 0 ${W} 10 L ${W} 20 C ${W} 28 ${W + 8} ${TAB_HEIGHT} ${filletEnd} ${TAB_HEIGHT}`}
                     stroke={FOLDERS_CONFIG.outlineColor}
                     strokeWidth="2"
                     strokeLinecap="round"
@@ -183,8 +183,8 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                     fill="none"
                   />
                   <text
-                    x="16"
-                    y="23"
+                    x="26"
+                    y="24"
                     fontFamily="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace"
                     fontSize="12"
                     fontWeight="900"
@@ -198,7 +198,10 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
 
               {/* ── folder body ────────────────────────────────────────── */}
               {isFront ? (
-                <span className="relative block w-full -mt-[2px] border-2 border-[#4A4036] rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.06)] bg-[#0c0d10]">
+                <span
+                  className="folder-body-rule relative block w-full -mt-[2px] border-x-2 border-b-2 border-[#4A4036] rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.06)] bg-[#0c0d10]"
+                  style={{ '--folder-tab-end': `${filletEnd}px` } as React.CSSProperties}
+                >
                   <img
                     src={cat.image}
                     alt={`${cat.title} — ${cat.subtitle}`}
@@ -207,7 +210,10 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                   />
                 </span>
               ) : (
-                <span className="folder-body block absolute inset-x-0 top-[34px] bottom-0 border-2 border-[#4A4036] rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.06)]">
+                <span
+                  className="folder-body folder-body-rule block absolute inset-x-0 top-[34px] bottom-0 border-x-2 border-b-2 border-[#4A4036] rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.06)]"
+                  style={{ '--folder-tab-end': `${filletEnd}px` } as React.CSSProperties}
+                >
                   <span
                     className="absolute inset-0"
                     style={{ backgroundColor: cfg.tabBg }}

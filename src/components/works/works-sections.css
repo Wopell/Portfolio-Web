@@ -30,6 +30,20 @@
   opacity: 0.35;
 }
 
+/* Top rule that flows out of the tab's outline into the body's silhouette
+   (the body itself has no top border; overflow-hidden clips this along the
+   rounded corners, as in the reference). */
+.folder-body-rule::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: var(--folder-tab-end, 0px);
+  right: 0;
+  height: 2px;
+  background: #4A4036;
+  pointer-events: none;
+}
+
 /* The whole folder row (tab + visible body strip) is the click target. */
 .folder-row {
   transition: filter 0.3s ease;
