@@ -36,7 +36,7 @@ export default function Works() {
 
       {/* 1. Hero header (approved) */}
       <div
-        className="relative pointer-events-none w-full max-w-[1100px] mx-auto px-3 sm:px-6 mb-6 sm:mb-12"
+        className="relative pointer-events-none w-full max-w-[1100px] mx-auto px-3 sm:px-6 mb-16 sm:mb-24"
         style={{ zIndex: 'var(--z-title, 50)' }}
       >
         <HeroHeader />
@@ -67,7 +67,7 @@ export default function Works() {
         <BrandsStrip />
 
         {/* Footer */}
-        <footer className="mt-12 pt-6 border-t border-black/15 flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 font-bold">
+        <footer className="mt-20 pt-6 border-t border-black/15 flex flex-col sm:flex-row justify-between items-center gap-3 text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 font-bold">
           <span>WOPELL // TOMY POWELL — PORTFOLIO CREATIVO</span>
           <span>BA — AR • WORLDWIDE</span>
         </footer>

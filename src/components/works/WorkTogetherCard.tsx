@@ -161,7 +161,7 @@ export const WorkTogetherCard: React.FC = () => {
       id="work-together"
       data-section="work-together"
       aria-labelledby="work-together-title"
-      className="w-full my-10 sm:my-14"
+      className="w-full my-16 sm:my-24"
     >
       <div
         data-wt-card

@@ -41,7 +41,7 @@ export const HeroHeader: React.FC = () => {
   return (
     <div
       id="hero-header-container"
-      className="relative pointer-events-none w-full pt-2 pb-14 sm:pb-16 flex flex-col items-center justify-center select-none"
+      className="relative pointer-events-none w-full pt-20 sm:pt-28 pb-14 sm:pb-16 flex flex-col items-center justify-center select-none"
       style={{ zIndex: 'var(--z-title, 50)' }}
     >
       {/* Blueprint cross, as in the reference */}

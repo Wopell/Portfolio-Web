@@ -117,7 +117,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
       id="selected-projects"
       data-section="selected-projects"
       aria-labelledby="selected-projects-title"
-      className="w-full my-12 sm:my-16 relative select-none"
+      className="w-full my-20 sm:my-32 relative select-none"
     >
       <header className="text-center mb-8 sm:mb-10">
         <h2

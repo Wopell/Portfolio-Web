@@ -74,7 +74,7 @@ export const BrandsStrip: React.FC = () => {
       id="brands"
       data-section="brands"
       aria-labelledby="brands-title"
-      className="w-full mt-16 sm:mt-24 mb-10"
+      className="w-full mt-24 sm:mt-36 mb-14"
     >
       <p
         id="brands-title"
