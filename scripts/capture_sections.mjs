@@ -118,7 +118,18 @@ const proc = spawn(bin, [
   `--user-data-dir=${userData}`,
   `--window-size=${WIDTH},${HEIGHT}`,
   'about:blank',
-], { stdio: ['ignore', 'pipe', 'pipe'] });
+], {
+  stdio: ['ignore', 'pipe', 'pipe'],
+  /* chrome-headless-shell needs a few system libs (nspr/nss/alsa); ships with
+     an offline copy in case the distro ones are unavailable */
+  env: {
+    ...process.env,
+    LD_LIBRARY_PATH: [
+      process.env.LD_LIBRARY_PATH,
+      path.join(homedir(), '.cache/hyperframes/chrome/syslibs/usr/lib/x86_64-linux-gnu'),
+    ].filter(Boolean).join(':'),
+  },
+});
 
 let wsEndpoint = null;
 proc.stderr.on('data', (d) => {

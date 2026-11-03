@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { gsap, ScrollTrigger, EASE, prefersReducedMotion } from '../../lib/gsap';
 import { CategoryData } from '../../data/projects';
 
@@ -8,14 +8,17 @@ import { CategoryData } from '../../data/projects';
  * =========================================================================
  * Faithful to the approved reference (docs/referencias/aprobados):
  *  - One flat-color folder per category: tab (mono label) + colored body.
- *  - Tight cascade (34px step) with a continuous #4A4036 outline.
+ *  - Generous cascade (56px step, 36px on mobile) so every folder shows a
+ *    preview strip of its projects, with a continuous #4A4036 outline that
+ *    runs from each tab into its body and a full-width "pocket" baseline
+ *    under the whole deck.
  *  - The front folder (004) carries the featured work card.
- * Interaction: hovering a folder lifts it slightly; clicking pulls it out
- * and opens that category's catalog. GSAP settles the deck on scroll.
+ * Interaction: hovering a folder pulls it out of the pile far enough to
+ * reveal its preview strip (game-like overshoot); clicking opens that
+ * category's catalog. GSAP deals the deck out on scroll.
  * =========================================================================
  */
 export const FOLDERS_CONFIG = {
-  stepPx: 34,
   outlineColor: '#4A4036',
   categories: {
     'category-animation': { tabBg: '#3B5BDB', tabWidth: 168 },
@@ -32,6 +35,10 @@ interface ProjectFoldersProps {
 
 const TAB_HEIGHT = 36;
 
+/** cascade step is responsive: tight on phones, generous on desktop */
+const cascadeStep = () =>
+  typeof window !== 'undefined' && window.innerWidth < 640 ? 36 : 56;
+
 export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
   categories,
   onOpenCategory,
@@ -40,17 +47,30 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
   const deckRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const openedRef = useRef(false);
+  const dealtRef = useRef(false);
+
+  /* responsive cascade step; transforms below follow it through stepRef */
+  const [step, setStep] = useState(cascadeStep);
+  const stepRef = useRef(step);
+  useEffect(() => {
+    stepRef.current = step;
+  }, [step]);
+
+  const n = categories.length;
 
   /* ── scroll settle: the closed pile deals out into the cascade ─────────── */
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
     const rows = gsap.utils.toArray<HTMLElement>('[data-folder-row]', deckRef.current);
     if (!rows.length) return;
+    const total = rows.length;
+    const step0 = stepRef.current;
 
-    const n = rows.length;
+    /* rows fly in from deep behind the pile — a long, overshooting deal */
     gsap.set(rows, {
-      y: (i) => (n - 1 - i) * FOLDERS_CONFIG.stepPx,
-      rotation: (i) => (i % 2 === 0 ? -1.1 : 1.1),
+      y: (i) => (total - 1 - i) * step0 * 2.1 + 46,
+      x: (i) => (i % 2 === 0 ? -34 : 34),
+      rotation: (i) => (i % 2 === 0 ? -2.4 : 2.4),
       transformOrigin: '50% 0%',
     });
 
@@ -64,15 +84,38 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
       });
       gsap.to(rows, {
         y: 0,
+        x: 0,
         rotation: 0,
-        duration: 1.0,
+        duration: 1.35,
         ease: EASE.outBack,
-        stagger: { each: 0.09, from: 'end' },
+        stagger: { each: 0.14, from: 'end' },
         scrollTrigger: { trigger: deckRef.current, start: 'top 80%', once: true },
+        onComplete: () => {
+          dealtRef.current = true;
+        },
       });
     }, sectionRef);
 
-    return () => ctx.revert();
+    /* keep the cascade honest when the featured card resizes */
+    const settled = () =>
+      rows.every((r) => Math.abs(gsap.getProperty(r, 'y') as number) < 1);
+    const onResize = () => {
+      setStep(cascadeStep());
+      const st = stepRef.current;
+      const target = dealtRef.current || settled();
+      gsap.set(rows, {
+        y: target ? 0 : (i) => (total - 1 - i) * st * 2.1 + 46,
+        x: target ? 0 : (i) => (i % 2 === 0 ? -34 : 34),
+        rotation: target ? 0 : (i) => (i % 2 === 0 ? -2.4 : 2.4),
+      });
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    };
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      ctx.revert();
+    };
   }, [categories.length]);
 
   /* ── keep ScrollTrigger honest when the featured card resizes ─────────── */
@@ -90,22 +133,45 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
     return () => ro.disconnect();
   }, []);
 
-  /* ── hover lift + pull-out on click ────────────────────────────────────── */
+  /* ── hover pull-out + click: game-like, one beat slower than a tooltip ─── */
   const bindRow = useCallback(
     (el: HTMLButtonElement | null, idx: number) => {
       if (!el || prefersReducedMotion()) return;
-      const lift = gsap.quickTo(el, 'y', { duration: 0.35, ease: EASE.outSoft });
-      el.addEventListener('pointerenter', () => lift(-6));
-      el.addEventListener('pointerleave', () => lift(0));
-      el.addEventListener('focus', () => lift(-6));
-      el.addEventListener('blur', () => lift(0));
+      /* ref callbacks can re-run in Strict Mode — bind a given node once */
+      if ((el as HTMLButtonElement & { __folderBound?: boolean }).__folderBound) return;
+      (el as HTMLButtonElement & { __folderBound?: boolean }).__folderBound = true;
+
+      const pull = gsap.quickTo(el, 'y', { duration: 0.8, ease: EASE.outBack });
+      const pullX = gsap.quickTo(el, 'x', { duration: 0.9, ease: EASE.outBack });
+      const tilt = gsap.quickTo(el, 'rotation', { duration: 0.9, ease: EASE.outBack });
+
+      const raise = () => {
+        /* pull the folder well clear of the pile so its preview strip is
+           fully visible — game-like, one beat slower than a UI tooltip */
+        pull(-(stepRef.current + 26));
+        pullX(idx % 2 === 0 ? 6 : 9);
+        tilt(idx % 2 === 0 ? -0.5 : 0.5);
+      };
+      const lower = () => {
+        pull(0);
+        pullX(0);
+        tilt(0);
+      };
+
+      /* pointer events land on the row's own visible band so stacked
+         rows don't swallow each other's hovers */
+      const zone = el.querySelector<HTMLElement>('[data-folder-hit]');
+      zone?.addEventListener('pointerenter', raise);
+      zone?.addEventListener('pointerleave', lower);
+      el.addEventListener('focus', raise);
+      el.addEventListener('blur', lower);
       el.addEventListener('click', () => {
         if (openedRef.current) return;
         openedRef.current = true;
         gsap
           .timeline({ onComplete: () => (openedRef.current = false) })
-          .to(el, { y: -12, rotation: idx % 2 === 0 ? -1.4 : 1.4, duration: 0.22, ease: 'power2.out' })
-          .to(el, { y: 0, rotation: 0, duration: 0.5, ease: EASE.settle }, '+=0.08');
+          .to(el, { y: -(stepRef.current + 40), rotation: idx % 2 === 0 ? -1.6 : 1.6, duration: 0.24, ease: 'power2.out' })
+          .to(el, { y: 0, rotation: 0, duration: 0.6, ease: EASE.settle }, '+=0.08');
       });
     },
     []
@@ -132,7 +198,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
       <div
         ref={deckRef}
         className="w-full relative mx-auto"
-        style={{ paddingTop: (categories.length - 1) * FOLDERS_CONFIG.stepPx }}
+        style={{ paddingTop: (n - 1) * step }}
       >
         {categories.map((cat, idx) => {
           const isFront = idx === categories.length - 1;
@@ -140,7 +206,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
             FOLDERS_CONFIG.categories[cat.id] ?? { tabBg: cat.badgeColor, tabWidth: 160 };
           const W = cfg.tabWidth;
           const filletEnd = W + 18;
-          const step = FOLDERS_CONFIG.stepPx;
+          const previews = cat.projects.slice(0, 3);
 
           return (
             <button
@@ -153,7 +219,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
               aria-haspopup="dialog"
               onClick={() => onOpenCategory(cat.id)}
               className={`folder-row group flex w-full flex-col items-stretch justify-start text-left cursor-pointer outline-none ${
-                isFront ? 'relative' : 'absolute inset-x-0'
+                isFront ? 'relative' : 'absolute inset-x-0 pointer-events-none'
               }`}
               style={
                 isFront
@@ -161,6 +227,16 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                   : { top: `${idx * step}px`, bottom: 0, zIndex: 10 + idx * 10 }
               }
             >
+              {/* hit zone: this folder's tab + its visible strip */}
+              {!isFront && (
+                <span
+                  data-folder-hit
+                  aria-hidden="true"
+                  className="pointer-events-auto absolute left-0 top-0 w-full cursor-pointer"
+                  style={{ height: `${step + TAB_HEIGHT - 1}px` }}
+                />
+              )}
+
               {/* ── folder tab ─────────────────────────────────────────── */}
               <span className="relative flex items-end h-[36px] z-10">
                 <svg
@@ -196,7 +272,8 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                 </svg>
               </span>
 
-              {/* ── folder body ────────────────────────────────────────── */}
+              {/* ── folder body: top rule starts at the tab's end so the
+                     outline flows continuously into the silhouette ─────── */}
               {isFront ? (
                 <span
                   className="folder-body-rule relative block w-full -mt-[2px] border-x-2 border-b-2 border-[#4A4036] rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.06)] bg-[#0c0d10]"
@@ -211,20 +288,66 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                 </span>
               ) : (
                 <span
-                  className="folder-body folder-body-rule block absolute inset-x-0 top-[34px] bottom-0 border-x-2 border-b-2 border-[#4A4036] rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-hidden shadow-[0_8px_20px_rgba(0,0,0,0.06)]"
+                  className="folder-body folder-body-rule block absolute inset-x-0 top-[35px] bottom-0 border-x-2 border-b-2 border-[#4A4036] rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-visible"
                   style={{ '--folder-tab-end': `${filletEnd}px` } as React.CSSProperties}
                 >
+                  {/* colored interior with the reference's graph-paper grid */}
                   <span
-                    className="absolute inset-0"
+                    className="absolute inset-x-0 top-0 bottom-0 rounded-tr-[24px] sm:rounded-tr-[28px] rounded-b-[24px] sm:rounded-b-[28px] overflow-hidden"
                     style={{ backgroundColor: cfg.tabBg }}
                     aria-hidden="true"
-                  />
-                  <span className="folder-body-grid absolute inset-0" aria-hidden="true" />
+                  >
+                    <span className="folder-body-grid absolute inset-0" aria-hidden="true" />
+                  </span>
+
+                  {/* preview strip: tilted project crops peeking out from
+                      under the next folder in the pile */}
+                  <span
+                    className="folder-previews relative flex items-start gap-[10px] sm:gap-3.5 pt-[5px] pl-[10px]"
+                    aria-hidden="true"
+                  >
+                    {previews.map((p, pi) => (
+                      <img
+                        key={p.id}
+                        src={p.image}
+                        alt=""
+                        loading="lazy"
+                        className={`folder-preview shrink-0 object-cover w-[96px] sm:w-[128px] h-[52px] sm:h-[70px] rounded-[4px] bg-[#e8e2d6] border-2 border-[#4A4036] shadow-[0_2px_6px_rgba(0,0,0,0.12)] select-none pointer-events-none ${
+                          pi % 2 === 0 ? 'rotate-[2.5deg]' : 'rotate-[-2deg]'
+                        }`}
+                        style={{
+                          objectPosition: ['18% 40%', '50% 55%', '85% 40%'][pi % 3],
+                        }}
+                        draggable={false}
+                      />
+                    ))}
+                    <span className="font-mono font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.18em] text-zinc-950/80 self-center mt-2">
+                      × {cat.projects.length} proyectos
+                    </span>
+                  </span>
                 </span>
               )}
             </button>
           );
         })}
+
+        {/* ── the pocket: full-width baseline under the whole deck ─────── */}
+        <span
+          className="absolute left-[-14px] right-[-14px] bottom-[-2px] h-[2px] bg-[#4A4036]"
+          aria-hidden="true"
+        />
+        <span
+          className="absolute left-[-26px] bottom-[-8px] font-mono font-bold text-[13px] text-[#4A4036]"
+          aria-hidden="true"
+        >
+          +
+        </span>
+        <span
+          className="absolute right-[-26px] bottom-[-8px] font-mono font-bold text-[13px] text-[#4A4036]"
+          aria-hidden="true"
+        >
+          +
+        </span>
       </div>
     </section>
   );
