@@ -1,12 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Instagram, Send, Mail, Copy, Check } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { Instagram, Send, Mail } from 'lucide-react';
 import { gsap, EASE, prefersReducedMotion } from '../../lib/gsap';
 
 /**
  * "LET'S WORK TOGETHER" — contact strip card (approved reference layout).
- * Semantic list of social links; email tile is a copy-to-clipboard action.
- * Hover/focus expands the hovered tile (flexGrow) to reveal long handles,
- * per senal_Redes_1920px.png.
+ * Semantic list of social links; every tile is an anchor. The email tile is a
+ * direct mailto: link that opens the user's mail client. Hover/focus expands
+ * the hovered tile (flexGrow) to reveal long handles, per senal_Redes_1920px.png.
  */
 const SOCIALS = [
   {
@@ -16,9 +16,9 @@ const SOCIALS = [
     href: 'https://instagram.com/wopell',
     external: true,
     bg: '#e22b5c',
-    dot: '#2fbd6e',
+    dot: '#e22b5c',
     icon: <Instagram size={22} />,
-    iconChip: { backgroundColor: '#ffd3e2', color: '#c31d55' },
+    iconChip: { backgroundColor: '#ffffff', color: '#c31d55' },
     text: 'text-white',
     sub: 'text-white/90',
   },
@@ -31,7 +31,7 @@ const SOCIALS = [
     bg: '#3360df',
     dot: '#2fbd6e',
     icon: <Send size={20} />,
-    iconChip: { backgroundColor: '#cfe0ff', color: '#2e57c9' },
+    iconChip: { backgroundColor: '#ffffff', color: '#2e57c9' },
     text: 'text-white',
     sub: 'text-white/90',
   },
@@ -45,7 +45,7 @@ const SOCIALS = [
     dot: '#2fbd6e',
     grow: 1.9,
     icon: <Mail size={20} />,
-    iconChip: { backgroundColor: '#fff6dc', color: '#a57b08' },
+    iconChip: { backgroundColor: '#ffffff', color: '#a57b08' },
     text: 'text-zinc-950',
     sub: 'text-zinc-900',
   },
@@ -58,7 +58,7 @@ const SOCIALS = [
     bg: '#3561e1',
     dot: '#2fbd6e',
     icon: <span className="font-display font-black text-[17px] leading-none">Bē</span>,
-    iconChip: { backgroundColor: '#d6e3ff', color: '#2e57c9' },
+    iconChip: { backgroundColor: '#ffffff', color: '#2e57c9' },
     text: 'text-white',
     sub: 'text-white/90',
   },
@@ -66,9 +66,6 @@ const SOCIALS = [
 
 export const WorkTogetherCard: React.FC = () => {
   const rootRef = useRef<HTMLElement>(null);
-  const copyIconRef = useRef<HTMLSpanElement>(null);
-  const [copied, setCopied] = useState(false);
-  const busyRef = useRef(false);
 
   /* entrance: card rises, buttons fan in with a playful tilt */
   useEffect(() => {
@@ -141,20 +138,6 @@ export const WorkTogetherCard: React.FC = () => {
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
-  const handleCopyEmail = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (busyRef.current) return;
-    busyRef.current = true;
-    navigator.clipboard?.writeText('tomy.wopell@gmail.com').catch(() => {});
-    setCopied(true);
-    gsap.fromTo(copyIconRef.current, { scale: 0.6, rotation: -14 }, { scale: 1, rotation: 0, duration: 0.45, ease: EASE.outBack });
-    setTimeout(() => {
-      setCopied(false);
-      busyRef.current = false;
-    }, 1800);
-  };
-
   return (
     <section
       ref={rootRef}
@@ -190,7 +173,7 @@ export const WorkTogetherCard: React.FC = () => {
                 data-grow={s.grow ? String(s.grow) : undefined}
                 href={s.href}
                 {...(s.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className='group relative flex min-w-0 items-center justify-between p-4 sm:p-[18px] rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300 will-change-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900'
+                className='group relative flex min-w-0 items-center justify-between p-4 sm:p-[18px] rounded-xl sm:rounded-2xl border-2 border-[#191510] shadow-[0_3px_10px_rgba(0,0,0,0.08)] hover:shadow-xl transition-shadow duration-300 will-change-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900'
                 style={{ backgroundColor: s.bg, flexGrow: 1, flexBasis: 0 }}
               >
                 <span
@@ -218,19 +201,6 @@ export const WorkTogetherCard: React.FC = () => {
                     </span>
                   </span>
                 </span>
-                {s.id === 'email' && (
-                  <button
-                    type="button"
-                    onClick={handleCopyEmail}
-                    title="Copiar email"
-                    aria-label={copied ? 'Email copiado' : 'Copiar email al portapapeles'}
-                    className="ml-auto p-2 rounded-xl bg-black/25 hover:bg-black hover:text-white text-[#fff6dc] transition-colors cursor-pointer shrink-0 focus-visible:outline-2 focus-visible:outline-white"
-                  >
-                    <span ref={copyIconRef} className="inline-flex">
-                      {copied ? <Check size={15} /> : <Copy size={15} />}
-                    </span>
-                  </button>
-                )}
               </a>
             </li>
           ))}
