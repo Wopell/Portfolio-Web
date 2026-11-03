@@ -3,20 +3,31 @@
  * Approved sections (hero header, planet) are deliberately untouched.
  */
 
-/* ── Hero: striped pixel title (LED dot-matrix look, per approved title ref) ── */
-.works-stripe-title {
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  background-image: repeating-linear-gradient(
-    90deg,
-    #17130f 0px,
-    #17130f 6px,
-    transparent 6px,
-    transparent 10px
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  filter: drop-shadow(0 2px 0 rgba(23, 19, 15, 0.14));
+/* ── Hero: "MY WORKS" ink-stamp title (per the current approved title ref) ──
+   Heavy grotesk with an ink-grain distress mask, like a rubber stamp on
+   paper. The mask is a fractal-noise SVG whose alpha is thresholded:
+   fully-opaque areas pass the glyph, near-opaque areas slightly lighten it
+   and zero-alpha areas erode it — one mask does both mottling and worn
+   edges. */
+.ink-stamp-title {
+  font-family: "Archivo Black", "Arial Black", sans-serif;
+  color: #17130f;
+  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='3' seed='17' stitchTiles='stitch'/><feComponentTransfer><feFuncA type='discrete' tableValues='0.5 0.82 0.9 0.95 1 1'/></feComponentTransfer></filter><rect width='300' height='300' filter='url(%23g)'/></svg>");
+  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='3' seed='17' stitchTiles='stitch'/><feComponentTransfer><feFuncA type='discrete' tableValues='0.5 0.82 0.9 0.95 1 1'/></feComponentTransfer></filter><rect width='300' height='300' filter='url(%23g)'/></svg>");
+  -webkit-mask-size: 300px 300px;
+  mask-size: 300px 300px;
+}
+
+.font-typer {
+  font-family: "Special Elite", "Courier New", monospace;
+}
+
+/* beige / kraft washi tape for polaroids and paper patches */
+.kraft-tape {
+  background: rgba(203, 178, 130, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(1px);
+  -webkit-backdrop-filter: blur(1px);
 }
 
 /* ── Folder deck ─────────────────────────────────────────────────────────── */

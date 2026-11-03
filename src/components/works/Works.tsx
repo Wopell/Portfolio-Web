@@ -36,7 +36,7 @@ export default function Works() {
 
       {/* 1. Hero header (approved) */}
       <div
-        className="relative pointer-events-none w-full max-w-[1100px] mx-auto px-3 sm:px-6 mb-16 sm:mb-24"
+        className="relative pointer-events-none w-full max-w-[1100px] mx-auto px-3 sm:px-6 mb-24 sm:mb-32"
         style={{ zIndex: 'var(--z-title, 50)' }}
       >
         <HeroHeader />
