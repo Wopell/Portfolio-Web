@@ -303,7 +303,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                   {/* preview strip: tilted project crops peeking out from
                       under the next folder in the pile */}
                   <span
-                    className="folder-previews relative flex items-start gap-[10px] sm:gap-3.5 pt-[5px] pl-[10px]"
+                    className="folder-previews relative flex items-start gap-[8px] sm:gap-3.5 pt-[4px] pl-[8px] sm:pt-[5px] sm:pl-[10px]"
                     aria-hidden="true"
                   >
                     {previews.map((p, pi) => (
@@ -312,7 +312,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                         src={p.image}
                         alt=""
                         loading="lazy"
-                        className={`folder-preview shrink-0 object-cover w-[96px] sm:w-[128px] h-[52px] sm:h-[70px] rounded-[4px] bg-[#e8e2d6] border-2 border-[#4A4036] shadow-[0_2px_6px_rgba(0,0,0,0.12)] select-none pointer-events-none ${
+                        className={`folder-preview shrink-0 object-cover w-[74px] sm:w-[128px] h-[44px] sm:h-[70px] rounded-[4px] bg-[#e8e2d6] border-2 border-[#4A4036] shadow-[0_2px_6px_rgba(0,0,0,0.12)] select-none pointer-events-none ${
                           pi % 2 === 0 ? 'rotate-[2.5deg]' : 'rotate-[-2deg]'
                         }`}
                         style={{
@@ -321,7 +321,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({
                         draggable={false}
                       />
                     ))}
-                    <span className="font-mono font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.18em] text-zinc-950/80 self-center mt-2">
+                    <span className="hidden sm:inline font-mono font-bold text-[9px] sm:text-[10px] uppercase tracking-[0.18em] text-zinc-950/80 self-center mt-2">
                       × {cat.projects.length} proyectos
                     </span>
                   </span>
