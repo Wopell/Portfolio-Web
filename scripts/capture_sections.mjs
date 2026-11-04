@@ -7,7 +7,7 @@
  *
  * Usage:
  *   node scripts/capture_sections.mjs [--out DIR] [--url URL] [--width N] [--height N]
- *        [--dsf N] [--mobile] [--shot "name:step;step;..."]
+ *        [--dsf N] [--mobile] [--json <path>] [--shot "name:step;step;..."]
  *
  * Steps:  scroll=<selector|y>  |  click=<selector>  |  wait=<ms>  |  eval=<js>
  * Default shots cover the works page sections. Requires the dev server on :5173.
@@ -30,6 +30,9 @@ const HEIGHT = Number(arg('height', 1080));
 const DSF = Number(arg('dsf', 1));
 const MOBILE = argv.includes('--mobile');
 const DEBUG = argv.includes('--debug');
+/* --json <path>: write { shots, consoleErrors, exceptions } side-channel for
+   scripts/qa.mjs (step results + page console, machine-readable) */
+const JSON_OUT = arg('json', null);
 const SHOTS = argv
   .map((a, i) => (a === '--shot' ? argv[i + 1] : a.startsWith('--shot=') ? a.slice(7) : null))
   .filter(Boolean);
@@ -151,6 +154,19 @@ const cdp = new CDP(page.webSocketDebuggerUrl);
 await cdp.open();
 await cdp.send('Page.enable');
 await cdp.send('Runtime.enable');
+await cdp.send('Log.enable');
+
+const consoleErrors = [];
+const exceptions = [];
+cdp.once('Log.entryAdded', (p) => {
+  if (p.entry?.level === 'error') consoleErrors.push({ source: p.entry.source, text: p.entry.text });
+});
+cdp.once('Runtime.consoleAPICalled', (p) => {
+  if (p.type === 'error') consoleErrors.push({ source: 'console.error', text: p.args?.map((a) => a.value ?? a.description ?? '').join(' ') });
+});
+cdp.once('Runtime.exceptionThrown', (p) => {
+  exceptions.push(p.exceptionDetails?.exception?.description || p.exceptionDetails?.text || 'unknown');
+});
 await cdp.send('Emulation.setDeviceMetricsOverride', {
   width: WIDTH,
   height: HEIGHT,
@@ -208,12 +224,15 @@ let runStep = async (step) => {
 };
 
 const shots = SHOTS.length ? SHOTS : DEFAULT_SHOTS;
+const jsonShots = [];
 for (const shot of shots) {
   const [name, ...rest] = shot.split(':');
   const steps = rest.join(':') ? rest.join(':').split(';').filter(Boolean) : [];
+  const stepResults = [];
   process.stdout.write(`  shot ${name} `);
   for (const s of steps) {
     const result = await runStep(s);
+    stepResults.push({ step: s, result: String(result) });
     if (DEBUG) process.stdout.write(` [${s.slice(0, 24)}→${result}]`);
     else process.stdout.write(`.`);
   }
@@ -238,6 +257,19 @@ for (const shot of shots) {
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: WIDTH, height: HEIGHT, deviceScaleFactor: MOBILE ? 2 : DSF, mobile: MOBILE });
   }
   console.log(`→ ${file}`);
+  jsonShots.push({ name, file, steps: stepResults });
+}
+
+if (JSON_OUT) {
+  writeFileSync(JSON_OUT, JSON.stringify({
+    url: URL,
+    width: WIDTH,
+    height: HEIGHT,
+    mobile: MOBILE,
+    shots: jsonShots,
+    consoleErrors,
+    exceptions,
+  }, null, 2));
 }
 
 cdp.close();

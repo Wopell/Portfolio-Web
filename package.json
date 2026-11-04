@@ -9,6 +9,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
+    "qa": "node scripts/qa.mjs",
+    "qa:full": "node scripts/qa.mjs --full",
     "make-blur": "node scripts/make-blur.mjs"
   },
   "dependencies": {
