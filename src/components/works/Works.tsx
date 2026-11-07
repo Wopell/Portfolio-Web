@@ -35,12 +35,7 @@ export default function Works() {
       <InkParticles />
 
       {/* 1. Hero header (approved) */}
-      <div
-        className="relative pointer-events-none w-full max-w-[1100px] mx-auto px-3 sm:px-6 mb-24 sm:mb-32"
-        style={{ zIndex: 'var(--z-title, 50)' }}
-      >
-        <HeroHeader />
-      </div>
+      <div className="relative w-full mb-0" style={{ zIndex: 'var(--z-title, 50)' }}><HeroHeader /></div>
 
       {/* 2. Halftone planet with orbiting labels (approved, untouched) */}
       <div
