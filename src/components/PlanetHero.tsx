@@ -2592,6 +2592,7 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, object>(function PlanetHe
       ref={containerRef}
       role="region"
       aria-label="Presentación interactiva del portafolio"
+      data-planet-canvas-wrap="true"
       tabIndex={0}
       onKeyDown={handleContainerKeyDown}
       className="relative w-full max-w-[1280px] mx-auto flex items-center justify-center select-none overflow-x-clip overflow-y-visible mt-6 sm:mt-8 md:mt-4 lg:mt-10 mb-20 md:mb-28 min-h-[380px] sm:min-h-[460px] md:min-h-[480px] lg:min-h-[740px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-black/10 rounded-xl"

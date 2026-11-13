@@ -6,7 +6,7 @@ import { ProjectFolders } from './ProjectFolders';
 import { CategoryOverlay } from './CategoryOverlay';
 import { ProjectModal } from './ProjectModal';
 import { FolderErrorBoundary } from '../FolderErrorBoundary';
-import { PlanetHero } from '../PlanetHero';
+import { PlanetSection } from './PlanetSection';
 import { InkParticles } from './InkParticles';
 import { CATEGORIES, CategoryData, ProjectItem } from '../../data/projects';
 import './works-sections.css';
@@ -37,14 +37,8 @@ export default function Works() {
       {/* 1. Hero header (approved) */}
       <div className="relative w-full mb-0" style={{ zIndex: 'var(--z-title, 50)' }}><HeroHeader /></div>
 
-      {/* 2. Halftone planet with orbiting labels (approved, untouched) */}
-      <div
-        data-section="planet"
-        className="relative w-full max-w-[1280px] mx-auto px-2 sm:px-4 overflow-visible"
-        style={{ isolation: 'isolate', zIndex: 'var(--z-planet, 10)' }}
-      >
-        <PlanetHero />
-      </div>
+      {/* 2. Halftone planet with orbiting labels wrapped in PlanetSection (Fase 2) */}
+      <PlanetSection />
 
       <div className="w-full max-w-[860px] mx-auto px-3 sm:px-6">
         {/* 3. Contact card */}

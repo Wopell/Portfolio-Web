@@ -55,7 +55,8 @@ QA_ROLE=builder node scripts/qa-punch.mjs dispute QA-001 "motivo"           # so
 
 ## Reglas duras de entorno
 
-- **WSL**: NUNCA correr `npm install` / `npm i` desde WSL en este repo (poda los binarios nativos linux de las deps Windows y rompe builds). Si se borran, se restauran con `npm pack` + extracción manual de `sharp`, etc.
+- **WSL**: NUNCA correr `npm install` en este repo (desde Windows NI desde WSL): cada instalación poda los binarios nativos de la **otra** plataforma y rompe el dev server/build del lado que queda. Visto en Nov 2025: un `npm install` desde Windows podó `@rollup/rollup-linux-x64-gnu`, `@esbuild/linux-x64` (también el anidado en `vite/node_modules`), `@tailwindcss/oxide-linux-x64-gnu` y `lightningcss-linux-x64-gnu`. Si se podan: restaurar a mano con `npm pack <pkg>@<versión-exacta>` + extracción del tarball dentro de `node_modules/` (nunca reinstalar).
+- **WSL**: editar código bajo `/mnt/f` NO dispara el file-watcher de vite (drvfs no emite inotify) — vite sigue sirviendo la transform vieja. Tras cada edición: reiniciar el dev server (kill por puerto `fuser -k 5173/tcp` + relanzar) o las capturas van a mostrar código viejo.
 - Dev server en `http://127.0.0.1:5173/works`. Si está caído: el hint del preflight de `qa.mjs` (WSL: `(nohup node node_modules/vite/bin/vite.js --port 5173 --host 127.0.0.1 > /tmp/opencode/vite-dev.log 2>&1 &)`), o `npm run dev` en terminal propia (bloquea).
 - Capturas mobile SIEMPRE con `--mobile --width 390 --height 844` (solo `--mobile` = 1920 con UA mobile).
 - chrome-headless-shell vive en `~/.cache/hyperframes/chrome/` y arranca con `LD_LIBRARY_PATH` apuntando a `~/.cache/hyperframes/chrome/syslibs/...` (ya resuelto en `capture_sections.mjs`).
