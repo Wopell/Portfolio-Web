@@ -92,6 +92,15 @@ export default function Navbar() {
 
   const showHomeButton = isWorksActive;
 
+  // «Mis trabajos» desde la intro o desde /works va a /works (antes, en `/` no
+  // hacía nada y con carga directa de /works te devolvía a la intro).
+  const worksTarget =
+    location.pathname === '/' || location.pathname === '/works' || isWorksActive ? '/works' : '/';
+  const handleWorksClick = () => {
+    if (worksTarget === '/works') setIsWorksActive(true);
+    handleTabSwitch(worksTarget);
+  };
+
   return (
     <motion.nav 
       initial={{ y: -20, opacity: 0 }}
@@ -142,8 +151,9 @@ export default function Navbar() {
           }}
         />
 
-        <button 
+        <button
           onClick={() => handleTabSwitch('/about')}
+          aria-current={isAbout ? 'page' : undefined}
           className={`relative z-10 py-2.5 transition-colors duration-500 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center cursor-pointer ${
             isAbout 
               ? 'text-white' 
@@ -153,7 +163,8 @@ export default function Navbar() {
           Sobre mi
         </button>
         <button 
-          onClick={() => handleTabSwitch(isWorksActive ? '/works' : '/')}
+          onClick={handleWorksClick}
+          aria-current={!isAbout ? 'page' : undefined}
           className={`relative z-10 py-2.5 transition-colors duration-500 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center cursor-pointer ${
             !isAbout 
               ? 'text-white'

@@ -1,11 +1,14 @@
 import { motion, useTransform, useScroll, useSpring, useMotionValueEvent } from "motion/react";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Scrollytelling from "./Scrollytelling";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Scrollytelling, { INTRO_RANGE_VH } from "./Scrollytelling";
 import About from "./About";
 import { useProgressiveMagneticScroll } from "../hooks/useProgressiveMagneticScroll";
 
 import { useWorksState } from "../context/WorksStateContext";
+
+/** progreso en el que la pantalla ya es blanco puro y se pasa a /works */
+const NAVIGATE_AT = 0.985;
 
 interface HomeProps {
   activeTab?: "works" | "about";
@@ -16,15 +19,22 @@ export default function Home({ activeTab = "works" }: HomeProps) {
   const { setIsWorksActive } = useWorksState();
   const isAbout = activeTab === "about";
 
-  // Activate Progressive Real-Time Magnetic Gravity Pull ONLY in "works" mode
+  // El imán solo asienta el final (desde el 70 %, cuando ya empieza el blanco).
+  // Nunca con reduced-motion ni en pantallas táctiles: ahí manda el dedo.
+  const [magnetAllowed] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches &&
+      !window.matchMedia("(pointer: coarse)").matches
+  );
   useProgressiveMagneticScroll({
     totalFrames: 100,
-    activationFrame: 2,
+    activationFrame: 70,
     targetFrame: 99,
     exponent: 2.0,
     maxPullSpeed: 4.5,
-    scrollytellingRangeVh: 4,
-    enabled: !isAbout,
+    scrollytellingRangeVh: INTRO_RANGE_VH,
+    enabled: !isAbout && magnetAllowed,
   });
 
   // Raw scroll position from document
@@ -42,10 +52,10 @@ export default function Home({ activeTab = "works" }: HomeProps) {
     mass: 0.8
   });
 
-  // Calculate smooth progress (0.0 to 1.0) over the 400vh active zoom range
+  // Calculate smooth progress (0.0 to 1.0) over the intro range
   const smoothProgress = useTransform(smoothScrollY, (y) => {
     if (isAbout) return 0;
-    const zoomScrollRange = window.innerHeight * 4;
+    const zoomScrollRange = window.innerHeight * INTRO_RANGE_VH;
     return Math.max(0, Math.min(1, y / zoomScrollRange));
   });
 
@@ -74,9 +84,16 @@ export default function Home({ activeTab = "works" }: HomeProps) {
     }
   }, [activeTab, isAbout, smoothScrollY]);
 
-  // Monitor progress when in landing mode: when smoothProgress hits 0.99 (reaching frame 99), activate works state and navigate!
+  // Cuando la pantalla ya es blanco puro, pasa a /works UNA sola vez
+  // (antes navegaba en cada tick del spring y llenaba el historial).
+  // `armed`: solo navega si en esta visita el scroll pasó por la primera mitad
+  // (al volver con Atrás no se dispara solo por una posición restaurada).
+  const navigatedRef = useRef(false);
+  const armedRef = useRef(false);
   useMotionValueEvent(smoothProgress, "change", (latestProgress) => {
-    if (!isAbout && latestProgress >= 0.99) {
+    if (latestProgress < 0.5) armedRef.current = true;
+    if (!isAbout && armedRef.current && !navigatedRef.current && latestProgress >= NAVIGATE_AT) {
+      navigatedRef.current = true;
       setIsWorksActive(true);
       navigate("/works");
     }
@@ -121,7 +138,8 @@ export default function Home({ activeTab = "works" }: HomeProps) {
           }}
         >
           {/* Hero Content vertically and horizontally centered inside the bottom-left white cutout square */}
-          <div className="absolute top-[68vh] bottom-[11vh] left-[4vw] md:left-[5vw] w-[21vw] md:w-[21vw] flex flex-col justify-center z-30 pointer-events-auto">
+          {/* la caja sigue al recorte de la máscara: mobile 4–46 % × 72–94 %, desktop 5–26,5 % × 68–89 % */}
+          <div className="absolute top-[72vh] bottom-[6vh] left-[4vw] w-[40vw] md:top-[68vh] md:bottom-[11vh] md:left-[5vw] md:w-[21vw] flex flex-col justify-center z-30 pointer-events-auto">
             <div className="text-reveal mb-2">
               <h1 className="text-[5.8vw] md:text-[4vw] lg:text-[3.4vw] leading-[0.85] select-none tracking-tight inline-flex items-baseline text-zinc-950 font-black">
                 <span className="font-futura uppercase tracking-[-0.04em]">port</span>
@@ -131,11 +149,21 @@ export default function Home({ activeTab = "works" }: HomeProps) {
 
             <div className="pl-0.5">
               <div className="text-[10px] md:text-[11px] lg:text-xs font-sans tracking-wide space-y-0.5 leading-tight text-zinc-800 font-semibold">
-                <p className="opacity-70 font-normal">trabajos seleccionados de</p>
+                <p>
+                  <span className="opacity-70 font-normal">trabajos seleccionados de </span>
+                  <span>Tomy Powell</span>
+                </p>
                 <p className="uppercase tracking-wider">ANIMATION</p>
                 <p className="uppercase tracking-wider">3D ART</p>
                 <p className="uppercase tracking-wider">IA &amp; POST PRODUCTION</p>
               </div>
+              <Link
+                to="/works"
+                onClick={() => setIsWorksActive(true)}
+                className="mt-1 inline-flex min-h-[44px] items-center gap-1.5 text-[11px] md:text-xs font-sans font-bold uppercase tracking-wider text-zinc-950 underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+              >
+                Ver trabajos <span aria-hidden="true">→</span>
+              </Link>
             </div>
           </div>
 

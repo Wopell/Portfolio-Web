@@ -7,6 +7,11 @@ import { WorksStateProvider } from './context/WorksStateContext';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
+  // la app maneja su propio scroll: que el navegador no restaure posiciones
+  // viejas al ir Atrás (en la intro eso re-disparaba la navegación a /works)
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+  }, []);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);

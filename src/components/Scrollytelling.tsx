@@ -10,13 +10,25 @@ const ZOOM_FACTOR = 1.0; // Set to 1.0 to show 100% of the image
 // --- CONFIGURATION ---
 const CONFIG = {
   FOLDER_NAME: "scroll", // The name of the folder inside public/
-  TOTAL_FRAMES: 100,   // Total number of images
+  // La cámara entra en la barra blanca de censura hasta llenar la pantalla en el
+  // fotograma ~54; los siguientes (niebla gris → negro) ya no se usan ni se cargan.
+  TOTAL_FRAMES: 54,
   EXTENSION: "webp",   // File extension
   getFileName: (index: number) => {
     const paddedIndex = index.toString().padStart(4, "0");
     return `${paddedIndex} copia.${CONFIG.EXTENSION}`;
   }
 };
+
+/** recorrido de la intro en alturas de pantalla (antes 4) */
+export const INTRO_RANGE_VH = 2.6;
+/** progreso en el que se llega al último fotograma */
+const FRAMES_END_P = 0.9;
+/** resplandor blanco: nace en la barra de censura y cubre la pantalla */
+const BLOOM_START_P = 0.6;
+const BLOOM_END_P = 0.95;
+/** centro de la barra en coordenadas del fotograma (fotogramas 40–54) */
+const BAR_CENTER = { x: 0.44, y: 0.35 };
 
 interface ScrollytellingProps {
   scrollY: MotionValue<number>;
@@ -100,6 +112,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   const canvasWrapperRef = useRef<HTMLDivElement>(null);
   const maskPathRef = useRef<SVGPathElement>(null);
   const heroTextMaskRef = useRef<SVGPathElement>(null);
+  const bloomRef = useRef<HTMLDivElement>(null);
 
   // Ref to persist the last known mouse position across mousemove, scroll, and render updates
   const mousePosRef = useRef<{ x: number; y: number } | null>(null);
@@ -199,7 +212,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     if (!isLoaded) return;
 
     const totalFrames = CONFIG.TOTAL_FRAMES;
-    const rawFrame = latestProgress * (totalFrames - 1);
+    const rawFrame = Math.min(1, latestProgress / FRAMES_END_P) * (totalFrames - 1);
     const currentFrame = Math.min(
       totalFrames - 1, 
       Math.max(0, Math.floor(rawFrame))
@@ -231,16 +244,39 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     const microZoom = (frameFraction / totalFrames) * 0.50;
     const virtualScale = baseScale + microZoom;
 
-    let opacity = 1;
-    let display = "block";
+    const opacity = 1;
+    const display = "block";
 
-    // Smooth fade out between 3.8vh and 4.0vh as Works section enters (in Works mode only)
-    if (!isZoomDisabled && latestScrollY > vh * 3.8) {
-      const fadeFraction = (latestScrollY - vh * 3.8) / (vh * 0.2);
-      opacity = Math.max(0, 1 - fadeFraction);
-    }
-    if (!isZoomDisabled && latestScrollY >= vh * 4) {
-      display = "none";
+    // Resplandor blanco: nace en la barra de censura (que la cámara ya está
+    // atravesando) y cubre la pantalla; /works arranca sobre ese mismo blanco.
+    const bloom = bloomRef.current;
+    if (bloom) {
+      const t = isZoomDisabled
+        ? 0
+        : Math.max(0, Math.min(1, (latestProgress - BLOOM_START_P) / (BLOOM_END_P - BLOOM_START_P)));
+      if (t <= 0) {
+        bloom.style.opacity = "0";
+      } else if (t >= 1) {
+        bloom.style.opacity = "1";
+        bloom.style.background = "#ffffff";
+      } else {
+        const e = t * t * (3 - 2 * t);
+        const vw = window.innerWidth;
+        // posición en pantalla de la barra: cover del fotograma + zoom del canvas
+        // (desde el centro) + escala 1.05 del contenedor de parallax
+        const tex = framesRef.current[0];
+        const tw = tex ? tex.width : 1920;
+        const th = tex ? tex.height : 1080;
+        const fit = Math.max(vw / tw, vh / th);
+        const sw = tw * fit;
+        const sh = th * fit;
+        const zoom = virtualScale * 1.05;
+        const cx = vw / 2 + ((vw - sw) / 2 + BAR_CENTER.x * sw - vw / 2) * zoom;
+        const cy = vh / 2 + ((vh - sh) / 2 + BAR_CENTER.y * sh - vh / 2) * zoom;
+        const r = Math.hypot(vw, vh) * (0.1 + 1.15 * e);
+        bloom.style.opacity = Math.min(1, t * 3).toFixed(3);
+        bloom.style.background = `radial-gradient(circle at ${cx.toFixed(1)}px ${cy.toFixed(1)}px, #ffffff ${(r * 0.55).toFixed(1)}px, rgba(255,255,255,0) ${r.toFixed(1)}px)`;
+      }
     }
 
     if (canvasRef.current) {
@@ -354,7 +390,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     <div 
       ref={containerRef} 
       className={`w-full ${isZoomDisabled ? "relative bg-[#e8e9eb]" : "bg-black"}`} 
-      style={{ height: isZoomDisabled ? "100vh" : "500vh" }}
+      style={{ height: isZoomDisabled ? "100vh" : `${(INTRO_RANGE_VH + 1) * 100}vh` }}
     >
       {/* SVG ClipPath Definition for the Stepped Rounded Mask & Hero Text Cutout Mask */}
       <svg className="absolute w-0 h-0 pointer-events-none" aria-hidden="true">
@@ -418,6 +454,14 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
           }}
         />
       </motion.div>
+
+      {/* Resplandor blanco del final (lo maneja updateRenderState) */}
+      <div
+        ref={bloomRef}
+        aria-hidden="true"
+        className="fixed inset-0 pointer-events-none z-[15]"
+        style={{ opacity: 0 }}
+      />
 
       {/* Scroll to top button */}
       <button
