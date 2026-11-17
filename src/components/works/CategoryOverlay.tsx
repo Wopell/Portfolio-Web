@@ -107,7 +107,7 @@ export const CategoryOverlay: React.FC<{
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-white/70 font-semibold block mb-2">
                 Categoría Seleccionada // {category.number}
               </p>
-              <h1 className="text-5xl sm:text-6xl md:text-8xl font-display font-black text-white tracking-tight uppercase">
+              <h1 className="arch-title !text-white" style={{ fontSize: 'clamp(56px, 10vw, 160px)' }}>
                 {category.title}
               </h1>
               <p className="text-white/80 font-sans text-sm sm:text-base md:text-lg max-w-2xl mt-3">
@@ -124,7 +124,7 @@ export const CategoryOverlay: React.FC<{
                   <p className="text-xs font-mono uppercase tracking-widest text-zinc-600 font-bold">
                     Catálogo Seleccionado // {category.title}
                   </p>
-                  <h2 className="text-2xl md:text-3xl font-display font-bold tracking-tight text-zinc-950 mt-1">
+                  <h2 className="mt-2 text-zinc-950" style={{ fontFamily: 'var(--arch-serif)', fontSize: 'clamp(28px, 3vw, 44px)', lineHeight: 1.05 }}>
                     {category.subtitle}
                   </h2>
                   <p className="text-zinc-600 font-sans text-sm mt-1 max-w-xl">

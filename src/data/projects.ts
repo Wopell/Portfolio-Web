@@ -7,6 +7,8 @@
  * =========================================================================
  */
 
+import { WORKS, type Work } from './display-works';
+
 export interface ProjectItem {
   id: string;
   title: string;
@@ -68,6 +70,23 @@ export function resolveCategoryPreview(index: number): string {
   }
 }
 
+/** Piezas reales (display-works) agrupadas por categoría. */
+export function workToProject(w: Work): ProjectItem {
+  const kind = w.kind === '3D' ? '3D' : w.kind.toLowerCase();
+  return {
+    id: w.id,
+    title: w.title,
+    client: w.client,
+    tag: w.kind,
+    year: `${w.format} · ${w.duration}`,
+    image: w.image,
+    description: w.client === 'Proyecto personal' ? `Pieza ${kind} personal.` : `Pieza de ${kind} para ${w.client}.`,
+  };
+}
+
+const fromWorks = (categoryId: string): ProjectItem[] =>
+  WORKS.filter((w) => w.categoryId === categoryId).map(workToProject);
+
 export const CATEGORIES: CategoryData[] = [
   {
     id: 'category-animation',
@@ -81,44 +100,7 @@ export const CATEGORIES: CategoryData[] = [
     tabText: 'text-white',
     projectNote: 'kinetic rhythm & variable axes',
     stampTag: 'BALANZ / KINETIC IDENTITY',
-    projects: [
-      {
-        id: 'anim-01',
-        title: 'Kinetic Identity Reel',
-        client: 'Balanz',
-        tag: 'Motion Design',
-        year: '2026',
-        image: resolveCategoryPreview(1),
-        description: 'Dynamic typographic branding exploring kinetic rhythm, variable axes, and responsive animation loops.',
-      },
-      {
-        id: 'anim-02',
-        title: 'Fluid Chroma Dynamics',
-        client: 'Amaze',
-        tag: 'Liquid Motion',
-        year: '2026',
-        image: resolveCategoryPreview(1),
-        description: 'High-viscosity chromatic liquid simulations rendered with raytraced caustic dispersion.',
-      },
-      {
-        id: 'anim-03',
-        title: 'Stylized Action Fight Test',
-        client: 'Fortiche Study',
-        tag: 'Character 3D',
-        year: '2025',
-        image: resolveCategoryPreview(1),
-        description: 'Stepped keyframe animation study mimicking painterly anime and 2.5D animation styles.',
-      },
-      {
-        id: 'anim-04',
-        title: '4K Broadcast Package',
-        client: 'Telecom',
-        tag: 'On-Air Identity',
-        year: '2025',
-        image: resolveCategoryPreview(1),
-        description: 'Comprehensive network rebrand featuring procedural transitions and reactive bumpers.',
-      },
-    ],
+    projects: fromWorks('category-animation'),
   },
   {
     id: 'category-3d-art',
@@ -132,44 +114,7 @@ export const CATEGORIES: CategoryData[] = [
     tabText: 'text-zinc-950 font-black',
     projectNote: 'brutalist monolith & octane render',
     stampTag: 'ARCHVIZ / VOLUMETRIC SANCTUM',
-    projects: [
-      {
-        id: '3d-01',
-        title: 'Brutalist Monolith Sanctum',
-        client: 'Archviz',
-        tag: 'Octane Render',
-        year: '2026',
-        image: resolveCategoryPreview(2),
-        description: 'Towering cast-concrete brutalist architecture with cinematic volumetric haze and raw sunlight beams.',
-      },
-      {
-        id: '3d-02',
-        title: 'Celestial Fragrance Bottle',
-        client: 'Mugler',
-        tag: 'Product CGI',
-        year: '2026',
-        image: resolveCategoryPreview(2),
-        description: 'Luxury perfume flacon featuring multi-layer dielectric glass dispersion and micro-facet metal cap.',
-      },
-      {
-        id: '3d-03',
-        title: 'Cybernetic Skull Anatomy',
-        client: 'Personal R&D',
-        tag: 'Hard Surface',
-        year: '2025',
-        image: resolveCategoryPreview(2),
-        description: 'Intricate mechanical cyber-skull integrating hydraulic micro-pistons, titanium plating, and exposed fiber optics.',
-      },
-      {
-        id: '3d-04',
-        title: 'Kinetic Automotive Aero Sculpt',
-        client: 'Chevrolet',
-        tag: 'Automotive CGI',
-        year: '2024',
-        image: resolveCategoryPreview(2),
-        description: 'Aerodynamic wind-tunnel visualization with colorful particle streamlines tracing high-speed carbon curves.',
-      },
-    ],
+    projects: fromWorks('category-3d-art'),
   },
   {
     id: 'category-ia',
@@ -183,44 +128,7 @@ export const CATEGORIES: CategoryData[] = [
     tabText: 'text-zinc-950 font-black',
     projectNote: 'latent space diffusion & neural mesh',
     stampTag: 'RUNWAY GEN-3 / LATENT INTERPOLATION',
-    projects: [
-      {
-        id: 'ia-01',
-        title: 'Latent Space Diffusion Reel',
-        client: 'Runway Gen-3',
-        tag: 'AI Motion',
-        year: '2026',
-        image: resolveCategoryPreview(3),
-        description: 'Continuous latent space interpolation blending surreal biological structures with cybernetic forms.',
-      },
-      {
-        id: 'ia-02',
-        title: 'Holographic UI & Neuro-Mesh',
-        client: 'Betterfly',
-        tag: 'Neural UI',
-        year: '2026',
-        image: resolveCategoryPreview(3),
-        description: 'AI-assisted procedural UI generated through custom fine-tuned LoRAs and vector workflows.',
-      },
-      {
-        id: 'ia-03',
-        title: 'Neural Architecture Synthesis',
-        client: 'Concept Study',
-        tag: 'Generative Arch',
-        year: '2025',
-        image: resolveCategoryPreview(3),
-        description: 'Exploring non-Euclidean parametric structures via iterative diffusion model prompting.',
-      },
-      {
-        id: 'ia-04',
-        title: 'Synthetic Fashion Editorial',
-        client: 'Mayma',
-        tag: 'Virtual Model',
-        year: '2025',
-        image: resolveCategoryPreview(3),
-        description: 'Hyper-realistic digital models and procedural haute couture garments synthesized at 8K resolution.',
-      },
-    ],
+    projects: fromWorks('category-ia'),
   },
   {
     id: 'category-post-production',
@@ -234,43 +142,11 @@ export const CATEGORIES: CategoryData[] = [
     tabText: 'text-zinc-950 font-black',
     projectNote: "that's me! post-production project",
     stampTag: 'VINTAGE / DIHKSPOOCEZEGG',
-    projects: [
-      {
-        id: 'post-01',
-        title: 'Commercial Film Color Grade',
-        client: 'Chevrolet',
-        tag: 'DaVinci Resolve',
-        year: '2026',
-        image: resolveCategoryPreview(4),
-        description: 'Rich contrast, warm cinematic skin tones, and calibrated highlight roll-off in ACES color space.',
-      },
-      {
-        id: 'post-02',
-        title: 'Dark Matter CGI Compositing',
-        client: 'Diageo',
-        tag: 'Nuke / Multi-Pass',
-        year: '2026',
-        image: resolveCategoryPreview(4),
-        description: 'Multi-pass EXR compositing uniting deep passes, ambient caustics, and live-action bottle plates.',
-      },
-      {
-        id: 'post-03',
-        title: 'Broadcast Finishing Suite',
-        client: 'Johnnie Walker',
-        tag: 'Mastering',
-        year: '2025',
-        image: resolveCategoryPreview(4),
-        description: 'High-profile commercial mastering for global TV networks with strict broadcast delivery standards.',
-      },
-      {
-        id: 'post-04',
-        title: 'Analog 35mm Bloom & Grain',
-        client: 'Smirnoff',
-        tag: 'Film Emulation',
-        year: '2025',
-        image: resolveCategoryPreview(4),
-        description: 'Authentic 35mm film halation, organic grain scan overlays, and vintage optical softness.',
-      },
-    ],
+    projects: fromWorks('category-post-production'),
   },
 ];
+
+// la portada de cada carpeta/catálogo es su primera pieza real
+for (const c of CATEGORIES) {
+  if (c.projects[0]) c.image = c.projects[0].image;
+}

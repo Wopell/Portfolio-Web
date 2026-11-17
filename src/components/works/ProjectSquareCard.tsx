@@ -13,13 +13,15 @@ export const ProjectSquareCard: React.FC<{
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
+    // el catálogo scrollea dentro de su propio contenedor, no en la ventana
+    const scroller = ref.current?.closest('[role="dialog"]') ?? undefined;
     const ctx = gsap.context(() => {
       gsap.from(ref.current, {
         y: 26,
         autoAlpha: 0,
         duration: 0.6,
         ease: EASE.settle,
-        scrollTrigger: { trigger: ref.current, start: 'top 94%', once: true },
+        scrollTrigger: { trigger: ref.current, scroller, start: 'top 94%', once: true },
       });
     }, ref);
     return () => ctx.revert();

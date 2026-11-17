@@ -1,83 +1,420 @@
 /**
- * works-sections.css — styles for the "Mis trabajos" page sections only.
- * Approved sections (hero header, planet) are deliberately untouched.
+ * works-sections.css — sistema «Archivo» de /works (ver DIRECTION.md).
+ * Papel, tinta y una voz serif; JetBrains Mono para el sistema.
  */
 
-/* ── Hero: "MY WORKS" ink-stamp title (per the current approved title ref) ──
-   Heavy grotesk with an ink-grain distress mask, like a rubber stamp on
-   paper. The mask is a fractal-noise SVG whose alpha is thresholded:
-   fully-opaque areas pass the glyph, near-opaque areas slightly lighten it
-   and zero-alpha areas erode it — one mask does both mottling and worn
-   edges. */
-.ink-stamp-title {
-  font-family: "Archivo Black", "Arial Black", sans-serif;
-  color: #17130f;
-  -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='3' seed='17' stitchTiles='stitch'/><feComponentTransfer><feFuncA type='discrete' tableValues='0.5 0.82 0.9 0.95 1 1'/></feComponentTransfer></filter><rect width='300' height='300' filter='url(%23g)'/></svg>");
-  mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.11' numOctaves='3' seed='17' stitchTiles='stitch'/><feComponentTransfer><feFuncA type='discrete' tableValues='0.5 0.82 0.9 0.95 1 1'/></feComponentTransfer></filter><rect width='300' height='300' filter='url(%23g)'/></svg>");
-  -webkit-mask-size: 300px 300px;
-  mask-size: 300px 300px;
+:root {
+  --arch-paper: #f2efe6;
+  --arch-card: #fbfaf6;
+  --arch-ink: #191510;
+  --arch-line: #4a4036;
+  --arch-soft: #6b6257;
+  --arch-accent: #2f6f6b;
+  --arch-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --arch-serif: "Instrument Serif", "Times New Roman", serif;
+  --arch-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
-.font-typer {
-  font-family: "Special Elite", "Courier New", monospace;
+/* ── Estructura ──────────────────────────────────────────────────────────── */
+
+.arch-wrap {
+  width: 100%;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 16px;
 }
 
-/* beige / kraft washi tape for polaroids and paper patches */
-.kraft-tape {
-  background: rgba(203, 178, 130, 0.9);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(1px);
-  -webkit-backdrop-filter: blur(1px);
+@media (min-width: 640px) {
+  .arch-wrap {
+    padding-inline: 32px;
+  }
 }
 
-/* ── Folder deck ─────────────────────────────────────────────────────────── */
-
-/* Colored folder body with the reference's inner graph-paper texture */
-.folder-body-grid {
-  background-size: 28px 28px;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
-  opacity: 0.35;
+.arch-mono {
+  font-family: var(--arch-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
-/* Top rule that flows out of the tab's outline into the body's silhouette
-   (the body itself has no top border; overflow-hidden clips this along the
-   rounded corners, as in the reference). */
-.folder-body-rule::before {
+/* etiqueta · línea · dato (patrón de la regla del hero) */
+.arch-rule {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--arch-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--arch-ink);
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .arch-rule--wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .arch-rule--wrap .arch-rule__line {
+    display: none;
+  }
+}
+
+.arch-rule__line {
+  flex: 1;
+  height: 1px;
+  background: var(--arch-line);
+  opacity: 0.55;
+}
+
+.arch-title {
+  font-family: var(--arch-serif);
+  font-weight: 400;
+  font-size: clamp(52px, 8.4vw, 128px);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  color: var(--arch-ink);
+  text-wrap: balance;
+}
+
+.arch-title em {
+  font-style: italic;
+}
+
+.arch-lede {
+  font-family: var(--arch-serif);
+  font-size: clamp(22px, 2.1vw, 30px);
+  line-height: 1.18;
+  color: var(--arch-ink);
+  max-width: 26ch;
+  text-wrap: pretty;
+}
+
+/* ── Ficha (contacto) ────────────────────────────────────────────────────── */
+
+.arch-card {
+  background: var(--arch-card);
+  border: 1px solid var(--arch-line);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(25, 21, 16, 0.04), 0 18px 40px -24px rgba(25, 21, 16, 0.25);
+  overflow: hidden;
+}
+
+.arch-channels > li + li {
+  border-top: 1px solid rgba(74, 64, 54, 0.3);
+}
+
+.arch-channel {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 16px;
+  padding: 26px 28px;
+  color: var(--arch-ink);
+  transition: background-color 240ms var(--arch-ease);
+}
+
+.arch-channel__label {
+  font-family: var(--arch-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--arch-soft);
+}
+
+.arch-channel__value {
+  font-family: var(--arch-serif);
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.arch-channel__arrow {
+  font-family: var(--arch-mono);
+  font-size: 16px;
+  transition: transform 240ms var(--arch-ease), color 240ms var(--arch-ease);
+}
+
+.arch-channel:hover,
+.arch-channel:focus-visible {
+  background-color: rgba(242, 239, 230, 0.7);
+}
+
+.arch-channel:hover .arch-channel__arrow,
+.arch-channel:focus-visible .arch-channel__arrow {
+  transform: translate(4px, -2px);
+  color: var(--arch-accent);
+}
+
+.arch-channel:focus-visible {
+  outline: 2px solid var(--arch-accent);
+  outline-offset: -2px;
+}
+
+@media (max-width: 639px) {
+  .arch-channel {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 6px;
+    padding: 20px;
+  }
+  .arch-channel__label {
+    grid-column: 1 / -1;
+  }
+}
+
+/* subrayado que se dibuja */
+.arch-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 240ms var(--arch-ease);
+  padding-bottom: 2px;
+}
+
+a:hover .arch-underline,
+a:focus-visible .arch-underline {
+  background-size: 100% 1px;
+}
+
+/* botones */
+.arch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--arch-ink);
+  border-radius: 999px;
+  font-family: var(--arch-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--arch-ink);
+  background: transparent;
+  cursor: pointer;
+  transition: transform 200ms var(--arch-ease), background-color 200ms var(--arch-ease), color 200ms var(--arch-ease);
+}
+
+.arch-btn:hover {
+  transform: translateY(-2px);
+}
+
+.arch-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.arch-btn--solid {
+  background: var(--arch-ink);
+  color: var(--arch-card);
+}
+
+.arch-btn:not(.arch-btn--solid):hover {
+  background: var(--arch-ink);
+  color: var(--arch-card);
+}
+
+.arch-btn:focus-visible {
+  outline: 2px solid var(--arch-accent);
+  outline-offset: 3px;
+}
+
+/* ── Carpetas ────────────────────────────────────────────────────────────── */
+
+.folder-deck {
+  perspective: 1600px;
+  perspective-origin: 50% 0%;
+}
+
+.folder {
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+.folder-deck.is-live .folder {
+  transition: transform 520ms var(--arch-ease);
+}
+
+.folder__hit {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  width: 100%;
+  cursor: pointer;
+  background: transparent;
+  border-radius: 10px 10px 0 0;
+}
+
+.folder__hit:focus-visible {
+  outline: 2px solid var(--arch-accent);
+  outline-offset: 3px;
+}
+
+.folder__body {
+  position: relative;
+  border: 1.5px solid var(--arch-line);
+  border-top: none;
+  border-radius: 0 14px 14px 14px;
+  box-shadow: 0 -10px 24px -18px rgba(25, 21, 16, 0.35);
+}
+
+.folder__body.absolute {
+  position: absolute;
+}
+
+/* regla superior que sale del final de la pestaña */
+.folder__body::before {
   content: '';
   position: absolute;
   top: 0;
-  left: var(--folder-tab-end, 0px);
-  right: 0;
+  left: calc(var(--tab-end, 0px) - 1.5px);
+  right: -1.5px;
+  height: 1.5px;
+  background: var(--arch-line);
+  border-top-right-radius: 14px;
+}
+
+.folder__strip {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 14px 0;
+}
+
+.folder__thumbs {
+  display: flex;
+  gap: 10px;
+}
+
+.folder__thumbs img {
+  width: 132px;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--arch-line);
+  border-radius: 3px;
+  background: #e6e0d2;
+}
+
+@media (max-width: 639px) {
+  .folder__thumbs img {
+    width: 92px;
+  }
+}
+
+.folder__count {
+  font-family: var(--arch-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--arch-soft);
+  padding-top: 6px;
+  white-space: nowrap;
+}
+
+.folder__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 4px 12px;
+  font-family: var(--arch-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--arch-soft);
+}
+
+.folder__meta > span:last-child {
+  white-space: nowrap;
+}
+
+.folder__meta > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folder__viewer {
+  position: relative;
+  aspect-ratio: 16 / 8;
+  overflow: hidden;
+  border: 1px solid var(--arch-line);
+  border-radius: 6px;
+  background: #e6e0d2;
+}
+
+@media (max-width: 639px) {
+  .folder__viewer {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+.folder__slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 900ms var(--arch-ease), transform 1400ms var(--arch-ease);
+}
+
+.folder__slide.is-on {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.folder:hover .folder__slide.is-on {
+  transform: scale(1.025);
+}
+
+.folder__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
   height: 2px;
-  background: #4A4036;
-  pointer-events: none;
+  width: 100%;
+  background: var(--arch-ink);
+  transform-origin: 0 50%;
+  animation: folder-progress linear forwards;
 }
 
-/* The whole folder row (tab + visible body strip) is the click target. */
-.folder-row {
-  transition: filter 0.3s ease;
+.folder__progress.is-paused {
+  animation-play-state: paused;
 }
 
-.folder-row:hover {
-  filter: brightness(1.03);
+@keyframes folder-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 
-/* accessible focus */
-.folder-row:focus-visible {
-  outline: 2px solid #1c1917;
-  outline-offset: 4px;
-  border-radius: 28px;
+.folder-deck__base {
+  position: absolute;
+  left: -16px;
+  right: -16px;
+  bottom: -1px;
+  height: 1px;
+  background: var(--arch-line);
 }
 
-/* ── Brands band ─────────────────────────────────────────────────────────── */
+/* ── Marcas ──────────────────────────────────────────────────────────────── */
 
-/* graph-paper texture inside each featured logo cell, as in the reference */
-/* soft fade at the band edges */
 .brands-marquee {
-  mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
 }
 
 .brands-marquee--static {
@@ -87,10 +424,17 @@
 /* ── Reduced motion ──────────────────────────────────────────────────────── */
 
 @media (prefers-reduced-motion: reduce) {
-  .folder-row,
-  [data-social-tile],
+  .folder,
+  .folder__slide,
+  .arch-channel,
+  .arch-channel__arrow,
+  .arch-btn,
+  .arch-underline,
   [data-brands-logo] {
     transition: none !important;
     animation: none !important;
+  }
+  .folder__progress {
+    display: none;
   }
 }

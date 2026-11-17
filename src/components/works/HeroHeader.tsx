@@ -11,6 +11,5 @@ export const HeroHeader: React.FC = () => (
       <span aria-hidden="true" className="flex-1 border-t border-black/60" />
       <span>2023 - 2027</span>
     </div>
-    <div aria-hidden="true" className="absolute bottom-0 left-0 w-full pointer-events-none" style={{ height: '12vh', background: 'linear-gradient(to bottom, rgba(255,255,255,0), var(--color-paper, #f2efe6))' }} />
   </section>
 );

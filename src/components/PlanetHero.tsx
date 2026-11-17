@@ -213,6 +213,17 @@ export interface OrbitProjection {
   blur: number;
 }
 
+export interface OrbitFramePos {
+  x: number;
+  y: number;
+  zNorm: number;
+  scale: number;
+}
+
+export interface PlanetHeroProps {
+  onOrbitFrame?: (positions: OrbitFramePos[]) => void;
+}
+
 export const ORBIT_LABELS: OrbitItem[] = [
   {
     id: 'editorial-design',
@@ -550,12 +561,22 @@ const getEffectiveDpr = (isMobile: boolean): number => {
   return Math.min(rawDpr, isMobile ? 2.0 : 1.5);
 };
 
-export const PlanetHero = forwardRef<PlanetHeroHandle, object>(function PlanetHero(_, ref) {
+export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function PlanetHero({ onOrbitFrame }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const debugCanvasRef = useRef<HTMLCanvasElement>(null);
   const labelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const circleRefs = useRef<(HTMLElement | null)[]>([]);
+
+  // Ítem 2: callback por frame con las 8 posiciones (4 labels + 4 círculos).
+  // Array preasignado y objetos reutilizados: el consumidor no debe retener el array.
+  const onOrbitFrameRef = useRef(onOrbitFrame);
+  const orbitFramePositionsRef = useRef<OrbitFramePos[]>(
+    Array.from({ length: ORBIT_LABELS.length + CONFIG.circleOrbits.length }, () => ({ x: 0, y: 0, zNorm: 0, scale: 1 }))
+  );
+  useEffect(() => {
+    onOrbitFrameRef.current = onOrbitFrame;
+  }, [onOrbitFrame]);
 
   // Estados responsivos dinámicos
   const currentRadiusRef = useRef<number>(CONFIG.radius);
@@ -2028,6 +2049,12 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, object>(function PlanetHe
 
         const zIdx = projZ >= 0 ? 20 + Math.round(((projZNorm + 1) / 2) * 20) : 1 + Math.round(((projZNorm + 1) / 2) * 8);
         el.style.zIndex = String(zIdx);
+
+        const fp = orbitFramePositionsRef.current[i];
+        fp.x = projX + paraX;
+        fp.y = -projY + paraY;
+        fp.zNorm = projZNorm;
+        fp.scale = projScale;
       }
 
       // Proyección de Círculos de Previews de Trabajos
@@ -2086,6 +2113,12 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, object>(function PlanetHe
         const zIdx = projZ >= 0 ? 20 + Math.round(((projZNorm + 1) / 2) * 20) : 1 + Math.round(((projZNorm + 1) / 2) * 8);
         el.style.zIndex = String(zIdx);
 
+        const fp = orbitFramePositionsRef.current[ORBIT_LABELS.length + i];
+        fp.x = projX + paraX;
+        fp.y = -projY + paraY;
+        fp.zNorm = projZNorm;
+        fp.scale = projScale;
+
         const isBehind = projZNorm < -0.2;
         el.style.pointerEvents = isBehind ? 'none' : 'auto';
         el.setAttribute('tabindex', isBehind ? '-1' : '0');
@@ -2095,6 +2128,9 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, object>(function PlanetHe
           setHoveredCircle(null);
         }
       }
+
+      // Ítem 2: única llamada por frame con las 8 posiciones ya calculadas.
+      if (onOrbitFrameRef.current) onOrbitFrameRef.current(orbitFramePositionsRef.current);
 
       const tAfterDom = performance.now();
       domTimeRef.current = domTimeRef.current * 0.95 + (tAfterDom - tBeforeDom) * 0.05;
