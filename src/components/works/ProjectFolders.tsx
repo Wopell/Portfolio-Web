@@ -14,10 +14,18 @@ import { SectionHead } from './SectionHead';
  */
 
 const ROTATE_MS = 10_000;
-const OUTLINE = '#4A4036';
-const FILLS = ['#e9e3d4', '#ede8db', '#f1ede3', '#fbfaf6'];
-/* una pestaña de color por carpeta (misma familia que las fichas de contacto) */
-const TAB_COLORS = ['#ff9f43', '#7cc8ff', '#c9b6ff', '#ff6b4a'];
+/* paleta: papel #f2efe6 · tinta #191510 · blanco · acento #2f6f6b */
+const INK = '#191510';
+const ACCENT = '#2f6f6b';
+const OUTLINE = 'rgba(25, 21, 16, 0.72)';
+/** papel oscurecido con tinta al `pct` % (profundidad sin sumar tonos) */
+const inkOnPaper = (pct: number) => {
+  const p = [242, 239, 230];
+  const k = [25, 21, 16];
+  return `#${p.map((c, i) => Math.round(c + (k[i] - c) * (pct / 100)).toString(16).padStart(2, '0')).join('')}`;
+};
+/* del fondo al frente: 12 % · 8 % · 4 % de tinta, y la del frente en blanco */
+const FILLS = [inkOnPaper(12), inkOnPaper(8), inkOnPaper(4), '#ffffff'];
 
 interface ProjectFoldersProps {
   categories: CategoryData[];
@@ -34,11 +42,12 @@ const useIsNarrow = () => {
   return narrow;
 };
 
-const FolderTab: React.FC<{ label: string; width: number; height: number; fill: string }> = ({
+const FolderTab: React.FC<{ label: string; width: number; height: number; fill: string; ink?: string }> = ({
   label,
   width: W,
   height: H,
   fill,
+  ink = INK,
 }) => {
   const end = W + 16;
   const shape = `M 0 ${H} L 0 12 Q 0 0 12 0 L ${W - 10} 0 Q ${W} 0 ${W} 10 L ${W} ${H - 14} C ${W} ${H - 4} ${W + 6} ${H} ${end} ${H}`;
@@ -59,7 +68,7 @@ const FolderTab: React.FC<{ label: string; width: number; height: number; fill: 
         fontSize="12"
         fontWeight="600"
         letterSpacing="1.4"
-        fill="#191510"
+        fill={ink}
       >
         {label}
       </text>
@@ -221,10 +230,9 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({ categories, onOp
           const isFront = idx === frontIdx;
           const label = `${cat.number} // ${cat.title}`;
           const tabW = Math.round(label.length * 8.6 + 34);
-          const tabColor = TAB_COLORS[idx % TAB_COLORS.length];
-          const paper = FILLS[Math.max(0, FILLS.length - (n - idx))] ?? FILLS[0];
-          // cuerpo: papel teñido con el color de su pestaña (más suave en el frente)
-          const fill = `color-mix(in srgb, ${tabColor} ${isFront ? 14 : 26}%, ${paper})`;
+          const fill = FILLS[Math.max(0, FILLS.length - (n - idx))] ?? FILLS[0];
+          // la pestaña del frente (carpeta abierta en vista) lleva el acento
+          const tabColor = isFront ? ACCENT : fill;
           const { y, rx } = offsetFor(idx);
           const thumbs = cat.projects.slice(0, narrow ? 2 : 4);
 
@@ -256,7 +264,7 @@ export const ProjectFolders: React.FC<ProjectFoldersProps> = ({ categories, onOp
               />
 
               <div className="relative z-[1] pointer-events-none" style={{ height: tabH }}>
-                <FolderTab label={label} width={tabW} height={tabH} fill={tabColor} />
+                <FolderTab label={label} width={tabW} height={tabH} fill={tabColor} ink={isFront ? '#ffffff' : INK} />
               </div>
 
               <div

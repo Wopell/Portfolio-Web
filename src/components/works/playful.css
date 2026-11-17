@@ -5,11 +5,11 @@
  */
 
 :root {
-  --pl-lime: #d9f24a;
-  --pl-pink: #ff7eb6;
-  --pl-sky: #7cc8ff;
-  --pl-blue: #3b5bff;
-  --pl-tape: rgba(222, 205, 160, 0.78);
+  --pl-paper: #f2efe6;
+  --pl-ink: #191510;
+  --pl-white: #ffffff;
+  --pl-accent: #2f6f6b;
+  --pl-tape: rgba(242, 239, 230, 0.9);
 }
 
 /* ── Piezas sueltas ──────────────────────────────────────────────────────── */
@@ -24,7 +24,7 @@
 
 /* resaltador */
 .hl {
-  background: linear-gradient(transparent 55%, var(--pl-lime) 55%, var(--pl-lime) 92%, transparent 92%);
+  background: linear-gradient(transparent 55%, rgba(47, 111, 107, 0.22) 55%, rgba(47, 111, 107, 0.22) 92%, transparent 92%);
   padding: 0 0.08em;
 }
 
@@ -34,7 +34,7 @@
   width: 92px;
   height: 26px;
   background: var(--pl-tape);
-  box-shadow: 0 1px 2px rgba(25, 21, 16, 0.12);
+  box-shadow: 0 1px 2px rgba(25, 21, 16, 0.16), inset 0 0 0 1px rgba(25, 21, 16, 0.08);
   -webkit-mask-image: linear-gradient(90deg, transparent 0 3px, #000 3px calc(100% - 3px), transparent calc(100% - 3px));
   mask-image: linear-gradient(90deg, transparent 0 3px, #000 3px calc(100% - 3px), transparent calc(100% - 3px));
   pointer-events: none;
@@ -85,8 +85,8 @@
   width: min(100%, 340px);
   margin: 6px 0 4px 10px;
   padding: 10px 10px 34px;
-  background: #fbfaf6;
-  border: 1px solid rgba(74, 64, 54, 0.25);
+  background: var(--pl-white);
+  border: 1px solid rgba(25, 21, 16, 0.2);
   box-shadow: 0 2px 0 rgba(25, 21, 16, 0.05), 0 22px 40px -22px rgba(25, 21, 16, 0.45);
   transform: rotate(-3deg);
   transition: transform 420ms var(--arch-ease);
@@ -190,23 +190,23 @@
 
 .wt-tile--email {
   --rot: -1deg;
-  background: var(--pl-lime);
+  background: var(--pl-white);
 }
 
 .wt-tile--instagram {
   --rot: 1.6deg;
-  background: var(--pl-pink);
+  background: var(--pl-paper);
 }
 
 .wt-tile--telegram {
   --rot: -1.4deg;
-  background: var(--pl-sky);
+  background: var(--pl-paper);
 }
 
 .wt-tile--behance {
   --rot: 1deg;
-  background: var(--pl-blue);
-  color: #fbfaf6;
+  background: var(--pl-ink);
+  color: var(--pl-paper);
 }
 
 .wt-tile__label {
@@ -309,7 +309,7 @@
    borde izquierdo (cinta sobre cinta) */
 .brands__band--hi {
   top: 26px;
-  background: var(--pl-lime);
+  background: var(--pl-white);
   transform: rotate(-4deg);
   z-index: 1;
 }

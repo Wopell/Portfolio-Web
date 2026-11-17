@@ -278,7 +278,7 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
     const texCache = new Map<string, Tex | 'loading'>();
     const blank = gl.createTexture()!;
     gl.bindTexture(gl.TEXTURE_2D, blank);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([11, 10, 8, 255]));
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([25, 21, 16, 255]));
     const getTex = (src: string): Tex | null => {
       const c = texCache.get(src);
       if (c && c !== 'loading') return c;

@@ -77,7 +77,7 @@ export const CategoryOverlay: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-label={category ? `Catálogo de ${category.title}` : undefined}
-      className="fixed inset-0 z-[110] overflow-y-auto bg-[var(--color-paper)] paper-grid text-zinc-950 opacity-0 invisible"
+      className="fixed inset-0 z-[110] overflow-y-auto bg-[var(--color-paper)] paper-grid text-[#191510] opacity-0 invisible"
     >
       {category && (
         <div ref={contentRef}>
@@ -88,7 +88,7 @@ export const CategoryOverlay: React.FC<{
                 ref={backRef}
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-full bg-black/80 backdrop-blur-md flex items-center gap-2.5 text-xs font-mono font-bold tracking-widest uppercase text-white hover:bg-white hover:text-black transition-colors duration-300 shadow-2xl cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
+                className="px-4 py-2.5 rounded-full bg-[#191510]/80 backdrop-blur-md flex items-center gap-2.5 text-xs font-mono font-bold tracking-widest uppercase text-white hover:bg-white hover:text-[#191510] transition-colors duration-300 shadow-2xl cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
               >
                 <ArrowLeft size={16} />
                 <span>Categorías</span>
@@ -101,7 +101,7 @@ export const CategoryOverlay: React.FC<{
               className="absolute inset-0 w-full h-full object-cover"
               data-overlay-reveal
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/30" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#191510]/90 via-[#191510]/40 to-[#191510]/30" />
 
             <div className="relative z-10 max-w-4xl" data-overlay-reveal>
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-white/70 font-semibold block mb-2">
@@ -119,19 +119,19 @@ export const CategoryOverlay: React.FC<{
           {/* Projects grid */}
           <section className="w-full py-14 md:py-20" aria-label={`Proyectos de ${category.title}`}>
             <div className="max-w-[1720px] mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
-              <div className="mb-10 md:mb-14 flex flex-col md:flex-row md:items-end justify-between border-b border-black/10 pb-6 gap-4" data-overlay-reveal>
+              <div className="mb-10 md:mb-14 flex flex-col md:flex-row md:items-end justify-between border-b border-[#191510]/10 pb-6 gap-4" data-overlay-reveal>
                 <div>
-                  <p className="text-xs font-mono uppercase tracking-widest text-zinc-600 font-bold">
+                  <p className="text-xs font-mono uppercase tracking-widest text-[#191510]/65 font-bold">
                     Catálogo Seleccionado // {category.title}
                   </p>
-                  <h2 className="mt-2 text-zinc-950" style={{ fontFamily: 'var(--arch-serif)', fontSize: 'clamp(28px, 3vw, 44px)', lineHeight: 1.05 }}>
+                  <h2 className="mt-2 text-[#191510]" style={{ fontFamily: 'var(--arch-serif)', fontSize: 'clamp(28px, 3vw, 44px)', lineHeight: 1.05 }}>
                     {category.subtitle}
                   </h2>
-                  <p className="text-zinc-600 font-sans text-sm mt-1 max-w-xl">
+                  <p className="text-[#191510]/65 font-sans text-sm mt-1 max-w-xl">
                     {category.description}
                   </p>
                 </div>
-                <p className="text-xs font-mono text-zinc-600 uppercase tracking-widest font-semibold">
+                <p className="text-xs font-mono text-[#191510]/65 uppercase tracking-widest font-semibold">
                   {category.projects.length} Proyectos
                 </p>
               </div>
@@ -144,16 +144,16 @@ export const CategoryOverlay: React.FC<{
                 ))}
               </ul>
 
-              <footer className="mt-20 pt-10 border-t border-black/10 flex flex-col sm:flex-row justify-between items-center gap-6">
+              <footer className="mt-20 pt-10 border-t border-[#191510]/10 flex flex-col sm:flex-row justify-between items-center gap-6">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-6 py-3 rounded-full bg-zinc-900 text-white hover:bg-black font-mono text-xs uppercase tracking-widest font-bold transition-colors shadow-md cursor-pointer flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+                  className="px-6 py-3 rounded-full bg-[#191510] text-white hover:bg-[#2f6f6b] font-mono text-xs uppercase tracking-widest font-bold transition-colors shadow-md cursor-pointer flex items-center gap-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f6f6b]"
                 >
                   <ArrowLeft size={16} />
                   <span>Volver al menú de categorías</span>
                 </button>
-                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-600 font-bold">
+                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#191510]/65 font-bold">
                   Wopell // {category.title}
                 </p>
               </footer>

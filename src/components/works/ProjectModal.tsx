@@ -88,31 +88,31 @@ export const ProjectModal: React.FC<{
       role="dialog"
       aria-modal="true"
       aria-label={`Proyecto ${rendered.title}`}
-      className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-8 bg-black/85 backdrop-blur-xl opacity-0"
+      className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-8 bg-[#191510]/85 backdrop-blur-xl opacity-0"
       onClick={close}
     >
       <div
         ref={panelRef}
         onClick={(e) => e.stopPropagation()}
-        className="relative max-w-4xl w-full bg-zinc-900 border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col"
+        className="relative max-w-4xl w-full bg-[#191510] border border-white/10 rounded-3xl overflow-hidden shadow-2xl flex flex-col"
       >
         <button
           type="button"
           data-modal-close
           onClick={close}
-          className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-black/60 text-white hover:bg-white hover:text-black transition-all shadow-md cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
+          className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-[#191510]/60 text-white hover:bg-white hover:text-[#191510] transition-all shadow-md cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
           aria-label="Cerrar modal"
         >
           <X size={18} />
         </button>
 
-        <div className="w-full h-[45vh] md:h-[55vh] relative overflow-hidden bg-black">
+        <div className="w-full h-[45vh] md:h-[55vh] relative overflow-hidden bg-[#191510]">
           <img src={rendered.image} alt={rendered.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#191510] via-transparent to-transparent" />
         </div>
 
         <div className="p-6 md:p-8 text-white">
-          <p className="flex flex-wrap items-center gap-2 mb-2 font-mono text-xs text-zinc-400 uppercase tracking-widest">
+          <p className="flex flex-wrap items-center gap-2 mb-2 font-mono text-xs text-[#f2efe6]/60 uppercase tracking-widest">
             <span>{rendered.client}</span>
             <span aria-hidden="true">•</span>
             <span>{rendered.tag}</span>
@@ -122,7 +122,7 @@ export const ProjectModal: React.FC<{
           <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight mb-3">
             {rendered.title}
           </h2>
-          <p className="text-zinc-300 font-sans text-sm md:text-base leading-relaxed max-w-2xl">
+          <p className="text-[#f2efe6]/80 font-sans text-sm md:text-base leading-relaxed max-w-2xl">
             {rendered.description}
           </p>
         </div>

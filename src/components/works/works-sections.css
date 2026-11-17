@@ -5,10 +5,10 @@
 
 :root {
   --arch-paper: #f2efe6;
-  --arch-card: #fbfaf6;
+  --arch-card: #ffffff;
   --arch-ink: #191510;
-  --arch-line: #4a4036;
-  --arch-soft: #6b6257;
+  --arch-line: rgba(25, 21, 16, 0.72);
+  --arch-soft: rgba(25, 21, 16, 0.64);
   --arch-accent: #2f6f6b;
   --arch-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
   --arch-serif: "Instrument Serif", "Times New Roman", serif;
@@ -104,7 +104,7 @@
 }
 
 .arch-channels > li + li {
-  border-top: 1px solid rgba(74, 64, 54, 0.3);
+  border-top: 1px solid rgba(25, 21, 16, 0.22);
 }
 
 .arch-channel {
@@ -299,7 +299,7 @@ a:focus-visible .arch-underline {
   object-fit: cover;
   border: 1px solid var(--arch-line);
   border-radius: 3px;
-  background: #e6e0d2;
+  background: var(--arch-paper);
 }
 
 @media (max-width: 639px) {
@@ -348,7 +348,7 @@ a:focus-visible .arch-underline {
   overflow: hidden;
   border: 1px solid var(--arch-line);
   border-radius: 6px;
-  background: #e6e0d2;
+  background: var(--arch-paper);
 }
 
 @media (max-width: 639px) {
@@ -383,7 +383,7 @@ a:focus-visible .arch-underline {
   bottom: 0;
   height: 2px;
   width: 100%;
-  background: var(--arch-ink);
+  background: var(--arch-accent);
   transform-origin: 0 50%;
   animation: folder-progress linear forwards;
 }

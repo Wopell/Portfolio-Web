@@ -7,7 +7,7 @@ export default function WorksPage() {
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-[var(--color-paper)] paper-grid text-zinc-950 pb-16 selection:bg-amber-200 selection:text-zinc-950 relative overflow-x-clip">
+    <div className="w-full min-h-screen bg-[var(--color-paper)] paper-grid text-zinc-950 pb-16 selection:bg-[#2f6f6b] selection:text-white relative overflow-x-clip">
       <Works />
     </div>
   );

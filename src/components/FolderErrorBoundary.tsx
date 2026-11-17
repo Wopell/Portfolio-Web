@@ -30,11 +30,11 @@ export class FolderErrorBoundary extends (React.Component as any) {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="w-full my-12 p-8 border border-black/20 rounded-2xl bg-[#fffdfa]/80 text-center font-mono">
-          <span className="text-xs uppercase tracking-widest text-zinc-500 font-bold block mb-1">
+        <div className="w-full my-12 p-8 border border-[#191510]/20 rounded-2xl bg-white/80 text-center font-mono">
+          <span className="text-xs uppercase tracking-widest text-[#191510]/65 font-bold block mb-1">
             MÓDULO SELECTED PROJECTS // TEMPORALMENTE NO DISPONIBLE
           </span>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-[11px] text-[#191510]/55">
             {this.state.error?.message || 'Ocurrió un error inesperado al renderizar las carpetas.'}
           </p>
         </div>

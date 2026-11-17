@@ -33,11 +33,11 @@ export const ProjectSquareCard: React.FC<{
         type="button"
         onClick={onClick}
         aria-label={`Abrir proyecto ${project.title} — ${project.client}`}
-        className="group relative block w-full aspect-square rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-900 border border-black/10 shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.2)] transition-shadow duration-500 cursor-pointer select-none text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-900"
+        className="group relative block w-full aspect-square rounded-2xl md:rounded-3xl overflow-hidden bg-[#191510] border border-[#191510]/10 shadow-[0_8px_24px_rgba(25,21,16,0.06)] hover:shadow-[0_20px_45px_rgba(25,21,16,0.2)] transition-shadow duration-500 cursor-pointer select-none text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2f6f6b]"
       >
         <span className="absolute inset-0 w-full h-full overflow-hidden">
           {!isLoaded && (
-            <span className="absolute inset-0 bg-zinc-800 animate-pulse flex items-center justify-center">
+            <span className="absolute inset-0 bg-[#191510] animate-pulse flex items-center justify-center">
               <span className="w-6 h-6 border-2 border-white/20 border-t-white/80 rounded-full animate-spin" />
             </span>
           )}
@@ -49,7 +49,7 @@ export const ProjectSquareCard: React.FC<{
             className="w-full h-full object-cover scale-100 group-hover:scale-108 transition-transform duration-700 ease-out"
             referrerPolicy="no-referrer"
           />
-          <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-black/35 group-hover:from-black/75 transition-colors duration-500" />
+          <span className="absolute inset-0 bg-gradient-to-t from-[#191510]/85 via-[#191510]/25 to-[#191510]/35 group-hover:from-[#191510]/75 transition-colors duration-500" />
         </span>
 
         <span className="absolute top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-20 flex items-center justify-between pointer-events-none">
@@ -62,7 +62,7 @@ export const ProjectSquareCard: React.FC<{
         </span>
 
         <span className="absolute inset-x-0 bottom-0 p-3.5 md:p-5 z-20 flex flex-col justify-end pointer-events-none">
-          <span className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-zinc-300 font-medium">
+          <span className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-[#f2efe6]/80 font-medium">
             {project.tag} • {project.year}
           </span>
           <span className="mt-1 text-xs sm:text-sm md:text-base font-sans font-bold tracking-tight text-white leading-snug drop-shadow-md">
