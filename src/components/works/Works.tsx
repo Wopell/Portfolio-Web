@@ -1,13 +1,10 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { HeroHeader } from './HeroHeader';
-import { WorkTogetherCard } from './WorkTogetherCard';
-import { BrandsStrip } from './BrandsStrip';
-import { ProjectFolders } from './ProjectFolders';
 import { CategoryOverlay } from './CategoryOverlay';
 import { ProjectModal } from './ProjectModal';
 import { FolderErrorBoundary } from '../FolderErrorBoundary';
 import { PlanetSection } from './PlanetSection';
-import { WorksDisplay } from './WorksDisplay';
+import { WorksHub } from './WorksHub';
 import { SplatFinale } from './SplatFinale';
 import { CATEGORIES, CategoryData, ProjectItem, workToProject } from '../../data/projects';
 import type { Work } from '../../data/display-works';
@@ -18,16 +15,24 @@ export type { CategoryData, ProjectItem };
 
 /**
  * "Mis trabajos" page orchestrator.
- * Order: hero header (approved) → planet (approved, untouched) → display
- * (splats) → contact card → folder deck → brands tape → finale (footer).
+ * Order: hero header (approved) → planet (approved, untouched) → hub «guía de
+ * canales» (pantalla + carpetas + contacto + clientes) → finale (footer).
  */
 export default function Works() {
   const [selectedCategoryId, setSelectedCategoryId] = React.useState<string | null>(null);
   const [selectedProject, setSelectedProject] = React.useState<ProjectItem | null>(null);
+  /* quien abrió el catálogo recupera el foco al cerrarlo (y la página no se mueve) */
+  const openerRef = useRef<HTMLElement | null>(null);
+
+  const openCategory = useCallback((catId: string) => {
+    openerRef.current = document.activeElement as HTMLElement | null;
+    setSelectedCategoryId(catId);
+  }, []);
 
   const closeCategory = useCallback(() => {
     setSelectedCategoryId(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const el = openerRef.current;
+    window.setTimeout(() => el?.focus({ preventScroll: true }), 320);
   }, []);
 
   const selectedCategory = CATEGORIES.find((c) => c.id === selectedCategoryId) ?? null;
@@ -43,22 +48,10 @@ export default function Works() {
       {/* 2. Halftone planet with orbiting labels wrapped in PlanetSection (Fase 2) */}
       <PlanetSection />
 
-      {/* 3. Display: piezas reales como splats */}
-      <WorksDisplay onOpenWork={openWork} />
-
-      {/* 4. Contact card */}
-      <WorkTogetherCard />
-
-      {/* 4. Selected projects folder deck (isolated so it can never blank the page) */}
+      {/* 3. Hub: pantalla + guía (carpetas, contacto, clientes) en una sola superficie */}
       <FolderErrorBoundary>
-        <ProjectFolders
-          categories={CATEGORIES}
-          onOpenCategory={(catId) => setSelectedCategoryId(catId)}
-        />
+        <WorksHub categories={CATEGORIES} onOpenWork={openWork} onOpenCategory={openCategory} />
       </FolderErrorBoundary>
-
-      {/* 5. Commercial brands */}
-      <BrandsStrip />
 
       {/* Imagen final + pie */}
       <SplatFinale />
