@@ -1,6 +1,6 @@
 import { motion, useTransform, useScroll, useSpring, useMotionValueEvent } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Scrollytelling, { INTRO_RANGE_VH } from "./Scrollytelling";
 import About from "./About";
 import { useProgressiveMagneticScroll } from "../hooks/useProgressiveMagneticScroll";
@@ -138,40 +138,23 @@ export default function Home({ activeTab = "works" }: HomeProps) {
           }}
         >
           {/* Hero Content vertically and horizontally centered inside the bottom-left white cutout square */}
-          {/* la caja sigue al recorte de la máscara: mobile 4–46 % × 72–94 %, desktop 5–26,5 % × 68–89 % */}
-          <div className="absolute top-[72vh] bottom-[6vh] left-[4vw] w-[40vw] md:top-[68vh] md:bottom-[11vh] md:left-[5vw] md:w-[21vw] flex flex-col justify-center z-30 pointer-events-auto">
-            <div className="text-reveal mb-2 md:mb-1">
-              {/* misma voz que «MY WORKS» del otro lado del blanco */}
-              <h1
-                className="text-[7vw] md:text-[3.9vw] leading-[0.85] select-none uppercase text-zinc-950"
-                style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, letterSpacing: '0.01em' }}
-              >
-                Portfolio
-              </h1>
-            </div>
-
-            <div className="pl-0.5">
-              <div className="font-mono text-[11px] font-medium uppercase tracking-[0.04em] md:tracking-[0.12em] space-y-0.5 leading-snug md:leading-tight text-zinc-800">
-                <p>
-                  <span className="opacity-70">trabajos seleccionados de </span>
-                  <span className="text-zinc-950">Tomy Powell</span>
-                </p>
-                <p>Animation</p>
-                <p>3D Art</p>
-                <p>IA &amp; Post Production</p>
-              </div>
-              <Link
-                to="/works"
-                onClick={() => setIsWorksActive(true)}
-                className="mt-1 inline-flex min-h-[44px] md:min-h-[28px] items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-950 underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
-              >
-                Ver trabajos <span aria-hidden="true">→</span>
-              </Link>
+          {/* la caja sigue al recorte de la máscara: mobile 4–70 % × 72–94 %, desktop 5–26,5 % × 68–89 % */}
+          <div className="absolute top-[72vh] bottom-[6vh] left-[4vw] w-[64vw] md:top-[68vh] md:bottom-[11vh] md:left-[5vw] md:w-[21vw] flex flex-col justify-center z-30 pointer-events-auto">
+            {/* misma voz que «MY WORKS» del otro lado del blanco */}
+            <h1
+              className="text-[12vw] md:text-[3.9vw] leading-[0.85] select-none uppercase text-zinc-950"
+              style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, letterSpacing: '0.01em' }}
+            >
+              Portfolio
+            </h1>
+            <div className="mt-3 font-sans text-zinc-950">
+              <p className="text-base font-semibold leading-snug">Tomy Powell</p>
+              <p className="text-sm font-medium leading-snug text-zinc-700">Animation · 3D Art · IA · Post Production</p>
+              <p className="mt-3 text-[0.875rem] font-semibold uppercase tracking-[0.08em] text-zinc-600" aria-hidden="true">
+                Deslizá ↓
+              </p>
             </div>
           </div>
-
-          {/* Vignette effect */}
-          <div className="absolute inset-0 pointer-events-none bg-radial-gradient from-transparent to-black/20" />
         </motion.div>
       )}
 

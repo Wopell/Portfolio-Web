@@ -135,7 +135,7 @@ export default function Navbar() {
         ? 'bg-white/95 border-black/10 shadow-lg' 
         : isWorksPage
           ? 'bg-white/95 border-black/10 shadow-sm backdrop-blur-md'
-          : 'bg-[#FBFAF6] border-black/15 shadow-sm backdrop-blur-md'
+          : 'bg-white/95 border-black/15 shadow-sm backdrop-blur-md'
       }`}>
         {/* Sliding Background */}
         <motion.div
@@ -146,7 +146,7 @@ export default function Navbar() {
           transition={{ type: "spring", stiffness: 450, damping: 35 }}
           className="absolute inset-y-1.5 left-1.5 w-[calc(50%-6px)] rounded-full z-0"
           style={{ 
-            backgroundColor: '#111111',
+            backgroundColor: '#191510',
             boxShadow: '0 4px 12px rgba(0,0,0,0.18)'
           }}
         />
@@ -154,7 +154,7 @@ export default function Navbar() {
         <button
           onClick={() => handleTabSwitch('/about')}
           aria-current={isAbout ? 'page' : undefined}
-          className={`relative z-10 py-2.5 transition-colors duration-500 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] flex items-center justify-center cursor-pointer ${
+          className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-500 font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
             isAbout 
               ? 'text-white' 
               : 'text-zinc-700 hover:text-zinc-950'
@@ -164,8 +164,8 @@ export default function Navbar() {
         </button>
         <button 
           onClick={handleWorksClick}
-          aria-current={!isAbout ? 'page' : undefined}
-          className={`relative z-10 py-2.5 transition-colors duration-500 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] flex items-center justify-center cursor-pointer ${
+          aria-current={location.pathname === '/works' ? 'page' : undefined}
+          className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-500 font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
             !isAbout 
               ? 'text-white'
               : 'text-zinc-500 hover:text-zinc-900'

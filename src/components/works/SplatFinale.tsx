@@ -5,9 +5,16 @@ import { SplatCanvas } from './SplatCanvas';
 import './display.css';
 
 /**
- * Imagen final — cierre de la página. Un fotograma de Arcane hecho splats que
- * se arma desde polvo a medida que bajás; el pie de página vive encima.
+ * Cierre — el único lugar de contacto. El papel se funde en un fotograma hecho
+ * splats que se arma a medida que bajás; encima, el email y las redes.
  */
+const EMAIL = 'tomy.wopell@gmail.com';
+const SOCIAL = [
+  { label: 'Instagram', href: 'https://instagram.com/wopell' },
+  { label: 'Behance', href: 'https://www.behance.net/wopell' },
+  { label: 'Telegram', href: 'https://t.me/wopell' },
+];
+
 export const SplatFinale: React.FC = () => {
   const ref = useRef<HTMLElement>(null);
   const assembleRef = useRef(prefersReducedMotion() ? 1 : 0);
@@ -28,12 +35,12 @@ export const SplatFinale: React.FC = () => {
   }, []);
 
   return (
-    <footer ref={ref} className="finale" aria-label="Cierre">
+    <footer ref={ref} className="finale" aria-labelledby="finale-title">
       <SplatCanvas
         sources={sources}
         index={0}
         assembleRef={assembleRef}
-        density={52000}
+        density={36000}
         depth={0.5}
         className="finale__canvas"
       />
@@ -41,13 +48,21 @@ export const SplatFinale: React.FC = () => {
       <span aria-hidden="true" className="finale__fade" />
 
       <div className="finale__inner">
-        <p className="disp__pixel finale__kicker">Fin de la transmisión</p>
-        <p className="finale__line">
+        <h2 id="finale-title" className="finale__line">
           Gracias por <em>mirar.</em>
-        </p>
-        <a className="finale__mail" href="mailto:tomy.wopell@gmail.com">
-          tomy.wopell@gmail.com <span aria-hidden="true">↗</span>
+        </h2>
+        <a className="finale__mail" href={`mailto:${EMAIL}`}>
+          {EMAIL}
         </a>
+        <ul className="finale__social" aria-label="Redes">
+          {SOCIAL.map((s) => (
+            <li key={s.label}>
+              <a href={s.href} target="_blank" rel="noopener noreferrer">
+                {s.label}
+              </a>
+            </li>
+          ))}
+        </ul>
         <div className="arch-rule arch-rule--wrap finale__rule">
           <span>Wopell — Tomy Powell</span>
           <span aria-hidden="true" className="arch-rule__line" />

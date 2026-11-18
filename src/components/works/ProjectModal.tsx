@@ -124,7 +124,7 @@ export const ProjectModal: React.FC<{
           type="button"
           data-modal-close
           onClick={close}
-          className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-[#191510]/60 text-white hover:bg-white hover:text-[#191510] transition-all shadow-md cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
+          className="absolute top-4 right-4 z-30 w-11 h-11 flex items-center justify-center rounded-full bg-[#191510]/60 text-white hover:bg-white hover:text-[#191510] transition-all shadow-md cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
           aria-label="Cerrar modal"
         >
           <X size={18} />
@@ -137,19 +137,16 @@ export const ProjectModal: React.FC<{
         </div>
 
         <div className="p-6 md:p-8 text-white">
-          <p className="flex flex-wrap items-center gap-2 mb-2 font-mono text-xs text-[#f2efe6]/60 uppercase tracking-widest">
+          <p className="flex flex-wrap items-center gap-2 mb-3 text-[0.875rem] font-semibold text-[#f2efe6]/70 uppercase tracking-[0.08em]" style={{ fontFamily: 'var(--arch-sans)' }}>
             <span>{rendered.client}</span>
             <span aria-hidden="true">•</span>
             <span>{rendered.tag}</span>
             <span aria-hidden="true">•</span>
             <span>{rendered.year}</span>
           </p>
-          <h2 className="text-4xl md:text-5xl leading-none mb-3" style={{ fontFamily: 'var(--arch-serif)' }}>
+          <h2 className="text-4xl md:text-5xl leading-none" style={{ fontFamily: 'var(--arch-serif)' }}>
             {rendered.title}
           </h2>
-          <p className="text-[#f2efe6]/85 text-lg md:text-xl leading-snug max-w-2xl" style={{ fontFamily: 'var(--arch-serif)' }}>
-            {rendered.description}
-          </p>
         </div>
       </div>
     </div>

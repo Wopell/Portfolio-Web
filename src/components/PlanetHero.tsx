@@ -2683,7 +2683,7 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
           ref: (el: HTMLElement | null) => {
             circleRefs.current[idx] = el;
           },
-          'aria-label': `Ver trabajo: ${work.title}`,
+          'aria-label': `Ver trabajos de ${work.title}`,
           onMouseEnter: () => handleCircleMouseEnter(idx),
           onMouseLeave: () => handleCircleMouseLeave(idx),
           onFocus: () => handleCircleMouseEnter(idx),
@@ -2777,9 +2777,12 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
               href={work.url}
               onClick={(e) => {
                 e.preventDefault();
+                // el círculo es un filtro: la grilla de trabajos muestra su categoría
+                window.dispatchEvent(new CustomEvent('works:filter', { detail: work.categoryNumber }));
                 const target = document.querySelector(work.url);
                 if (target) {
-                  target.scrollIntoView({ behavior: 'smooth' });
+                  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                  target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
                 }
               }}
               {...commonProps}

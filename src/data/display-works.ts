@@ -148,3 +148,20 @@ export const WORKS: Work[] = [
 
 /** imagen de cierre de la página (la «imagen final») */
 export const FINALE_IMAGE = '/works/arcane-1.webp';
+
+/**
+ * Filtros de la grilla. `planet` es el número de categoría de cada círculo del
+ * planeta: al hacer clic en uno, la grilla se filtra por esa categoría.
+ */
+export const FILTERS = [
+  { id: 'all', label: 'Todo' },
+  { id: 'category-animation', label: 'Animación', planet: '001' },
+  { id: 'category-3d-art', label: '3D', planet: '002' },
+  { id: 'category-ia', label: 'IA', planet: '003' },
+  { id: 'category-post-production', label: 'Post', planet: '004' },
+] as const;
+
+export type FilterId = (typeof FILTERS)[number]['id'];
+
+/** evento que emite el planeta para filtrar la grilla (detail = número de categoría) */
+export const FILTER_EVENT = 'works:filter';

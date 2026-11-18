@@ -170,6 +170,8 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
   const [fallback, setFallback] = useState(false);
 
   /* estado compartido con el loop (no re-renderiza React) */
+  /* despierta el loop (con reduced-motion se duerme cuando no hay nada que dibujar) */
+  const wakeRef = useRef<() => void>(() => {});
   const live = useRef({
     from: index,
     to: index,
@@ -190,6 +192,7 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
     L.to = index;
     L.want = index;
     L.t = reduced() ? 1 : 0;
+    wakeRef.current();
   }, [index]);
 
   useEffect(() => {
@@ -298,6 +301,7 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
           texCache.set(src, { tex, w: img.naturalWidth, h: img.naturalHeight });
+          wakeRef.current();
         };
         img.onerror = () => texCache.delete(src);
         img.src = src;
@@ -346,6 +350,7 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
         buildGrid(aspect);
       }
       gl.viewport(0, 0, W, H);
+      wakeRef.current();
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -415,16 +420,12 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
 
       // reduced-motion: la imagen está quieta; solo se redibuja si cambió algo
       if (still) {
-        if (!okB && lastSig) {
-          raf = requestAnimationFrame(frame);
-          return;
-        }
+        // esperando la imagen nueva: se despierta en su onload
+        if (!okB && lastSig) return;
         L.t = 1;
         const sig = `${L.from}|${L.to}|${L.t}|${okA}|${okB}|${W}x${H}|${count}`;
-        if (sig === lastSig) {
-          raf = requestAnimationFrame(frame);
-          return;
-        }
+        // nada cambió: el loop se duerme hasta el próximo wake
+        if (sig === lastSig) return;
         lastSig = sig;
       }
 
@@ -443,6 +444,9 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.POINTS, 0, count);
       raf = requestAnimationFrame(frame);
+    };
+    wakeRef.current = () => {
+      if (!disposed && visible && !raf) raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
 

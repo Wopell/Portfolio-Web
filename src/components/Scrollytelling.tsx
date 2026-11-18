@@ -46,7 +46,7 @@ function getSteppedMaskPath(p: number, isMobile: boolean) {
   const l = lerp(isMobile ? 0.04 : 0.05, 0.0);   // Left inset (5%)
   const r = lerp(isMobile ? 0.96 : 0.95, 1.0);   // Right inset (5%)
   const b = lerp(isMobile ? 0.94 : 0.89, 1.0);   // Bottom border (11%)
-  const sx = lerp(isMobile ? 0.46 : 0.265, 0.0); // Step X position shifted left to 26.5% (Matching user's red line)
+  const sx = lerp(isMobile ? 0.7 : 0.265, 0.0); // Step X position shifted left to 26.5% (Matching user's red line)
   const sy = lerp(isMobile ? 0.72 : 0.68, 1.0);  // Step Y height position
 
   const ky = lerp(isMobile ? 0.024 : 0.026, 0.0); // Vertical radius (percentage of screen height)
@@ -79,7 +79,7 @@ function getHeroTextMaskPath(p: number, isMobile: boolean) {
 
   const l = lerp(isMobile ? 0.04 : 0.05, 0.0);   // Left inset
   const b = lerp(isMobile ? 0.94 : 0.89, 1.0);   // Bottom border
-  const sx = lerp(isMobile ? 0.46 : 0.265, 0.0); // Step X position
+  const sx = lerp(isMobile ? 0.7 : 0.265, 0.0); // Step X position
   const sy = lerp(isMobile ? 0.72 : 0.68, 1.0);  // Step Y height position
 
   const ky = lerp(isMobile ? 0.024 : 0.026, 0.0); // Vertical radius
@@ -397,10 +397,8 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
       {/* Loading Overlay */}
       {!isLoaded && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white">
-          <div className="text-4xl mb-4 text-white/80" style={{ fontFamily: "'Instrument Serif', serif" }}>
-            Loading Assets
-          </div>
-          <div className="font-mono text-7xl md:text-8xl font-medium tabular-nums">
+          <div className="font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] mb-3 text-white/70">Cargando</div>
+          <div className="text-7xl md:text-8xl tabular-nums" style={{ fontFamily: "'Instrument Serif', serif" }}>
             {loadedPercentage.toString().padStart(3, "0")}%
           </div>
           <div className="w-64 h-1 bg-white/20 mt-8 rounded-full overflow-hidden">
@@ -414,7 +412,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
 
       {/* Light White Outer Frame Background */}
       <motion.div 
-        className="fixed top-0 left-0 w-full h-screen pointer-events-none z-0 bg-[#e8e9eb]"
+        className="fixed top-0 left-0 w-full h-screen pointer-events-none z-0 bg-[#f2efe6]"
         style={{ opacity: frameOpacity, y: frameY }}
       />
 
