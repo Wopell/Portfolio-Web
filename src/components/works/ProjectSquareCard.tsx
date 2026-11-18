@@ -53,7 +53,7 @@ export const ProjectSquareCard: React.FC<{
         </span>
 
         <span className="absolute top-3 left-3 right-3 md:top-4 md:left-4 md:right-4 z-20 flex items-center justify-between pointer-events-none">
-          <span className="glass-pill-badge px-3 py-1 rounded-full text-[10px] md:text-xs font-mono font-semibold tracking-wider text-white drop-shadow-sm">
+          <span className="glass-pill-badge px-3 py-1 rounded-full text-[11px] md:text-xs font-mono font-semibold tracking-wider text-white drop-shadow-sm">
             {project.client}
           </span>
           <span className="glass-pill-badge w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:scale-110 shadow-lg">
@@ -62,10 +62,10 @@ export const ProjectSquareCard: React.FC<{
         </span>
 
         <span className="absolute inset-x-0 bottom-0 p-3.5 md:p-5 z-20 flex flex-col justify-end pointer-events-none">
-          <span className="text-[10px] md:text-xs font-mono uppercase tracking-widest text-[#f2efe6]/80 font-medium">
+          <span className="text-[11px] md:text-xs font-mono uppercase tracking-widest text-[#f2efe6]/80 font-medium">
             {project.tag} • {project.year}
           </span>
-          <span className="mt-1 text-xs sm:text-sm md:text-base font-sans font-bold tracking-tight text-white leading-snug drop-shadow-md">
+          <span className="mt-1 text-lg md:text-2xl text-white leading-tight drop-shadow-md" style={{ fontFamily: 'var(--arch-serif)' }}>
             {project.title}
           </span>
         </span>

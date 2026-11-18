@@ -23,8 +23,11 @@ export const CategoryOverlay: React.FC<{
     const root = rootRef.current;
     if (!root) return;
     if (category) {
+      // el foco entra cuando el botón ya es visible (con autoAlpha 0 .focus() no hace nada)
+      const focusBack = () => backRef.current?.focus({ preventScroll: true });
       if (prefersReducedMotion()) {
         gsap.set(root, { autoAlpha: 1 });
+        focusBack();
       } else {
         gsap
           .timeline()
@@ -35,9 +38,9 @@ export const CategoryOverlay: React.FC<{
             duration: 0.6,
             ease: EASE.settle,
             stagger: 0.08,
-          }, '-=0.15');
+          }, '-=0.15')
+          .add(focusBack, 0.5);
       }
-      backRef.current?.focus({ preventScroll: true });
       const prev = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
       return () => {
@@ -61,11 +64,32 @@ export const CategoryOverlay: React.FC<{
     return () => ctx.revert();
   }, [category?.id]);
 
-  /* Escape closes the catalog */
+  /* Escape cierra el catálogo (la ficha, si está abierta, se queda con su Escape);
+     Tab queda atrapado adentro mientras el foco esté en el catálogo */
   useEffect(() => {
     if (!category) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      const root = rootRef.current;
+      if (e.key !== 'Tab' || !root) return;
+      const inside = root.contains(document.activeElement);
+      if (!inside && document.activeElement && document.activeElement !== document.body) return; // foco en la ficha
+      const items = [...root.querySelectorAll<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])')].filter(
+        (el) => el.offsetParent !== null || getComputedStyle(el).position === 'fixed'
+      );
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -107,10 +131,10 @@ export const CategoryOverlay: React.FC<{
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-white/70 font-semibold block mb-2">
                 Categoría Seleccionada // {category.number}
               </p>
-              <h1 className="arch-title !text-white" style={{ fontSize: 'clamp(56px, 10vw, 160px)' }}>
+              <h1 className="arch-title !text-white" style={{ fontSize: 'clamp(56px, 8vw, 96px)' }}>
                 {category.title}
               </h1>
-              <p className="text-white/80 font-sans text-sm sm:text-base md:text-lg max-w-2xl mt-3">
+              <p className="text-white/85 text-lg md:text-2xl leading-snug max-w-2xl mt-3" style={{ fontFamily: 'var(--arch-serif)' }}>
                 {category.subtitle}
               </p>
             </div>
@@ -127,12 +151,12 @@ export const CategoryOverlay: React.FC<{
                   <h2 className="mt-2 text-[#191510]" style={{ fontFamily: 'var(--arch-serif)', fontSize: 'clamp(28px, 3vw, 44px)', lineHeight: 1.05 }}>
                     {category.subtitle}
                   </h2>
-                  <p className="text-[#191510]/65 font-sans text-sm mt-1 max-w-xl">
+                  <p className="text-[#191510]/70 text-lg leading-snug mt-2 max-w-xl" style={{ fontFamily: 'var(--arch-serif)' }}>
                     {category.description}
                   </p>
                 </div>
                 <p className="text-xs font-mono text-[#191510]/65 uppercase tracking-widest font-semibold">
-                  {category.projects.length} Proyectos
+                  {category.projects.length} {category.projects.length === 1 ? 'Proyecto' : 'Proyectos'}
                 </p>
               </div>
 
@@ -153,7 +177,7 @@ export const CategoryOverlay: React.FC<{
                   <ArrowLeft size={16} />
                   <span>Volver al menú de categorías</span>
                 </button>
-                <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-[#191510]/65 font-bold">
+                <p className="text-[11px] font-mono uppercase tracking-[0.25em] text-[#191510]/65 font-bold">
                   Wopell // {category.title}
                 </p>
               </footer>

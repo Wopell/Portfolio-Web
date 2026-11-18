@@ -140,38 +140,34 @@ export default function Home({ activeTab = "works" }: HomeProps) {
           {/* Hero Content vertically and horizontally centered inside the bottom-left white cutout square */}
           {/* la caja sigue al recorte de la máscara: mobile 4–46 % × 72–94 %, desktop 5–26,5 % × 68–89 % */}
           <div className="absolute top-[72vh] bottom-[6vh] left-[4vw] w-[40vw] md:top-[68vh] md:bottom-[11vh] md:left-[5vw] md:w-[21vw] flex flex-col justify-center z-30 pointer-events-auto">
-            <div className="text-reveal mb-2">
-              <h1 className="text-[5.8vw] md:text-[4vw] lg:text-[3.4vw] leading-[0.85] select-none tracking-tight inline-flex items-baseline text-zinc-950 font-black">
-                <span className="font-futura uppercase tracking-[-0.04em]">port</span>
-                <span className="font-serif font-normal uppercase ml-1.5 text-zinc-900">folio</span>
+            <div className="text-reveal mb-2 md:mb-1">
+              {/* misma voz que «MY WORKS» del otro lado del blanco */}
+              <h1
+                className="text-[7vw] md:text-[3.9vw] leading-[0.85] select-none uppercase text-zinc-950"
+                style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, letterSpacing: '0.01em' }}
+              >
+                Portfolio
               </h1>
             </div>
 
             <div className="pl-0.5">
-              <div className="text-[10px] md:text-[11px] lg:text-xs font-sans tracking-wide space-y-0.5 leading-tight text-zinc-800 font-semibold">
+              <div className="font-mono text-[11px] font-medium uppercase tracking-[0.04em] md:tracking-[0.12em] space-y-0.5 leading-snug md:leading-tight text-zinc-800">
                 <p>
-                  <span className="opacity-70 font-normal">trabajos seleccionados de </span>
-                  <span>Tomy Powell</span>
+                  <span className="opacity-70">trabajos seleccionados de </span>
+                  <span className="text-zinc-950">Tomy Powell</span>
                 </p>
-                <p className="uppercase tracking-wider">ANIMATION</p>
-                <p className="uppercase tracking-wider">3D ART</p>
-                <p className="uppercase tracking-wider">IA &amp; POST PRODUCTION</p>
+                <p>Animation</p>
+                <p>3D Art</p>
+                <p>IA &amp; Post Production</p>
               </div>
               <Link
                 to="/works"
                 onClick={() => setIsWorksActive(true)}
-                className="mt-1 inline-flex min-h-[44px] items-center gap-1.5 text-[11px] md:text-xs font-sans font-bold uppercase tracking-wider text-zinc-950 underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+                className="mt-1 inline-flex min-h-[44px] md:min-h-[28px] items-center gap-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-950 underline decoration-1 underline-offset-4 hover:decoration-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
               >
                 Ver trabajos <span aria-hidden="true">→</span>
               </Link>
             </div>
-          </div>
-
-          {/* Language Switcher anchored in the bottom white strip, aligned with the right mask edge */}
-          <div className="absolute top-[89vh] bottom-0 right-[4vw] md:right-[5vw] flex items-center gap-2 z-40 text-xs md:text-sm font-sans tracking-widest uppercase font-bold text-zinc-900 pointer-events-auto">
-            <span className="opacity-50">EN</span>
-            <span className="opacity-30">-</span>
-            <span className="opacity-100">ES</span>
           </div>
 
           {/* Vignette effect */}

@@ -24,8 +24,14 @@ export const ProjectModal: React.FC<{
 
   useEffect(() => {
     if (!rendered) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    // el foco entra recién cuando el diálogo ya es visible (con autoAlpha 0 el
+    // navegador ignora .focus())
+    const focusClose = () =>
+      panelRef.current?.querySelector<HTMLButtonElement>('[data-modal-close]')?.focus({ preventScroll: true });
     if (prefersReducedMotion()) {
       gsap.set([rootRef.current, panelRef.current], { autoAlpha: 1, y: 0, scale: 1 });
+      focusClose();
     } else {
       gsap
         .timeline()
@@ -35,10 +41,9 @@ export const ProjectModal: React.FC<{
           { autoAlpha: 0, y: 26, scale: 0.96 },
           { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: EASE.snap },
           '-=0.1'
-        );
+        )
+        .add(focusClose, 0.25);
     }
-    const previousFocus = document.activeElement as HTMLElement | null;
-    panelRef.current?.querySelector<HTMLButtonElement>('[data-modal-close]')?.focus();
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
@@ -70,14 +75,33 @@ export const ProjectModal: React.FC<{
       .to(rootRef.current, { autoAlpha: 0, duration: 0.22, ease: 'power1.in' }, '-=0.08');
   }, [rendered, onClose]);
 
-  /* Escape closes the lightbox */
+  /* Escape cierra solo la ficha (captura + stopPropagation: el catálogo de
+     abajo no recibe la misma tecla); Tab queda atrapado adentro */
   useEffect(() => {
     if (!rendered) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        close();
+        return;
+      }
+      if (e.key === 'Tab' && panelRef.current) {
+        const items = [...panelRef.current.querySelectorAll<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])')];
+        if (!items.length) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        const inside = panelRef.current.contains(document.activeElement);
+        if (e.shiftKey && (document.activeElement === first || !inside)) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
   }, [rendered, close]);
 
   if (!rendered) return null;
@@ -106,7 +130,8 @@ export const ProjectModal: React.FC<{
           <X size={18} />
         </button>
 
-        <div className="w-full h-[45vh] md:h-[55vh] relative overflow-hidden bg-[#191510]">
+        {/* 16:9 entero (antes se recortaba en vertical en mobile) */}
+        <div className="w-full aspect-video max-h-[55vh] relative overflow-hidden bg-[#191510]">
           <img src={rendered.image} alt={rendered.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#191510] via-transparent to-transparent" />
         </div>
@@ -119,10 +144,10 @@ export const ProjectModal: React.FC<{
             <span aria-hidden="true">•</span>
             <span>{rendered.year}</span>
           </p>
-          <h2 className="text-2xl md:text-3xl font-display font-black tracking-tight mb-3">
+          <h2 className="text-4xl md:text-5xl leading-none mb-3" style={{ fontFamily: 'var(--arch-serif)' }}>
             {rendered.title}
           </h2>
-          <p className="text-[#f2efe6]/80 font-sans text-sm md:text-base leading-relaxed max-w-2xl">
+          <p className="text-[#f2efe6]/85 text-lg md:text-xl leading-snug max-w-2xl" style={{ fontFamily: 'var(--arch-serif)' }}>
             {rendered.description}
           </p>
         </div>

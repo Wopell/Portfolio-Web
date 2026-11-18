@@ -9,7 +9,6 @@ import { SplatFinale } from './SplatFinale';
 import { CATEGORIES, CategoryData, ProjectItem, workToProject } from '../../data/projects';
 import type { Work } from '../../data/display-works';
 import './works-sections.css';
-import './playful.css';
 
 export type { CategoryData, ProjectItem };
 

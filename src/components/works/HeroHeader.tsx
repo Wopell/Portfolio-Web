@@ -9,7 +9,7 @@ export const HeroHeader: React.FC = () => (
     <div className="absolute left-1/2 flex items-center gap-4 whitespace-nowrap" style={{ top: '78%', width: '60%', transform: 'translateX(-50%)', fontFamily: 'Inter, sans-serif', fontSize: 'clamp(9px, 0.9vw, 14px)', letterSpacing: '0.08em' }}>
       <span>SELECTED PORTFOLIO</span>
       <span aria-hidden="true" className="flex-1 border-t border-black/60" />
-      <span>2023 - 2027</span>
+      <span>2023 - 2026</span>
     </div>
   </section>
 );

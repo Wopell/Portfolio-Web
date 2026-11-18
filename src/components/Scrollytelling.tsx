@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { MotionValue, useMotionValueEvent, useTransform, motion } from "motion/react";
 
-gsap.registerPlugin(ScrollToPlugin);
 
 const ZOOM_FACTOR = 1.0; // Set to 1.0 to show 100% of the image
 
@@ -119,7 +117,6 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
 
   const [loadedPercentage, setLoadedPercentage] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [showScrollButton, setShowScrollButton] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -220,9 +217,6 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     
     // Fractional progress between current frame and next frame (0.0 to 1.0)
     const frameFraction = rawFrame - currentFrame;
-
-    // Show scroll to top button only after 4.5 * viewport height
-    setShowScrollButton(latestScrollY > window.innerHeight * 4.5);
 
     // Only draw to canvas when the discrete frame index changes
     if (currentFrame !== lastRenderedFrameRef.current) {
@@ -382,10 +376,6 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     };
   }, [isLoaded]);
 
-  const handleScrollToTop = () => {
-    gsap.to(window, { scrollTo: 0, duration: 1.5, ease: "power3.inOut" });
-  };
-
   return (
     <div 
       ref={containerRef} 
@@ -407,8 +397,10 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
       {/* Loading Overlay */}
       {!isLoaded && (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white">
-          <div className="text-4xl font-light mb-4 text-white/80">Loading Assets</div>
-          <div className="text-8xl font-bold font-display tabular-nums">
+          <div className="text-4xl mb-4 text-white/80" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            Loading Assets
+          </div>
+          <div className="font-mono text-7xl md:text-8xl font-medium tabular-nums">
             {loadedPercentage.toString().padStart(3, "0")}%
           </div>
           <div className="w-64 h-1 bg-white/20 mt-8 rounded-full overflow-hidden">
@@ -463,17 +455,6 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
         style={{ opacity: 0 }}
       />
 
-      {/* Scroll to top button */}
-      <button
-        onClick={handleScrollToTop}
-        className={`fixed bottom-8 right-8 z-40 bg-white/10 hover:bg-white/20 text-white backdrop-blur-md rounded-full w-12 h-12 flex items-center justify-center transition-all duration-300 shadow-lg border border-white/10 cursor-pointer ${showScrollButton ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
-        aria-label="Scroll to Top"
-        style={{ display: isLoaded ? "flex" : "none" }}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m18 15-6-6-6 6"/>
-        </svg>
-      </button>
     </div>
   );
 }

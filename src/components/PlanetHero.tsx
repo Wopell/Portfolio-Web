@@ -227,7 +227,7 @@ export interface PlanetHeroProps {
 export const ORBIT_LABELS: OrbitItem[] = [
   {
     id: 'editorial-design',
-    text: 'Editorial Design',
+    text: 'Animation',
     radiusMultiplier: 1.54,
     period: CONFIG.orbitPeriods[0],
     initialPhase: Math.PI,
@@ -237,7 +237,7 @@ export const ORBIT_LABELS: OrbitItem[] = [
   },
   {
     id: 'social-media',
-    text: 'Social Media',
+    text: '3D Art',
     radiusMultiplier: 1.30,
     period: CONFIG.orbitPeriods[1],
     initialPhase: Math.PI * 0.5,
@@ -247,7 +247,7 @@ export const ORBIT_LABELS: OrbitItem[] = [
   },
   {
     id: 'branding',
-    text: 'Branding',
+    text: 'IA',
     radiusMultiplier: 1.48,
     period: CONFIG.orbitPeriods[2],
     initialPhase: 0,
@@ -257,7 +257,7 @@ export const ORBIT_LABELS: OrbitItem[] = [
   },
   {
     id: 'event-graphics',
-    text: 'Event Graphics',
+    text: 'Post Production',
     radiusMultiplier: 1.38,
     period: CONFIG.orbitPeriods[3],
     initialPhase: Math.PI * 1.5,

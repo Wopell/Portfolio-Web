@@ -1,83 +1,83 @@
-# DIRECTION — «Archivo»
+# DIRECTION — «Archivo» (revisión: guía de canales)
 
-Dirección visual de /works (wopell · Tomy Powell). Fuente de verdad para las próximas sesiones.
-Elegida por Claude con libertad creativa total (pedido del usuario, 17 nov 2026).
+Dirección visual de `/` y `/works` (wopell · Tomy Powell). Fuente de verdad para las próximas sesiones.
+Primera versión: 17 nov 2026. Revisada el mismo día tras la crítica: paleta restringida, intro
+que termina en blanco, hub «guía de canales» y tipografía recortada a dos familias.
 
 ## Idea
 
-Un archivo editorial ordenado: papel, tinta y una sola voz serif. El diseño se calla y el
-trabajo pone el color. El planeta halftone es el único gran momento; el resto es precisión.
+Un archivo editorial que también es una sala de proyección: papel, tinta y una sola voz serif.
+El diseño se calla y el trabajo pone el color. El planeta halftone es el gran momento de entrada;
+después, una sola superficie donde está todo al alcance, como el menú de una consola.
 
-Público: marcas, agencias y emprendedores que contratan diseño y quieren ver trabajo real
-antes de escribir. Acción principal: abrir una carpeta → ver el proyecto → escribir.
+Público: marcas, agencias y emprendedores que contratan motion, 3D y post y quieren ver trabajo
+real antes de escribir. Acción principal: elegir una pieza → ver la ficha → escribir.
 
-## Tipografía (solo self-hosted, `public/fonts/`)
+## Tipografía (solo self-hosted, `public/fonts/`; sin Google Fonts)
 
-| Rol | Fuente | Uso |
-|---|---|---|
-| Display | Instrument Serif regular | Títulos de sección, en mayúsculas o en caja normal, tamaño grande |
-| Acento | Instrument Serif italic | Una palabra o frase por título («by wopell», «together») |
-| Sistema | JetBrains Mono 500/700 | Etiquetas, pestañas `001 // EDITORIAL`, metadatos, botones, footer |
+| Rol | Fuente | Tamaño | Uso |
+|---|---|---|---|
+| Display | Instrument Serif regular | máx. 96px (6rem); 44–84px en títulos de sección | «MY WORKS», «PORTFOLIO», «Now playing», «Gracias por mirar», título del catálogo |
+| Acento | Instrument Serif italic | — | Una palabra por título, no en todos |
+| Título de pieza | Instrument Serif | 36–64px en la ficha; 19px en la guía; 18–24px en tarjetas | Nombres de piezas y textos descriptivos cortos |
+| Sistema | JetBrains Mono 500/600 | etiquetas 11px · metadatos 12px | Etiquetas, pestañas `001 // ANIMATION`, HUD, botones, navbar, números |
+| Nota | Caveat 600 | 26–28px | Una sola nota a mano por página (hoy: «también con las flechas») |
 
-- Nada más. Archivo Black, Bodoni, Jost, Outfit, Special Elite, Caveat, Silkscreen,
-  Press Start, Permanent Marker y Playfair quedan fuera de /works.
-- Las etiquetas del planeta siguen en Inter hasta migrarlas (deuda).
-- Mono siempre en mayúsculas, tracking 0.14–0.22em, 10–12px. Serif nunca en negrita.
+- Nada más. Fuera de `/` y `/works`: Jost, Bodoni, Outfit, Inter, Archivo Black, Silkscreen,
+  Special Elite, Press Start, Permanent Marker, Playfair.
+- Excepciones congeladas: la regla del hero («SELECTED PORTFOLIO ——— …») y las etiquetas
+  del planeta siguen en Inter.
+- Mono siempre en mayúsculas, tracking 0.12–0.16em, nunca por debajo de 11px. Serif nunca en negrita.
 
 ## Color
 
-| Rol | Hex |
-|---|---|
-| Papel | `#f2efe6` |
-| Blanco (hero) | `#ffffff` |
-| Ficha (superficie elevada) | `#fbfaf6` |
-| Tinta | `#191510` |
-| Contorno / líneas | `#4A4036` |
-| Tinta suave (texto secundario) | `#6b6257` |
-| Acento único (foco, estado activo, aro de satélites) | `#2F6F6B` |
-| Marca puntual (pines del planeta) | `#7A2E4D` |
+| Rol | Hex | Dónde |
+|---|---|---|
+| Papel | `#f2efe6` | Fondo, texto sobre tinta, carpetas del fondo |
+| Tinta | `#191510` | Texto, líneas y texto suave (con opacidad), monitor, cierre, catálogo, modal |
+| Blanco | `#ffffff` | Superficies elevadas: hero, cuerpo de carpetas, celdas de contacto, cinta de clientes |
+| Acento único | `#2f6f6b` | Lo activo o en marcha: progreso, «● REC», pestaña de la carpeta activa, celda en pantalla, foco, selección |
+| Marca puntual (congelada) | `#7A2E4D` | Pines del planeta |
 
-- Sin violeta ni lavanda en el diseño propio.
-- Sin degradados de color: solo papel, tinta y contorno. El color viene de las piezas.
-- El satélite periwinkle del planeta (`#8C8CF0`) pasa a cobalto o a la imagen del trabajo
-  cuando se toque esa parte.
+- Sin neón ni pasteles. Sin degradados de color: el color viene de las piezas.
+- Profundidad con papel oscurecido por tinta (4 / 8 / 12 %), no con tonos nuevos.
 
 ## Layout
 
-- Orden: Hero (blanco) → Planeta (papel) → Contacto → Carpetas → Marcas → Footer.
-- Eje centrado. Contenido 860–1120px; márgenes laterales iguales; 16px de gutter en 390.
-- Líneas finas de 1px `#4A4036` como estructura (la regla «SELECTED PORTFOLIO ——— 2023-2027»
-  del hero es el patrón: etiqueta mono · línea · dato mono).
-- Cada sección abre con su encabezado de archivo: `0N — NOMBRE` en mono a la izquierda,
-  línea, dato a la derecha; y un título serif grande debajo.
-- Contacto = ficha de archivo: contorno de tinta, título serif, canales como filas con
-  etiqueta mono, dato serif y flecha.
-- Carpetas = cascada solo contorno, pestaña con texto (sin barra de color), cuerpo papel.
-- Marcas = logos en tinta sobre papel, en loop.
-- Sin fotos de stock ni imágenes remotas. Solo trabajo real (o placeholders neutros marcados).
+- `/`: intro de fotogramas dentro de la máscara escalonada (2,6 pantallas). La cámara entra en
+  la barra blanca de censura, un resplandor blanco cubre la pantalla y `/works` arranca en ese
+  mismo blanco. Navega una sola vez; «Ver trabajos» y «Mis trabajos» son atajos reales.
+- `/works`: Hero (blanco) → Planeta (papel) → **Hub «Guía de canales»** → Cierre.
+- Hub: arriba, monitor (splats) + ficha de la pieza; abajo, la guía: las carpetas tendidas como
+  filas con sus piezas (la pestaña abre el catálogo con FLIP), canal 099 Contacto y canal 100
+  Clientes. Mobile: cada carpeta se desliza de costado.
+- Eje centrado, contenido hasta 1520px, gutter 16px en 390 y 40px desde 640.
+- Sin eyebrows ni numeración `0N —` sobre los títulos; la numeración solo existe donde es un
+  canal (001–004, 099, 100).
+- Sin fotos de stock ni imágenes remotas. Solo trabajo real.
 
 ## Movimiento
 
-- El planeta es el momento: no se compite con él.
-- Hover: subrayado que se dibuja (240ms), flecha que avanza 4px, ficha que sube 2px,
-  zoom 1.02 en previews. Press: escala 0.98.
-- Carpetas: hover 3D (rotateX leve + pull) con compactación de las demás; la preview
-  rota cada 10 s; click = vuelo FLIP al modal; cerrar = vuelve a su carpeta.
-- Entradas: una sola vez por sección, 500–700ms, ease `cubic-bezier(.2,.7,.1,1)`.
-  Nada aparece tarjeta por tarjeta con el scroll.
-- `prefers-reduced-motion`: todo quieto, nada oculto.
+- El planeta y el encendido del monitor son los momentos; el resto es respuesta a la mano.
+- Hover: la celda se tiñe y la miniatura escala 1.03; la pestaña sube 3px. Press: 0.97–0.98.
+- Guía: hover previsualiza en pantalla, clic abre la ficha, flechas mueven la selección.
+- Autoplay de 7 s con barra de progreso; se pausa con hover, con foco adentro y con «Pausa».
+- Catálogo: vuelo FLIP de la imagen; al cerrar, la página no se mueve y el foco vuelve.
+- `prefers-reduced-motion`: sin imán en la intro, sin autoplay, sin transiciones; nada oculto.
 
 ## Diales (1–10)
 
 | Dial | Valor | Lectura |
 |---|---|---|
-| Variedad de diseño | 4 | Sistema estable; la sorpresa la pone el planeta |
-| Intensidad de movimiento | 5 | Momento fuerte en planeta y carpetas, el resto solo hover |
-| Densidad visual | 3 | Mucho aire, poco texto, una idea por pantalla |
+| Variedad de diseño | 4 | Sistema estable; la sorpresa la ponen el planeta y la pantalla |
+| Intensidad de movimiento | 5 | Dos momentos fuertes, el resto responde a la mano |
+| Densidad visual | 5 | Todo al alcance en ~1,5 pantallas, sin amontonar |
 
 ## Nunca
 
 - Corporativo, barato, recargado, stock/Unsplash.
-- Chips de colores saturados, stickers, cinta o notas manuscritas en /works.
-- Más de dos familias tipográficas nuevas.
+- Neón, pasteles, chips de colores saturados, stickers con sombra dura.
+- Más de una nota a mano por página.
+- Más de dos familias tipográficas (más Caveat para esa única nota).
 - Datos inventados (clientes, cifras, testimonios) presentados como reales.
+- Scroll que arrastra al usuario o que navega solo más de una vez.

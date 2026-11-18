@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { ScrollTrigger, prefersReducedMotion } from '../../lib/gsap';
 import { FINALE_IMAGE } from '../../data/display-works';
 import { SplatCanvas } from './SplatCanvas';
+import './display.css';
 
 /**
  * Imagen final — cierre de la página. Un fotograma de Arcane hecho splats que

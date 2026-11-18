@@ -154,18 +154,18 @@ export default function Navbar() {
         <button
           onClick={() => handleTabSwitch('/about')}
           aria-current={isAbout ? 'page' : undefined}
-          className={`relative z-10 py-2.5 transition-colors duration-500 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center cursor-pointer ${
+          className={`relative z-10 py-2.5 transition-colors duration-500 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] flex items-center justify-center cursor-pointer ${
             isAbout 
               ? 'text-white' 
               : 'text-zinc-700 hover:text-zinc-950'
           }`}
         >
-          Sobre mi
+          Sobre mí
         </button>
         <button 
           onClick={handleWorksClick}
           aria-current={!isAbout ? 'page' : undefined}
-          className={`relative z-10 py-2.5 transition-colors duration-500 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center justify-center cursor-pointer ${
+          className={`relative z-10 py-2.5 transition-colors duration-500 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] flex items-center justify-center cursor-pointer ${
             !isAbout 
               ? 'text-white'
               : 'text-zinc-500 hover:text-zinc-900'

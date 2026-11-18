@@ -333,6 +333,8 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
     let aspect = 16 / 9;
     const resize = () => {
       const r = wrap.getBoundingClientRect();
+      // sin tamaño todavía (montaje, display:none): no hay grilla que armar
+      if (r.width < 2 || r.height < 2) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       W = Math.max(1, Math.round(r.width * dpr));
       H = Math.max(1, Math.round(r.height * dpr));
@@ -388,6 +390,7 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
     let raf = 0;
     let last = performance.now();
     const still = reduced();
+    let lastSig = '';
     const frame = (now: number) => {
       raf = 0;
       if (disposed || !visible) return;
@@ -407,7 +410,23 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
       const okA = bindSlot(0, L.from, u.coverA, u.lodA, aspect);
       const okB = bindSlot(1, L.to, u.coverB, u.lodB, aspect);
       // si la imagen destino todavía no cargó, la transición espera
-      if (!okB && L.t > 0.3) L.t = 0.3;
+      // (con reduced-motion no hay transición: se queda la anterior y después cambia de una)
+      if (!okB && L.t > 0.3 && !still) L.t = 0.3;
+
+      // reduced-motion: la imagen está quieta; solo se redibuja si cambió algo
+      if (still) {
+        if (!okB && lastSig) {
+          raf = requestAnimationFrame(frame);
+          return;
+        }
+        L.t = 1;
+        const sig = `${L.from}|${L.to}|${L.t}|${okA}|${okB}|${W}x${H}|${count}`;
+        if (sig === lastSig) {
+          raf = requestAnimationFrame(frame);
+          return;
+        }
+        lastSig = sig;
+      }
 
       gl.uniform1f(u.t, okA || L.t > 0 ? L.t : 1);
       gl.uniform1f(u.dir, L.dir);
