@@ -1,11 +1,17 @@
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home as HomeIcon } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { gsap, EASE, prefersReducedMotion } from '../lib/gsap';
 import { useWorksState } from '../context/WorksStateContext';
 
-gsap.registerPlugin(ScrollToPlugin);
+/* mismas curvas que --arch-ease / EASE.ui y EASE.move, para motion */
+const UI_OUT = [0.23, 1, 0.32, 1] as const;
+const UI_IN_OUT = [0.77, 0, 0.175, 1] as const;
+
+/* motion 12: los atajos x/y/scale corren en el hilo principal y la navbar se
+   anima justo cuando la página está ocupada (carga, cambio de ruta). Con un
+   string de transform motion usa WAAPI y va por el compositor. Como
+   reducedMotion="user" no cubre strings de transform, se resuelve a mano. */
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -14,75 +20,33 @@ export default function Navbar() {
   
   const isWorksPage = location.pathname === '/works' || (isWorksActive && location.pathname !== '/about');
   const isAbout = location.pathname === '/about';
+  const reduce = useReducedMotion();
 
   const handleTabSwitch = (targetPath: string) => {
-    const currentScroll = window.scrollY;
+    const y = window.scrollY;
 
+    // misma pestaña: volver arriba. Corto (< 300 ms), ease-in-out porque es la
+    // página moviéndose a la vista, y sin bloquear nada: si el usuario mueve la
+    // rueda, autoKill corta el tween y manda él.
     if (location.pathname === targetPath) {
-      if (currentScroll > 10) {
-        const scrollDistanceFactor = Math.min(1, currentScroll / (window.innerHeight * 2));
-        const scrollDuration = Math.max(0.15, 0.6 * scrollDistanceFactor);
-        gsap.to(window, { 
-          scrollTo: 0, 
-          duration: scrollDuration, 
-          ease: "power2.out",
-          overwrite: "auto"
-        });
+      if (y <= 10) return;
+      if (prefersReducedMotion()) {
+        window.scrollTo(0, 0);
+        return;
       }
+      gsap.to(window, {
+        scrollTo: { y: 0, autoKill: true },
+        duration: Math.min(0.28, 0.16 + y / 20000),
+        ease: EASE.move,
+        overwrite: 'auto',
+      });
       return;
     }
 
-    // If scroll is already at 0, navigate immediately without any waiting time
-    if (currentScroll <= 10) {
-      window.scrollTo(0, 0);
-      navigate(targetPath);
-      return;
-    }
-
-    // Block user scroll input during transition to prevent over-scroll
-    const preventScroll = (e: Event) => {
-      e.preventDefault();
-    };
-    const preventKeyScroll = (e: KeyboardEvent) => {
-      const keys = ["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Space", " "];
-      if (keys.includes(e.key)) {
-        e.preventDefault();
-      }
-    };
-
-    window.addEventListener("wheel", preventScroll, { passive: false });
-    window.addEventListener("touchmove", preventScroll, { passive: false });
-    window.addEventListener("keydown", preventKeyScroll, { passive: false });
-
-    const unlockScroll = () => {
-      window.removeEventListener("wheel", preventScroll);
-      window.removeEventListener("touchmove", preventScroll);
-      window.removeEventListener("keydown", preventKeyScroll);
-    };
-
-    // Calculate duration proportionally to the scroll distance:
-    const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    const scrollPercent = currentScroll / maxScroll;
-
-    const scrollDistanceFactor = Math.min(1, currentScroll / (window.innerHeight * 2));
-    const dynamicScrollDuration = Math.max(0.15, 0.6 * scrollDistanceFactor);
-
-    // If scroll does not exceed 12%, hold time resting at 0 is halved (0.2s instead of 0.4s)
-    const holdDuration = scrollPercent <= 0.12 ? 0.2 : 0.4;
-
-    gsap.to(window, {
-      scrollTo: 0,
-      duration: dynamicScrollDuration,
-      ease: "power2.out",
-      overwrite: "auto",
-      onComplete: () => {
-        gsap.delayedCall(holdDuration, () => {
-          window.scrollTo(0, 0);
-          unlockScroll();
-          navigate(targetPath);
-        });
-      }
-    });
+    // otra página: se navega ya, sin subir primero ni esperar. ScrollToTop
+    // (App) deja la página nueva arriba antes del primer pintado.
+    gsap.killTweensOf(window);
+    navigate(targetPath);
   };
 
   const handleHomeClick = () => {
@@ -102,9 +66,10 @@ export default function Navbar() {
   };
 
   return (
-    <motion.nav 
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
+    <motion.nav
+      initial={reduce ? { opacity: 0 } : { opacity: 0, transform: 'translateY(-8px)' }}
+      animate={reduce ? { opacity: 1 } : { opacity: 1, transform: 'translateY(0px)' }}
+      transition={{ duration: 0.25, ease: UI_OUT }}
       className="fixed top-5 md:top-7 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-2.5"
       style={{
         zIndex: 'var(--z-nav, 100)',
@@ -116,21 +81,24 @@ export default function Navbar() {
         {showHomeButton && (
           <motion.button
             key="home-btn"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, transform: 'scale(0.9)' }}
+            animate={{ opacity: 1, ...(reduce ? {} : { transform: 'scale(1)' }), transition: { duration: 0.2, ease: UI_OUT } }}
+            exit={{ opacity: 0, ...(reduce ? {} : { transform: 'scale(0.9)' }), transition: { duration: 0.15, ease: UI_OUT } }}
+            whileTap={reduce ? undefined : { transform: 'scale(0.97)', transition: { duration: 0.16, ease: UI_OUT } }}
             onClick={handleHomeClick}
-            className="flex items-center justify-center w-11 h-11 rounded-full border border-black/10 bg-white/95 hover:bg-zinc-950 hover:text-white text-zinc-900 shadow-sm backdrop-blur-md transition-all duration-300 group cursor-pointer"
+            /* solo colores en CSS: el transform lo maneja motion (transition-all
+               peleaba con sus estilos inline cuadro a cuadro) */
+            className="flex items-center justify-center w-11 h-11 rounded-full border border-black/10 bg-white/95 hover:bg-zinc-950 hover:text-white text-zinc-900 shadow-sm backdrop-blur-md transition-colors duration-200 ease-[ease] cursor-pointer"
             title="Volver al inicio"
             aria-label="Volver al inicio"
           >
-            <HomeIcon size={16} className="transition-transform duration-300 group-hover:scale-110" />
+            {/* sin zoom del ícono en hover: el cambio de color ya alcanza */}
+            <HomeIcon size={16} />
           </motion.button>
         )}
       </AnimatePresence>
 
-      <div className={`relative grid grid-cols-2 p-1.5 rounded-full border transition-all duration-700 ease-[0.22,1,0.36,1] w-[320px] md:w-[350px] ${
+      <div className={`relative grid grid-cols-2 p-1.5 rounded-full border transition-[background-color,border-color,box-shadow] duration-200 ease-[ease] w-[320px] md:w-[350px] ${
         isAbout 
         ? 'bg-white/95 border-black/10 shadow-lg' 
         : isWorksPage
@@ -140,10 +108,10 @@ export default function Navbar() {
         {/* Sliding Background */}
         <motion.div
           initial={false}
-          animate={{
-            x: isAbout ? 0 : '100%',
-          }}
-          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+          animate={{ transform: isAbout ? 'translateX(0%)' : 'translateX(100%)' }}
+          // se mueve de una pestaña a la otra a la vista: ease-in-out, < 300 ms;
+          // motion arranca desde donde esté si se interrumpe. Reduced: salta.
+          transition={reduce ? { duration: 0 } : { duration: 0.25, ease: UI_IN_OUT }}
           className="absolute inset-y-1.5 left-1.5 w-[calc(50%-6px)] rounded-full z-0"
           style={{ 
             backgroundColor: '#191510',
@@ -154,7 +122,7 @@ export default function Navbar() {
         <button
           onClick={() => handleTabSwitch('/about')}
           aria-current={isAbout ? 'page' : undefined}
-          className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-500 font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
+          className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-200 ease-[ease] font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
             isAbout 
               ? 'text-white' 
               : 'text-zinc-700 hover:text-zinc-950'
@@ -165,7 +133,7 @@ export default function Navbar() {
         <button 
           onClick={handleWorksClick}
           aria-current={location.pathname === '/works' ? 'page' : undefined}
-          className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-500 font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
+          className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-200 ease-[ease] font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
             !isAbout 
               ? 'text-white'
               : 'text-zinc-500 hover:text-zinc-900'

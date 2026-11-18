@@ -30,6 +30,9 @@ interface SplatCanvasProps {
   interactive?: boolean;
   /** duración del cambio de pieza en segundos */
   transition?: number;
+  /** si está en true al cambiar `index`, el cambio es un corte sin barrido
+   *  (lo usa la navegación por teclado). Se vuelve a false solo. */
+  cutRef?: React.MutableRefObject<boolean>;
   className?: string;
   alt?: string;
 }
@@ -151,6 +154,23 @@ const compile = (gl: WebGL2RenderingContext, type: number, src: string) => {
   return sh;
 };
 
+/** segundos que tardaría un barrido completo cuando hay que apurarlo */
+const RUSH = 0.25;
+
+/** arranca el barrido de la pieza actual (L.to) a la pieza `next` */
+const startSweep = (
+  L: { from: number; to: number; t: number; dir: number; rush: boolean; sources: unknown[] },
+  next: number
+) => {
+  const n = L.sources.length;
+  const fwd = (next - L.to + n) % n;
+  L.dir = fwd <= n / 2 ? 1 : -1;
+  L.from = L.to;
+  L.to = next;
+  L.t = 0;
+  L.rush = false;
+};
+
 const reduced = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -162,6 +182,7 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
   depth = 0.38,
   interactive = true,
   transition = 1.6,
+  cutRef,
   className = '',
   alt = '',
 }) => {
@@ -178,20 +199,31 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
     t: 1,
     dir: 1,
     want: index,
+    /** true: hay una pieza nueva esperando; el barrido actual termina rápido */
+    rush: false,
     sources,
   });
   live.current.sources = sources;
 
   useEffect(() => {
     const L = live.current;
+    const cut = !!cutRef?.current;
+    if (cutRef) cutRef.current = false;
     if (index === L.want) return;
-    const n = L.sources.length;
-    const fwd = (index - L.want + n) % n;
-    L.dir = fwd <= n / 2 ? 1 : -1;
-    L.from = L.t > 0.5 ? L.to : L.from;
-    L.to = index;
     L.want = index;
-    L.t = reduced() ? 1 : 0;
+    if (cut || reduced()) {
+      // corte: la pieza nueva aparece entera, sin barrido
+      L.from = index;
+      L.to = index;
+      L.t = 1;
+      L.rush = false;
+    } else if (L.t >= 1) {
+      startSweep(L, index);
+    } else {
+      // interrumpido: nada salta. El barrido en curso termina rápido desde
+      // donde está y el loop encadena la pieza nueva (ver frame)
+      L.rush = true;
+    }
     wakeRef.current();
   }, [index]);
 
@@ -402,7 +434,9 @@ export const SplatCanvas: React.FC<SplatCanvasProps> = ({
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       const L = live.current;
-      if (L.t < 1) L.t = Math.min(1, L.t + dt / transition);
+      if (L.t < 1) L.t = Math.min(1, L.t + dt / (L.rush ? RUSH : transition));
+      // terminó un barrido y el usuario ya eligió otra pieza: arranca la siguiente
+      if (L.t >= 1 && L.want !== L.to) startSweep(L, L.want);
 
       const k = 1 - Math.pow(0.0015, dt);
       ptr.x += (ptr.tx - ptr.x) * k;

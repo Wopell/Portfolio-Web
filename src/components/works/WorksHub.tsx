@@ -27,6 +27,10 @@ const ORDER = [
   'postpro',
   'south-ia',
 ];
+/* entrada de la grilla al filtrar: escalonado que se acorta (60 → 30 ms entre
+   tarjetas); a partir de la octava entran juntas */
+const STAGGER = [0, 60, 110, 150, 185, 215, 245, 275];
+
 const SORTED: Work[] = [...WORKS].sort((a, b) => ORDER.indexOf(a.id) - ORDER.indexOf(b.id));
 
 interface WorksHubProps {
@@ -40,8 +44,15 @@ export const WorksHub: React.FC<WorksHubProps> = ({ onOpenWork }) => {
   const chipRefs = useRef(new Map<FilterId, HTMLButtonElement>());
   const assembleRef = useRef(prefersReducedMotion() ? 1 : 0);
   const hoverTimer = useRef(0);
+  /* foco por teclado: el monitor corta a la pieza sin barrido (recorrer la
+     grilla con Tab no puede disparar un barrido por tarjeta) */
+  const cutRef = useRef(false);
 
   const [filter, setFilter] = useState<FilterId>('all');
+  const filterRef = useRef<FilterId>('all');
+  /* cuántas veces cambió el filtro: re-monta la grilla para que entre animada
+     (0 = recién cargada, sin animación) */
+  const [swaps, setSwaps] = useState(0);
   const [index, setIndex] = useState(0);
   const [inView, setInView] = useState(false);
 
@@ -53,6 +64,8 @@ export const WorksHub: React.FC<WorksHubProps> = ({ onOpenWork }) => {
   const reduced = prefersReducedMotion();
 
   const applyFilter = useCallback((id: FilterId) => {
+    if (id !== filterRef.current) setSwaps((s) => s + 1);
+    filterRef.current = id;
     setFilter(id);
     const first = id === 'all' ? SORTED[0] : SORTED.find((w) => w.categoryId === id);
     if (first) setIndex(SORTED.indexOf(first));
@@ -88,21 +101,31 @@ export const WorksHub: React.FC<WorksHubProps> = ({ onOpenWork }) => {
       assembleRef.current = 1;
       return;
     }
-    const tl = gsap
-      .timeline()
-      .fromTo(
-        screenRef.current,
+    // encendido con WAAPI: el navegador lo corre sin JS por cuadro, justo cuando
+    // la página está ocupada arrancando WebGL (antes GSAP lo pintaba cuadro a cuadro)
+    const power = screenRef.current?.animate(
+      [
         { clipPath: 'inset(49.6% 0% 49.6% 0% round 16px)', filter: 'brightness(3)' },
-        { clipPath: 'inset(0% 0% 0% 0% round 16px)', filter: 'brightness(1)', duration: 0.7, ease: 'expo.out', clearProps: 'clipPath,filter' }
-      )
-      .to(assembleRef, { current: 1, duration: 2.4, ease: 'power2.out' }, 0.15);
-    return () => void tl.progress(1);
+        { clipPath: 'inset(0% 0% 0% 0% round 16px)', filter: 'brightness(1)' },
+      ],
+      { duration: 700, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' } // ≈ expo.out
+    );
+    // el armado de los splats es un valor que lee el shader: sigue en GSAP
+    const tween = gsap.to(assembleRef, { current: 1, duration: 2.4, ease: 'power2.out', delay: 0.15 });
+    return () => {
+      power?.finish();
+      tween.progress(1);
+    };
   }, [inView, reduced]);
 
+  /* intención de hover: el monitor cambia solo si el mouse se queda 150 ms sobre
+     la tarjeta; al barrer la grilla de pasada no dispara un cambio por tarjeta */
   const preview = (i: number) => {
     window.clearTimeout(hoverTimer.current);
-    hoverTimer.current = window.setTimeout(() => setIndex(i), 80);
+    hoverTimer.current = window.setTimeout(() => setIndex(i), 150);
   };
+  const cancelPreview = () => window.clearTimeout(hoverTimer.current);
+  useEffect(() => cancelPreview, []);
 
   return (
     <section ref={sectionRef} id="selected-projects" data-section="works" aria-labelledby="works-title" className="hub">
@@ -118,6 +141,8 @@ export const WorksHub: React.FC<WorksHubProps> = ({ onOpenWork }) => {
               sources={sources}
               index={index}
               assembleRef={assembleRef}
+              transition={0.9}
+              cutRef={cutRef}
               className="disp__canvas"
               alt={`${work.client} — ${work.title}`}
             />
@@ -129,7 +154,7 @@ export const WorksHub: React.FC<WorksHubProps> = ({ onOpenWork }) => {
 
           <div className="hub__info">
             <p className="hub__client">{work.client}</p>
-            <p key={work.id} className="hub__title">
+            <p className="hub__title">
               {work.title}
             </p>
             <p className="hub__specs">
@@ -161,18 +186,22 @@ export const WorksHub: React.FC<WorksHubProps> = ({ onOpenWork }) => {
         </div>
 
         {/* ── grilla ── */}
-        <ul className="hub__grid">
-          {visible.map((w) => {
+        <ul key={swaps} className={`hub__grid${swaps ? ' is-swapped' : ''}`}>
+          {visible.map((w, n) => {
             const i = SORTED.indexOf(w);
             const on = i === index;
             return (
-              <li key={w.id}>
+              <li key={w.id} style={{ '--d': `${STAGGER[Math.min(n, STAGGER.length - 1)]}ms` } as React.CSSProperties}>
                 <button
                   type="button"
                   className={`hub-card ${on ? 'is-on' : ''}`}
                   aria-label={`${w.client} — ${w.title}. Ver proyecto`}
                   onPointerEnter={(e) => e.pointerType === 'mouse' && preview(i)}
-                  onFocus={() => setIndex(i)}
+                  onPointerLeave={cancelPreview}
+                  onFocus={(e) => {
+                    cutRef.current = e.currentTarget.matches(':focus-visible');
+                    setIndex(i);
+                  }}
                   onClick={() => {
                     setIndex(i);
                     onOpenWork(w);

@@ -12,7 +12,7 @@
   --arch-line: rgba(25, 21, 16, 0.72);
   --arch-soft: rgba(25, 21, 16, 0.68);
   --arch-accent: #2f6f6b;
-  --arch-ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --arch-ease: cubic-bezier(0.23, 1, 0.32, 1); /* ease-out fuerte (Emil): todo lo que entra o sale */
   --arch-serif: "Instrument Serif", "Times New Roman", serif;
   --arch-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
@@ -75,15 +75,12 @@
   color: var(--arch-ink);
   background: transparent;
   cursor: pointer;
-  transition: transform 200ms var(--arch-ease), background-color 200ms var(--arch-ease), color 200ms var(--arch-ease);
-}
-
-.arch-btn:hover {
-  transform: translateY(-2px);
-}
-
-.arch-btn:active {
-  transform: translateY(0) scale(0.98);
+  /* movimiento con ease-out fuerte; color con `ease` (cambio de estado, no desplazamiento) */
+  transition:
+    transform 160ms var(--arch-ease),
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
 }
 
 .arch-btn--solid {
@@ -91,9 +88,21 @@
   color: var(--arch-card);
 }
 
-.arch-btn--solid:hover {
-  background: var(--arch-accent);
-  border-color: var(--arch-accent);
+/* hover solo con mouse: en touch el :hover queda pegado después del tap */
+@media (hover: hover) and (pointer: fine) {
+  .arch-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .arch-btn--solid:hover {
+    background: var(--arch-accent);
+    border-color: var(--arch-accent);
+  }
+}
+
+/* press: va después del hover para ganarle mientras se mantiene apretado */
+.arch-btn:active {
+  transform: scale(0.97);
 }
 
 .arch-btn:focus-visible {
@@ -101,8 +110,16 @@
   outline-offset: 3px;
 }
 
+/* menos movimiento no es cero: se va el desplazamiento, queda el cambio de color */
 @media (prefers-reduced-motion: reduce) {
   .arch-btn {
-    transition: none !important;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+  .arch-btn:hover,
+  .arch-btn:active {
+    transform: none;
   }
 }

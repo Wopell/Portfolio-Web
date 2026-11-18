@@ -59,10 +59,29 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
 ## Movimiento
 
 - Momentos: el resplandor de la intro, el planeta y el encendido del monitor. Nada más.
-- Sin autoplay. El monitor cambia cuando el usuario elige (hover, foco o filtro).
-- Hover: la miniatura escala 1.03; botones suben 2px. Press: 0.98.
-- `prefers-reduced-motion`: sin imán en la intro, sin transiciones; el monitor no anima ni
-  redibuja si nada cambia.
+- Sin autoplay. El monitor cambia cuando el usuario elige (hover sostenido 150 ms, foco o filtro);
+  el barrido de splats dura 0,9 s. Si se elige otra pieza a mitad de barrido, el actual termina
+  rápido y encadena la nueva (nada salta). Con Tab el monitor corta sin barrido.
+- Curvas (iguales en CSS y GSAP): entrar/salir `cubic-bezier(0.23, 1, 0.32, 1)` (`--arch-ease`,
+  `EASE.ui`); moverse a la vista `cubic-bezier(0.77, 0, 0.175, 1)` (`EASE.move`); color `ease`.
+  Nunca `ease-in` en la interfaz.
+- Duraciones: press 160 ms; color 150–200 ms; ficha: entra en 300 ms, sale en 180 ms (si se
+  cierra mientras entra, sale desde donde quedó); volver arriba < 300 ms; la navbar cambia de
+  página al instante y su indicador se mueve en 250 ms; el loader de la intro se funde en 200 ms.
+- Hover (solo mouse): la miniatura escala 1.03 en 240 ms; botones suben 2px; el mail del cierre
+  dibuja su subrayado. Press: 0.97
+  (miniatura 0.98). El título de la pieza cambia sin animar (acción frecuente).
+- Al cambiar de filtro la grilla entra con 240 ms, escalonada 0 · 60 · 110 · 150 · 185 · 215 · 245 ·
+  275 ms; nunca al cargar.
+- En motion (v12) nada de atajos x/y/scale en lo que se anima mientras la página carga o cambia
+  de ruta: strings de transform (WAAPI). El encendido del monitor también va por WAAPI.
+- `prefers-reduced-motion`: la intro no hace zoom (primer fotograma quieto en su marco, sin imán,
+  sin parallax ni inercia): el scroll funde el texto y después el blanco, y /works arranca en ese
+  blanco. En el resto, sin escalas ni desplazamientos; quedan los cambios de color y fundidos
+  cortos. Los círculos del planeta muestran su título sin crecer. El monitor no anima ni redibuja
+  si nada cambia.
+- Planeta: el hover de los círculos es solo con mouse (o foco de teclado); el título crece desde
+  el círculo en 150 ms.
 
 ## Nunca
 

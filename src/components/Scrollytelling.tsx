@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
+import { gsap, prefersReducedMotion } from "../lib/gsap";
 import { MotionValue, useMotionValueEvent, useTransform, motion } from "motion/react";
 
 
@@ -27,6 +27,8 @@ const BLOOM_START_P = 0.6;
 const BLOOM_END_P = 0.95;
 /** centro de la barra en coordenadas del fotograma (fotogramas 40–54) */
 const BAR_CENTER = { x: 0.44, y: 0.35 };
+/** reduced-motion: tramo del scroll en el que el blanco entra por opacidad */
+const STILL_FADE = { from: 0.2, to: 0.9 };
 
 interface ScrollytellingProps {
   scrollY: MotionValue<number>;
@@ -112,12 +114,22 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   const heroTextMaskRef = useRef<SVGPathElement>(null);
   const bloomRef = useRef<HTMLDivElement>(null);
 
-  // Ref to persist the last known mouse position across mousemove, scroll, and render updates
-  const mousePosRef = useRef<{ x: number; y: number } | null>(null);
 
   const [loadedPercentage, setLoadedPercentage] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  // el loader se funde (200 ms) en vez de cortar de negro al papel; recién
+  // después se desmonta
+  const [loaderGone, setLoaderGone] = useState(false);
+  useEffect(() => {
+    if (!isLoaded) return;
+    const id = window.setTimeout(() => setLoaderGone(true), 240);
+    return () => window.clearTimeout(id);
+  }, [isLoaded]);
   const [isMobile, setIsMobile] = useState(false);
+  // reduced-motion: intro sin zoom. La imagen queda quieta en su marco (primer
+  // fotograma, máscara y escala fijas) y el scroll solo maneja opacidades: el
+  // texto se va y el blanco entra; /works arranca sobre ese blanco igual que siempre.
+  const [still] = useState(() => prefersReducedMotion());
 
   useEffect(() => {
     const checkMobile = () => {
@@ -129,7 +141,10 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   }, []);
 
   // Light white frame background opacity (fades out as frame stroke shrinks to 0)
-  const frameOpacity = useTransform(smoothProgress, [0.18, 0.25], [1, 0]);
+  // (reduced-motion: el marco no se va; lo tapa el blanco)
+  const frameOpacity = useTransform(smoothProgress, (p) =>
+    still ? 1 : p <= 0.18 ? 1 : p >= 0.25 ? 0 : 1 - (p - 0.18) / 0.07
+  );
 
   // Translate outer frame background up along with document scroll when in About mode
   const frameY = useTransform(scrollY, (y) => (isZoomDisabled ? -y : 0));
@@ -208,8 +223,10 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   const updateRenderState = (latestScrollY: number, latestProgress: number) => {
     if (!isLoaded) return;
 
+    // progreso que mueve la geometría (fotogramas, máscara, zoom): quieto en reduced-motion
+    const geoP = still ? 0 : latestProgress;
     const totalFrames = CONFIG.TOTAL_FRAMES;
-    const rawFrame = Math.min(1, latestProgress / FRAMES_END_P) * (totalFrames - 1);
+    const rawFrame = Math.min(1, geoP / FRAMES_END_P) * (totalFrames - 1);
     const currentFrame = Math.min(
       totalFrames - 1, 
       Math.max(0, Math.floor(rawFrame))
@@ -226,15 +243,15 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
 
     // Update SVG mask path in real time via DOM attribute (hardware-accelerated GPU 60fps+)
     if (maskPathRef.current) {
-      maskPathRef.current.setAttribute("d", getSteppedMaskPath(latestProgress, isMobile));
+      maskPathRef.current.setAttribute("d", getSteppedMaskPath(geoP, isMobile));
     }
     if (heroTextMaskRef.current) {
-      heroTextMaskRef.current.setAttribute("d", getHeroTextMaskPath(latestProgress, isMobile));
+      heroTextMaskRef.current.setAttribute("d", getHeroTextMaskPath(geoP, isMobile));
     }
 
     // Continuous digital zoom: combines progressive base zoom + sub-frame micro zoom to smooth out low frame-rate jumps
     const vh = window.innerHeight;
-    const baseScale = 1.0 + (latestProgress * 0.32);
+    const baseScale = 1.0 + (geoP * 0.32);
     const microZoom = (frameFraction / totalFrames) * 0.50;
     const virtualScale = baseScale + microZoom;
 
@@ -244,7 +261,14 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     // Resplandor blanco: nace en la barra de censura (que la cámara ya está
     // atravesando) y cubre la pantalla; /works arranca sobre ese mismo blanco.
     const bloom = bloomRef.current;
-    if (bloom) {
+    if (bloom && still) {
+      // reduced-motion: blanco liso que entra solo por opacidad
+      const t = isZoomDisabled
+        ? 0
+        : Math.max(0, Math.min(1, (latestProgress - STILL_FADE.from) / (STILL_FADE.to - STILL_FADE.from)));
+      bloom.style.background = "#ffffff";
+      bloom.style.opacity = (t * t * (3 - 2 * t)).toFixed(3);
+    } else if (bloom) {
       const t = isZoomDisabled
         ? 0
         : Math.max(0, Math.min(1, (latestProgress - BLOOM_START_P) / (BLOOM_END_P - BLOOM_START_P)));
@@ -329,50 +353,29 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     return () => window.removeEventListener("resize", handleResize);
   }, [isLoaded, smoothScrollY, smoothProgress]);
 
-  // Persistent mouse parallax function anchored to last known mouse position
-  const updateParallax = () => {
-    if (!parallaxWrapperRef.current) return;
-
-    const mouseX = mousePosRef.current ? mousePosRef.current.x : window.innerWidth / 2;
-    const mouseY = mousePosRef.current ? mousePosRef.current.y : window.innerHeight / 2;
-
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-
-    const moveX = (mouseX - centerX) / centerX;
-    const moveY = (mouseY - centerY) / centerY;
-
-    gsap.to(parallaxWrapperRef.current, {
-      x: -moveX * 18,
-      y: -moveY * 18,
-      scale: 1.05,
-      duration: 0.8,
-      ease: "power2.out",
-      overwrite: "auto",
-    });
-  };
-
-  // Mouse move and scroll listener to lock parallax to last mouse coordinates
+  // Parallax del mouse: la imagen sigue al puntero con un retardo suave.
+  // quickTo reutiliza un solo tween por eje (antes se creaba uno por cada
+  // mousemove). Con reduced-motion no hay parallax: es movimiento decorativo
+  // que sigue al cursor.
   useEffect(() => {
-    if (!isLoaded) return;
+    const el = parallaxWrapperRef.current;
+    if (!isLoaded || !el || prefersReducedMotion()) return;
+
+    gsap.set(el, { scale: 1.05 });
+    const toX = gsap.quickTo(el, "x", { duration: 0.8, ease: "power2.out" });
+    const toY = gsap.quickTo(el, "y", { duration: 0.8, ease: "power2.out" });
 
     const handleMouseMove = (e: MouseEvent) => {
-      mousePosRef.current = { x: e.clientX, y: e.clientY };
-      updateParallax();
-    };
-
-    const handleScroll = () => {
-      if (mousePosRef.current) {
-        updateParallax();
-      }
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      toX(-((e.clientX - cx) / cx) * 18);
+      toY(-((e.clientY - cy) / cy) * 18);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("scroll", handleScroll);
+      gsap.killTweensOf(el);
     };
   }, [isLoaded]);
 
@@ -395,16 +398,20 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
       </svg>
 
       {/* Loading Overlay */}
-      {!isLoaded && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white">
+      {!loaderGone && (
+        <div
+          aria-hidden={isLoaded || undefined}
+          className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white transition-opacity duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${isLoaded ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+        >
           <div className="font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] mb-3 text-white/70">Cargando</div>
           <div className="text-7xl md:text-8xl tabular-nums" style={{ fontFamily: "'Instrument Serif', serif" }}>
             {loadedPercentage.toString().padStart(3, "0")}%
           </div>
           <div className="w-64 h-1 bg-white/20 mt-8 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-white transition-all duration-300 ease-out" 
-              style={{ width: `${loadedPercentage}%` }}
+            {/* scaleX en vez de width: no dispara layout en cada paso */}
+            <div
+              className="h-full w-full origin-left bg-white transition-transform duration-200 ease-linear motion-reduce:transition-none"
+              style={{ transform: `scaleX(${loadedPercentage / 100})` }}
             />
           </div>
         </div>
@@ -428,7 +435,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
           <canvas
             ref={canvasRef}
             className="w-full h-full object-cover origin-center pointer-events-none"
-            style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 1s ease-in-out" }}
+            style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 600ms cubic-bezier(0.23, 1, 0.32, 1)" }}
           />
         </div>
 
@@ -437,8 +444,8 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
           ref={vignetteRef}
           className="absolute inset-0 pointer-events-none"
           style={{ 
-            opacity: isLoaded ? 1 : 0, 
-            transition: "opacity 1s ease-in-out",
+            opacity: isLoaded ? 1 : 0,
+            transition: "opacity 600ms cubic-bezier(0.23, 1, 0.32, 1)",
             boxShadow: "inset 0 0 150px 80px rgba(0,0,0,1)",
             background: "radial-gradient(circle, transparent 60%, rgba(0,0,0,0.6) 100%)"
           }}

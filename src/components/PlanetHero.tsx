@@ -2676,6 +2676,8 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
       {/* Capa A / C: 4 Círculos de Previews de Trabajos en Órbita */}
       {WORKS.map((work, idx) => {
         const isHovered = hoveredCircle === idx;
+        // reduced-motion: el hover muestra el título (fundido) pero el círculo no crece
+        const reduceHover = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const hasUrl = Boolean(work.url && work.url.trim().length > 0);
         const isHash = hasUrl && work.url.startsWith('#');
 
@@ -2684,9 +2686,11 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
             circleRefs.current[idx] = el;
           },
           'aria-label': `Ver trabajos de ${work.title}`,
-          onMouseEnter: () => handleCircleMouseEnter(idx),
-          onMouseLeave: () => handleCircleMouseLeave(idx),
-          onFocus: () => handleCircleMouseEnter(idx),
+          // hover solo con mouse: en touch el tap dejaba el círculo agrandado y el
+          // título pegado (el tap igual filtra y baja a la grilla)
+          onPointerEnter: (e: React.PointerEvent) => e.pointerType === 'mouse' && handleCircleMouseEnter(idx),
+          onPointerLeave: (e: React.PointerEvent) => e.pointerType === 'mouse' && handleCircleMouseLeave(idx),
+          onFocus: (e: React.FocusEvent<HTMLElement>) => e.currentTarget.matches(':focus-visible') && handleCircleMouseEnter(idx),
           onBlur: () => handleCircleMouseLeave(idx),
           onKeyDown: (e: React.KeyboardEvent) => {
             if (e.key === 'Escape') {
@@ -2706,12 +2710,12 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
         const innerContent = (
           <>
             <div
-              className="relative rounded-full overflow-hidden transition-transform duration-200 ease-out will-change-transform flex items-center justify-center w-[64px] h-[64px] md:w-[90px] md:h-[90px]"
+              className="relative rounded-full overflow-hidden transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] will-change-transform flex items-center justify-center w-[64px] h-[64px] md:w-[90px] md:h-[90px]"
               style={{
                 border: `3px solid ${CONFIG.circleBorderColor}`,
                 boxShadow: '0 6px 16px rgba(0,0,0,0.18)',
                 backgroundColor: '#FBFAF6',
-                transform: isHovered ? `scale(${CONFIG.hoverScale})` : 'scale(1)',
+                transform: isHovered && !reduceHover ? `scale(${CONFIG.hoverScale})` : 'scale(1)',
               }}
             >
               <img
@@ -2729,9 +2733,10 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
               />
             </div>
 
-            {/* Tooltip accesible con título del proyecto */}
+            {/* Tooltip accesible con título del proyecto. Crece desde el círculo
+                (origin-bottom), anima solo opacidad/escala/desplazamiento en 150 ms */}
             <div
-              className={`absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-200 ease-out ${
+              className={`absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 pointer-events-none origin-bottom transition-[opacity,scale,translate] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-opacity motion-reduce:scale-100 motion-reduce:translate-y-0 ${
                 isHovered
                   ? 'opacity-100 scale-100 translate-y-0'
                   : 'opacity-0 scale-95 translate-y-1 group-focus-visible:opacity-100 group-focus-visible:scale-100 group-focus-visible:translate-y-0'

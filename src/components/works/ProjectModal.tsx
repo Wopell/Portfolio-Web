@@ -30,19 +30,24 @@ export const ProjectModal: React.FC<{
     const focusClose = () =>
       panelRef.current?.querySelector<HTMLButtonElement>('[data-modal-close]')?.focus({ preventScroll: true });
     if (prefersReducedMotion()) {
-      gsap.set([rootRef.current, panelRef.current], { autoAlpha: 1, y: 0, scale: 1 });
-      focusClose();
-    } else {
+      // sin movimiento: solo un fundido corto
+      gsap.set(panelRef.current, { y: 0, scale: 1 });
       gsap
         .timeline()
-        .fromTo(rootRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: 'power1.out' })
+        .fromTo([rootRef.current, panelRef.current], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.15, ease: EASE.ui })
+        .add(focusClose, 0.02);
+    } else {
+      // entrada ≤ 300 ms con ease-out fuerte; el panel crece desde 0.96 (nunca desde 0)
+      gsap
+        .timeline()
+        .fromTo(rootRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: EASE.ui })
         .fromTo(
           panelRef.current,
-          { autoAlpha: 0, y: 26, scale: 0.96 },
-          { autoAlpha: 1, y: 0, scale: 1, duration: 0.45, ease: EASE.snap },
-          '-=0.1'
+          { autoAlpha: 0, y: 12, scale: 0.96 },
+          { autoAlpha: 1, y: 0, scale: 1, duration: 0.3, ease: EASE.ui },
+          0
         )
-        .add(focusClose, 0.25);
+        .add(focusClose, 0.05);
     }
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -57,22 +62,24 @@ export const ProjectModal: React.FC<{
   const close = useCallback(() => {
     if (closingRef.current || !rendered) return;
     closingRef.current = true;
-    if (prefersReducedMotion()) {
+    const done = () => {
       closingRef.current = false;
       setRendered(null);
       onClose();
+    };
+    // si se cierra mientras todavía entra, la entrada se corta acá y la salida
+    // arranca desde donde quedó (si no, las dos pelean y la entrada puede
+    // volver a mostrar el panel justo antes de desmontarlo)
+    gsap.killTweensOf([panelRef.current, rootRef.current]);
+    if (prefersReducedMotion()) {
+      gsap.to([panelRef.current, rootRef.current], { autoAlpha: 0, duration: 0.12, ease: EASE.ui, onComplete: done });
       return;
     }
+    // salida más rápida que la entrada y con ease-out (nunca ease-in: arranca lenta)
     gsap
-      .timeline({
-        onComplete: () => {
-          closingRef.current = false;
-          setRendered(null);
-          onClose();
-        },
-      })
-      .to(panelRef.current, { autoAlpha: 0, y: 18, scale: 0.97, duration: 0.28, ease: 'power2.in' })
-      .to(rootRef.current, { autoAlpha: 0, duration: 0.22, ease: 'power1.in' }, '-=0.08');
+      .timeline({ onComplete: done })
+      .to(panelRef.current, { autoAlpha: 0, scale: 0.98, duration: 0.16, ease: EASE.ui }, 0)
+      .to(rootRef.current, { autoAlpha: 0, duration: 0.18, ease: EASE.ui }, 0.02);
   }, [rendered, onClose]);
 
   /* Escape cierra solo la ficha (captura + stopPropagation: el catálogo de
@@ -124,7 +131,7 @@ export const ProjectModal: React.FC<{
           type="button"
           data-modal-close
           onClick={close}
-          className="absolute top-4 right-4 z-30 w-11 h-11 flex items-center justify-center rounded-full bg-[#191510]/60 text-white hover:bg-white hover:text-[#191510] transition-all shadow-md cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
+          className="absolute top-4 right-4 z-30 w-11 h-11 flex items-center justify-center rounded-full bg-[#191510]/60 text-white hover:bg-white hover:text-[#191510] transition-colors duration-200 ease-[ease] shadow-md cursor-pointer focus-visible:outline-2 focus-visible:outline-white"
           aria-label="Cerrar modal"
         >
           <X size={18} />

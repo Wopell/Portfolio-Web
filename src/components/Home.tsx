@@ -46,11 +46,16 @@ export default function Home({ activeTab = "works" }: HomeProps) {
   });
 
   // Apply custom spring physics (damping: 30, stiffness: 160, mass: 0.8) ONLY to works scroll
-  const smoothScrollY = useSpring(worksScrollY, {
+  const springScrollY = useSpring(worksScrollY, {
     damping: 30,
     stiffness: 160,
     mass: 0.8
   });
+  // reduced-motion: sin inercia, la intro sigue al scroll 1:1
+  const [still] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
+  const smoothScrollY = still ? worksScrollY : springScrollY;
 
   // Calculate smooth progress (0.0 to 1.0) over the intro range
   const smoothProgress = useTransform(smoothScrollY, (y) => {
