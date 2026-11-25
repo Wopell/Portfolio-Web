@@ -1,0 +1,253 @@
+/**
+ * blackhole.css — transición planeta → trabajos en 3D (BlackHole.tsx).
+ * Escenario fijo (sticky) sobre el comienzo de la galería. La escena es un piso
+ * de papel en perspectiva con un pozo cuadrado real (cuatro paños alrededor del
+ * hueco + cuatro paredes + fondo), todo en un mismo contexto 3D.
+ */
+
+.bh {
+  position: relative;
+  z-index: 2;
+  height: 260vh;
+  /* la galería empieza una pantalla antes de que termine el recorrido: queda
+     debajo de la escena y aparece cuando el piso se va */
+  margin-bottom: -100vh;
+  pointer-events: none;
+  --h: min(19vw, 230px); /* lado de la boca del pozo */
+  --d: calc(var(--h) * 1.5); /* profundidad del pozo */
+  --F: 2600px; /* alcance del piso */
+}
+
+.bh + * {
+  position: relative;
+  z-index: 1;
+}
+
+.bh__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  perspective: 900px;
+  perspective-origin: 50% 38%;
+}
+
+/* origen de la escena: el centro de la boca del pozo */
+.bh__world {
+  position: absolute;
+  left: 50%;
+  top: 60%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(58deg);
+  will-change: transform;
+}
+
+.bh__spin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  transform: rotate(45deg);
+}
+
+/* el piso: el mismo papel cuadriculado de la página */
+.bh__panel {
+  position: absolute;
+  background-color: #f2efe6;
+  background-size: 28px 28px;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.065) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.065) 1px, transparent 1px);
+  backface-visibility: hidden;
+}
+
+/* la cuadrícula de cada paño arranca en el centro del pozo, así continúa de un
+   paño al otro; los paños de los costados se montan 1px sobre los otros para que
+   no quede una junta visible */
+.bh__panel--n {
+  left: calc(-1 * var(--F));
+  top: calc(-1 * var(--F));
+  width: calc(2 * var(--F));
+  height: calc(var(--F) - var(--h) / 2);
+  background-position: var(--F) var(--F);
+}
+
+.bh__panel--s {
+  left: calc(-1 * var(--F));
+  top: calc(var(--h) / 2);
+  width: calc(2 * var(--F));
+  height: calc(var(--F) - var(--h) / 2);
+  background-position: var(--F) calc(var(--h) / -2);
+}
+
+.bh__panel--w {
+  left: calc(-1 * var(--F));
+  top: calc(var(--h) / -2 - 1px);
+  width: calc(var(--F) - var(--h) / 2);
+  height: calc(var(--h) + 2px);
+  background-position: var(--F) calc(var(--h) / 2 + 1px);
+}
+
+.bh__panel--e {
+  left: calc(var(--h) / 2);
+  top: calc(var(--h) / -2 - 1px);
+  width: calc(var(--F) - var(--h) / 2);
+  height: calc(var(--h) + 2px);
+  background-position: calc(var(--h) / -2) calc(var(--h) / 2 + 1px);
+}
+
+/* bruma de papel sobre el horizonte: el piso se funde con la página a lo lejos */
+.bh__fog {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, #f2efe6 0%, #f2efe6 20%, rgba(242, 239, 230, 0) 46%);
+}
+
+/* el pozo: sin ventanas; las paredes se oscurecen hacia el fondo */
+.bh__shaft {
+  position: absolute;
+  left: calc(var(--h) / -2);
+  top: calc(var(--h) / -2);
+  width: var(--h);
+  height: var(--h);
+  transform-style: preserve-3d;
+}
+
+.bh__wall {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* paredes norte y sur: cuelgan de los bordes de arriba y de abajo */
+.bh__wall--n,
+.bh__wall--s {
+  width: var(--h);
+  height: var(--d);
+  transform-origin: 50% 0;
+  transform: rotateX(-90deg);
+}
+
+.bh__wall--s {
+  top: var(--h);
+}
+
+/* paredes oeste y este: cuelgan de los bordes izquierdo y derecho */
+.bh__wall--w,
+.bh__wall--e {
+  width: var(--d);
+  height: var(--h);
+  transform-origin: 0 50%;
+  transform: rotateY(90deg);
+}
+
+.bh__wall--e {
+  left: var(--h);
+}
+
+/* las paredes del fondo (las que mira la cámara) más claras; las del frente más oscuras */
+.bh__wall--n {
+  background: linear-gradient(to bottom, #3b342c, #0d0b09);
+}
+.bh__wall--w {
+  background: linear-gradient(to right, #332c25, #0d0b09);
+}
+.bh__wall--s {
+  background: linear-gradient(to bottom, #241f1a, #0a0807);
+}
+.bh__wall--e {
+  background: linear-gradient(to right, #1f1a16, #0a0807);
+}
+
+.bh__bottom {
+  position: absolute;
+  inset: 0;
+  background: #0a0807;
+  transform: translateZ(calc(-1 * var(--d)));
+}
+
+/* la losa del barrido: el fondo del pozo cuando ya llena la pantalla. Bisagra en
+   el borde de arriba y ojo a esa altura: al bascular hacia el fondo se ve como un
+   trapecio que se achica en perspectiva y termina como una línea arriba. */
+.bh__lid {
+  position: absolute;
+  inset: 0;
+  perspective: 1000px;
+  perspective-origin: 50% 0%;
+}
+
+.bh__shade,
+.bh__slab {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* la galería, debajo, arranca en sombra y se aclara cuando la losa se va */
+.bh__shade {
+  background: linear-gradient(to bottom, rgba(10, 8, 7, 0.9), rgba(10, 8, 7, 0.45));
+}
+
+/* el mismo oscuro del fondo del pozo, con los bordes algo más claros como sus paredes */
+.bh__slab {
+  transform-origin: 50% 0;
+  background: radial-gradient(130% 95% at 50% 45%, #0a0807 55%, #1d1814 100%);
+  will-change: transform;
+}
+
+/* el canto de la losa: una banda más clara abajo que se aplasta con la perspectiva */
+.bh__edge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: clamp(10px, 1.6vh, 18px);
+  background: linear-gradient(to bottom, #3a3129, #16120e);
+}
+
+/* CREATIVE, en una línea, sobre el pozo */
+.bh__word {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 30%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.32em;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(1.5rem, 0.9rem + 1.6vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1;
+  color: #191510;
+}
+
+.bh__letter {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* teléfono: el pozo un poco más grande en proporción */
+@media (max-width: 639px) {
+  .bh {
+    --h: 34vw;
+    height: 240vh;
+  }
+}
+
+/* reduced-motion: sin cámara ni barrido; el piso quieto en isométrico */
+@media (prefers-reduced-motion: reduce) {
+  .bh {
+    height: auto;
+    margin-bottom: 0;
+  }
+  .bh__stage {
+    position: relative;
+  }
+}

@@ -1,6 +1,6 @@
 /**
- * hub.css — trabajos: monitor + ficha breve, filtros y grilla.
- * Una sola superficie de papel; el tamaño lo pone el trabajo.
+ * hub.css — trabajos: filtros y galería masonry.
+ * Las piezas a sangre en su formato real; la interfaz se calla.
  */
 
 .hub {
@@ -26,51 +26,14 @@
   }
 }
 
-/* ── pieza en pantalla ───────────────────────────────────────────────── */
-
-.hub__top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 24px;
-}
-
-@media (min-width: 1024px) {
-  .hub__top {
-    grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
-    gap: 48px;
-    align-items: end;
-  }
-}
-
-.disp__screen.hub__screen {
-  border-radius: 16px;
-}
-
-.hub__info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 14px;
-  min-width: 0;
-}
-
-.hub__client {
-  font-family: var(--arch-sans);
-  font-size: var(--t-label);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--arch-soft);
-}
-
+/* textos del aviso «sin piezas» */
 .hub__title {
   font-family: var(--arch-serif);
   font-size: var(--t-title);
   line-height: 0.98;
   color: var(--arch-ink);
   text-wrap: balance;
-  /* sin animación: cambia en cada hover de la grilla (acción frecuente) y el
-     monitor ya marca el cambio */
+  overflow-wrap: anywhere;
 }
 
 .hub__specs {
@@ -80,23 +43,12 @@
   color: var(--arch-soft);
 }
 
-.hub__cta {
-  margin-top: 10px;
-}
-
 /* ── filtros ─────────────────────────────────────────────────────────── */
 
 .hub__filters {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 72px;
-}
-
-@media (min-width: 640px) {
-  .hub__filters {
-    margin-top: 96px;
-  }
 }
 
 .hub__chip {
@@ -121,6 +73,12 @@
   .hub__chip:hover {
     border-color: var(--arch-ink);
   }
+
+  /* el filtro activo también responde al mouse */
+  .hub__chip[aria-pressed='true']:hover {
+    background: color-mix(in srgb, var(--arch-ink) 82%, var(--arch-card));
+    border-color: color-mix(in srgb, var(--arch-ink) 82%, var(--arch-card));
+  }
 }
 
 .hub__chip:active {
@@ -139,59 +97,61 @@
   outline-offset: 4px;
 }
 
-/* ── grilla ──────────────────────────────────────────────────────────── */
+/* ── galería masonry ─────────────────────────────────────────────────── */
 
+/* columnas (las reparte WorksHub por altura: cada pieza va a la más corta) */
 .hub__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 32px 24px;
-  margin: 32px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-@media (min-width: 640px) {
-  .hub__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 48px 28px;
-  }
+  grid-template-columns: repeat(var(--cols, 1), minmax(0, 1fr));
+  align-items: start;
+  gap: 0 16px;
+  margin-top: 24px;
 }
 
 @media (min-width: 1100px) {
   .hub__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0 20px;
   }
+}
+
+.hub__col {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .hub-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   padding: 0;
   background: none;
   color: var(--arch-ink);
   text-align: left;
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: 10px;
 }
 
 .hub-card__media {
+  position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: 10px;
   background: rgba(25, 21, 16, 0.08);
-  box-shadow: 0 0 0 1px rgba(25, 21, 16, 0.12);
-  transition:
-    transform 160ms var(--arch-ease),
-    box-shadow 150ms ease;
+  transition: transform 160ms var(--arch-ease);
 }
 
-.hub-card__media img {
+.hub-card__media img,
+.hub-card__media video {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
@@ -200,19 +160,38 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .hub-card:hover .hub-card__media img {
+  .hub-card:hover .hub-card__media img,
+  .hub-card:hover .hub-card__media video {
     transform: scale(1.03);
   }
 }
 
-/* press: la miniatura cede apenas (una tarjeta grande no necesita 0.97) */
+/* press: la pieza cede apenas (una tarjeta grande no necesita 0.97) */
 .hub-card:active .hub-card__media {
   transform: scale(0.98);
 }
 
-/* al cambiar de filtro la grilla entra, no aparece de golpe. Solo después del
+.hub-card__client {
+  overflow-wrap: anywhere;
+  font-family: var(--arch-sans);
+  font-size: var(--t-label);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--arch-soft);
+}
+
+.hub-card__title {
+  overflow-wrap: anywhere;
+  font-family: var(--arch-serif);
+  font-size: var(--t-card);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+/* al cambiar de filtro la galería entra, no aparece de golpe. Solo después del
    primer cambio (la clase la pone WorksHub), nunca al cargar */
-.hub__grid.is-swapped > li {
+.hub__grid.is-swapped li {
   animation: hub-card-in 240ms var(--arch-ease) both;
   animation-delay: var(--d, 0ms);
 }
@@ -224,34 +203,28 @@
   }
 }
 
-.hub-card.is-on .hub-card__media {
-  box-shadow: 0 0 0 2px var(--arch-accent);
-}
-
-.hub-card__client {
+/* filtro sin piezas / sitio sin piezas */
+.hub__none {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  margin-top: 32px;
+  padding: 40px 0;
+  border-top: 1px solid rgba(25, 21, 16, 0.14);
   font-family: var(--arch-sans);
-  font-size: var(--t-label);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--t-body);
   color: var(--arch-soft);
 }
 
-.hub-card.is-on .hub-card__client {
-  color: var(--arch-accent);
+.hub__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-
-.hub-card__title {
-  font-family: var(--arch-serif);
-  font-size: var(--t-card);
-  line-height: 1.05;
-  text-wrap: balance;
-}
-
-/* ── reduced motion ──────────────────────────────────────────────────── */
 
 /* menos movimiento no es cero: se van escalas y desplazamientos, quedan los
-   cambios de color y un fundido corto de la grilla */
+   cambios de color y un fundido corto de la galería (y los loops no corren) */
 @media (prefers-reduced-motion: reduce) {
   .hub__chip {
     transition:
@@ -261,16 +234,16 @@
   }
   .hub__chip:active,
   .hub-card:active .hub-card__media,
-  .hub-card:hover .hub-card__media img {
+  .hub-card:hover .hub-card__media img,
+  .hub-card:hover .hub-card__media video {
     transform: none;
   }
-  .hub-card__media {
-    transition: box-shadow 150ms ease;
-  }
-  .hub-card__media img {
+  .hub-card__media,
+  .hub-card__media img,
+  .hub-card__media video {
     transition: none;
   }
-  .hub__grid.is-swapped > li {
+  .hub__grid.is-swapped li {
     animation: hub-card-fade 160ms ease both;
     animation-delay: 0ms;
   }

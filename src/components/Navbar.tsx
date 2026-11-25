@@ -124,7 +124,7 @@ export default function Navbar() {
           aria-current={isAbout ? 'page' : undefined}
           className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-200 ease-[ease] font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
             isAbout 
-              ? 'text-white' 
+              ? 'text-white hover:text-white/75' 
               : 'text-zinc-700 hover:text-zinc-950'
           }`}
         >
@@ -135,7 +135,7 @@ export default function Navbar() {
           aria-current={location.pathname === '/works' ? 'page' : undefined}
           className={`relative z-10 min-h-[44px] py-2.5 transition-colors duration-200 ease-[ease] font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] flex items-center justify-center cursor-pointer ${
             !isAbout 
-              ? 'text-white'
+              ? 'text-white hover:text-white/75'
               : 'text-zinc-500 hover:text-zinc-900'
           }`}
         >

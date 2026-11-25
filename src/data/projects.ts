@@ -13,6 +13,9 @@ export interface ProjectItem {
   /** formato · duración del archivo original */
   year: string;
   image: string;
+  /** loop corto del video y su proporción */
+  loop?: string;
+  ratio?: '16/9' | '9/16';
   /** heredado: solo lo usan componentes viejos sin uso (AsciiWorld) */
   description?: string;
 }
@@ -39,7 +42,9 @@ export function workToProject(w: Work): ProjectItem {
     title: w.title,
     client: w.client,
     tag: w.kind,
-    year: `${w.format} · ${w.duration}`,
+    year: [w.format, w.duration].map((s) => s.trim()).filter(Boolean).join(' · '),
     image: w.image,
+    loop: w.loop,
+    ratio: w.ratio,
   };
 }

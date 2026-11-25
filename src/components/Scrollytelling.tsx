@@ -44,7 +44,10 @@ function getSteppedMaskPath(p: number, isMobile: boolean) {
 
   const aspect = typeof window !== "undefined" && window.innerHeight > 0 ? window.innerWidth / window.innerHeight : 16 / 9;
 
-  const t = lerp(isMobile ? 0.06 : 0.11, 0.0);   // Top border (11%)
+  // en mobile el borde de arriba deja lugar a la navbar (termina a ~76 px): antes
+  // la navbar tapaba el borde superior de la foto
+  const mobileTop = typeof window !== "undefined" && window.innerHeight > 0 ? Math.min(0.16, 88 / window.innerHeight) : 0.11;
+  const t = lerp(isMobile ? mobileTop : 0.11, 0.0);   // Top border (11%)
   const l = lerp(isMobile ? 0.04 : 0.05, 0.0);   // Left inset (5%)
   const r = lerp(isMobile ? 0.96 : 0.95, 1.0);   // Right inset (5%)
   const b = lerp(isMobile ? 0.94 : 0.89, 1.0);   // Bottom border (11%)
@@ -382,7 +385,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   return (
     <div 
       ref={containerRef} 
-      className={`w-full ${isZoomDisabled ? "relative bg-[#e8e9eb]" : "bg-black"}`} 
+      className={`w-full ${isZoomDisabled ? "relative bg-[#f2efe6]" : "bg-black"}`} 
       style={{ height: isZoomDisabled ? "100vh" : `${(INTRO_RANGE_VH + 1) * 100}vh` }}
     >
       {/* SVG ClipPath Definition for the Stepped Rounded Mask & Hero Text Cutout Mask */}

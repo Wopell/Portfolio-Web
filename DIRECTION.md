@@ -26,7 +26,7 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
 
 - Instrument Serif nunca por debajo de 24px (solo existe en 400 y es de trazo fino).
 - Nada por debajo de 14px. Tamaños en `rem` (respetan el tamaño de letra del navegador).
-- Excepciones congeladas: la regla del hero (Inter) y las etiquetas del planeta (Inter).
+- Excepción congelada: la regla del hero (Inter).
 - Fuera: JetBrains Mono, Caveat, Jost, Bodoni, Outfit, Silkscreen y cualquier otra.
 
 ## Color
@@ -34,10 +34,9 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
 | Rol | Hex | Dónde |
 |---|---|---|
 | Papel | `#f2efe6` | Fondo de todo el recorrido, marco de la intro |
-| Tinta | `#191510` | Texto, monitor, cierre, filtro activo, botón principal |
+| Tinta | `#191510` | Texto, cierre, filtro activo, botón principal |
 | Blanco | `#ffffff` | Hero, resplandor de la intro |
-| Acento único | `#2f6f6b` | Pieza activa, foco, hover del botón principal, selección |
-| Marca puntual (congelada) | `#7A2E4D` | Pines del planeta |
+| Acento único | `#2f6f6b` | Pieza activa, foco, hover del botón principal y de los círculos del planeta, selección |
 
 ## Layout
 
@@ -46,22 +45,39 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
   Al final, el resplandor blanco y /works en el mismo blanco.
 - `/works`, de corrido sobre el mismo papel:
   1. Hero (congelado).
-  2. Planeta (congelado en look y movimiento): sus 4 círculos filtran la grilla.
-  3. Trabajos: monitor con la pieza elegida + su título grande + «Ver proyecto»;
-     filtros «Todo · Animación · 3D · IA · Post»; grilla de 3 columnas (2 en tablet, 1 en mobile)
-     con miniaturas grandes. Hover muestra la pieza en el monitor; clic abre la ficha.
+  2. Planeta: el globo de puntos está congelado (look y giro). Va más abajo, con aire arriba y
+     abajo: ninguna órbita pasa por debajo del hero. Las órbitas no se dibujan enteras: detrás de
+     cada objeto queda un rastro punteado largo sobre su elipse real (151° los círculos, 108° los
+     objetos) que se desvanece; los puntos quedan fijos en la órbita, nunca tiemblan, y empiezan
+     8 px fuera del borde del objeto (no se ve de dónde nacen aunque el objeto esté detrás y
+     semitransparente). Delante del globo el rastro se ve encima; detrás, el disco lo tapa.
+     Cuatro círculos de trabajos, como lentes (aro de papel, filete de tinta), cada uno con su
+     plaquita en tinta con el nombre del filtro que abre (Animación · 3D · IA · Post); clic
+     filtra la grilla. En las otras cuatro órbitas, objetos de tinta: dos lunas, un satélite y un
+     planetoide con anillo. Cada 9–16 s un cometa cruza por detrás del globo.
+  2b. Agujero negro (transición, CSS 3D real): un piso de papel cuadriculado en isométrico, que se
+     funde con la página a lo lejos, con un pozo cuadrado sin ventanas (paredes en sombra y fondo
+     negro). Encima se lee CREATIVE en una línea. Atado al scroll: las letras caen una por una
+     dentro del pozo; la cámara gira hasta mirarlo de frente y entra en él (las paredes pasan en
+     perspectiva) hasta que el fondo ocupa toda la pantalla; ese fondo es una losa con canto que
+     bascula desde su borde de arriba hacia el fondo y debajo aparece la galería, que se aclara
+     mientras la losa se va. Con reduced-motion, el piso quieto con el pozo y la palabra.
+  3. Trabajos: filtros «Todo · Animación · 3D · IA · Post» y una galería masonry (3 columnas,
+     2 en tablet, 1 en mobile) con cada pieza en su formato real (16:9 o 9:16). Cada tarjeta
+     muestra el póster y un loop de 6 s sin audio exportado del video original
+     (public/works/loops). Clic abre la ficha, que muestra el loop en su formato.
   4. Clientes: una fila estática de 12 logos.
-  5. Cierre a sangre: el papel se funde en la imagen; «Gracias por mirar», email y redes.
-     Es el único lugar de contacto.
+  5. Cierre en tinta: el papel se funde en negro; solo «Gracias por mirar», email y redes.
+     Es el único lugar de contacto (además de «Sobre mí»).
+- `/about`: póster (nombre en Inter 800 + 200, una frase, anillos de tinta como piso) y los datos
+  del CV como anotaciones con barra negra en mucho espacio; aparecen al entrar en pantalla.
 - Una sola vista de detalle: la ficha (modal). Sin catálogo, sin carpetas en caja.
 - Sin eyebrows, sin numeraciones decorativas, sin notas a mano, sin estadísticas.
 
 ## Movimiento
 
-- Momentos: el resplandor de la intro, el planeta y el encendido del monitor. Nada más.
-- Sin autoplay. El monitor cambia cuando el usuario elige (hover sostenido 150 ms, foco o filtro);
-  el barrido de splats dura 0,9 s. Si se elige otra pieza a mitad de barrido, el actual termina
-  rápido y encadena la nueva (nada salta). Con Tab el monitor corta sin barrido.
+- Momentos: el resplandor de la intro, el planeta y el agujero negro. Nada más.
+- Los loops de la galería corren solo en pantalla, sin audio; con reduced-motion queda el póster.
 - Curvas (iguales en CSS y GSAP): entrar/salir `cubic-bezier(0.23, 1, 0.32, 1)` (`--arch-ease`,
   `EASE.ui`); moverse a la vista `cubic-bezier(0.77, 0, 0.175, 1)` (`EASE.move`); color `ease`.
   Nunca `ease-in` en la interfaz.
@@ -70,25 +86,24 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
   página al instante y su indicador se mueve en 250 ms; el loader de la intro se funde en 200 ms.
 - Hover (solo mouse): la miniatura escala 1.03 en 240 ms; botones suben 2px; el mail del cierre
   dibuja su subrayado. Press: 0.97
-  (miniatura 0.98). El título de la pieza cambia sin animar (acción frecuente).
+  (miniatura 0.98).
 - Al cambiar de filtro la grilla entra con 240 ms, escalonada 0 · 60 · 110 · 150 · 185 · 215 · 245 ·
   275 ms; nunca al cargar.
 - En motion (v12) nada de atajos x/y/scale en lo que se anima mientras la página carga o cambia
-  de ruta: strings de transform (WAAPI). El encendido del monitor también va por WAAPI.
+  de ruta: strings de transform (WAAPI).
 - `prefers-reduced-motion`: la intro no hace zoom (primer fotograma quieto en su marco, sin imán,
   sin parallax ni inercia): el scroll funde el texto y después el blanco, y /works arranca en ese
   blanco. En el resto, sin escalas ni desplazamientos; quedan los cambios de color y fundidos
-  cortos. Los círculos del planeta muestran su título sin crecer. El monitor no anima ni redibuja
-  si nada cambia.
-- Planeta: el hover de los círculos es solo con mouse (o foco de teclado); el título crece desde
-  el círculo en 150 ms.
+  cortos. En el planeta: objetos quietos, sin estelas ni cometa, y los círculos no crecen.
+- Planeta: el hover de los círculos es solo con mouse (o foco de teclado); el círculo crece 1.2
+  y su plaquita baja con él en 200 ms y se pinta con el acento en 150 ms.
 
 ## Nunca
 
 - Corporativo, recargado, stock.
 - Letra fina y chica: nada por debajo de 14px, serif nunca por debajo de 24px.
 - Más de una forma de llegar al mismo lugar o de abrir lo mismo.
-- Mostrar las mismas piezas en más de un lugar (además del monitor y la ficha).
+- Mostrar las mismas piezas en más de un lugar (además de la ficha).
 - Cortes en el recorrido: cajas, tarjetas con márgenes, numeraciones de sección.
 - Datos inventados presentados como reales.
 - Scroll que arrastra al usuario o que navega solo más de una vez.

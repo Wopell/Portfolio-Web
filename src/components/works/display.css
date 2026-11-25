@@ -1,5 +1,5 @@
 /**
- * display.css — el monitor de trabajos y la imagen final (SplatFinale).
+ * display.css — el cierre (Finale) y la fila de clientes.
  */
 
 .hub,
@@ -9,59 +9,13 @@
   --disp-hi: #ffffff;
 }
 
-/* ── monitor ─────────────────────────────────────────────────────────── */
-
-.disp__screen {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  border-radius: 16px;
-  overflow: hidden;
-  background: var(--disp-bg);
-  box-shadow:
-    inset 0 0 0 1px rgba(242, 239, 230, 0.1),
-    0 0 0 8px color-mix(in srgb, #f2efe6 7%, #191510),
-    0 0 0 9px rgba(242, 239, 230, 0.08),
-    0 40px 90px -30px rgba(25, 21, 16, 0.8);
-}
-
-.disp__canvas,
-.finale__canvas {
-  position: absolute !important;
-  inset: 0;
-}
-
-.disp__scan {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: repeating-linear-gradient(to bottom, rgba(25, 21, 16, 0.16) 0 1px, transparent 1px 3px);
-}
-
-.disp__vignette {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(25, 21, 16, 0.55) 100%);
-  box-shadow: inset 0 0 80px rgba(25, 21, 16, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-}
-
-.disp__open {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  cursor: pointer;
-  background: transparent;
-}
-
-/* ── imagen final (a sangre, el papel se funde en ella) ──────────────── */
+/* ── cierre: el papel se funde en tinta; solo texto ───────────────────── */
 
 .finale {
   position: relative;
   display: block;
-  height: min(100svh, 980px);
-  min-height: 620px;
+  height: min(88svh, 860px);
+  min-height: 560px;
   overflow: hidden;
   background: var(--disp-bg);
   color: var(--disp-ink);
@@ -75,14 +29,6 @@
   height: 22%;
   pointer-events: none;
   background: linear-gradient(to bottom, var(--arch-paper), rgba(242, 239, 230, 0));
-}
-
-.finale__fade {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(to bottom, transparent 40%, rgba(25, 21, 16, 0.92));
 }
 
 .finale__inner {
@@ -127,6 +73,8 @@
   margin-top: 20px;
   font-family: var(--arch-serif);
   font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.75rem);
+  max-width: 100%;
+  overflow-wrap: anywhere; /* un mail largo corta antes que salirse en 320 px */
   color: var(--disp-ink);
   transition: color 200ms ease;
 }
@@ -197,9 +145,12 @@
   outline-offset: 4px;
 }
 
-.finale__rule {
+/* .arch-rule (works-sections.css) pone tinta oscura: sobre el cierre oscuro no se
+   leía. Con dos clases gana el color claro. */
+.arch-rule.finale__rule {
   margin-top: 36px;
   color: var(--disp-ink);
+  opacity: 0.85;
 }
 
 .finale__rule .arch-rule__line {

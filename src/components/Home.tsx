@@ -123,7 +123,7 @@ export default function Home({ activeTab = "works" }: HomeProps) {
   }, []);
 
   return (
-    <div className={`w-full min-h-screen relative ${isAbout ? 'bg-[#e8e9eb] text-black' : 'bg-black text-white'}`}>
+    <div className={`w-full min-h-screen relative ${isAbout ? 'bg-[#f2efe6] text-black' : 'bg-black text-white'}`}>
       {/* Scrollytelling Canvas Section with Spring Physics and Dynamic Stepped Rounded Mask */}
       <Scrollytelling 
         scrollY={scrollY}
@@ -165,7 +165,7 @@ export default function Home({ activeTab = "works" }: HomeProps) {
 
       {/* Mode "about": Render About section directly below landing frame */}
       {isAbout && (
-        <div className="relative z-20 bg-[#e8e9eb] text-black min-h-screen">
+        <div className="relative z-20 bg-[#f2efe6] text-black min-h-screen">
           <About />
         </div>
       )}

@@ -1,210 +1,316 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  PlanetHero,
-  ORBIT_LABELS,
-  CONFIG,
-  projectOrbit,
-  type PlanetHeroHandle,
-  type OrbitItem,
-  type OrbitFramePos,
-} from '../PlanetHero';
+import { PlanetHero, ORBIT_LABELS, CONFIG, type PlanetHeroHandle, type OrbitFramePos, type OrbitItem } from '../PlanetHero';
 
 /**
- * PlanetSection — Wrapper de PlanetHero (planeta como sección propia).
- * PlanetHero solo expone `onOrbitFrame` (callback por frame con las 8 posiciones).
+ * PlanetSection — el planeta como sección propia, con aire arriba y abajo para que
+ * ninguna órbita pase por debajo del hero.
  *
- * 1. Transición hero→papel en UNA sola curva (overlay blanco que se desvanece sobre el papel).
- * 2. Papel cuadriculado con bordes laterales/inferior difuminados.
- * 3. Halo suave detrás del globo.
- * 4. Marcas decorativas tenues.
- * 5. Trayectorias dinámicas: trazo continuo de cada órbita, anillo que sigue al satélite
- *    y estela que se desvanece en los 4 círculos. Un solo rAF (el de PlanetHero).
+ * Las órbitas no están dibujadas enteras: detrás de cada objeto queda un rastro
+ * punteado sobre su elipse real, que se va desvaneciendo. Los puntos están fijos en
+ * la órbita (el objeto los va dejando) y arrancan a unos px del borde del objeto, así
+ * no se ve de dónde nacen aunque el objeto esté detrás y semitransparente. Lo que está
+ * delante del globo se dibuja encima del globo; lo que está detrás, debajo (el disco
+ * lo tapa). Cada tanto un cometa cruza por detrás. Un solo rAF: el de PlanetHero.
  */
+
+const INK = '25, 21, 16';
+const N_DECOR = ORBIT_LABELS.length; // órbitas 0..3: objetos decorativos
+const N_ITEMS = N_DECOR + CONFIG.circleOrbits.length; // 4..7: círculos de trabajos
+const ORBITS: OrbitItem[] = [...ORBIT_LABELS, ...CONFIG.circleOrbits];
+
+/* rastro punteado */
+const isCircle = (i: number) => i >= N_DECOR;
+const TRAIL_SPAN = (i: number) => (isCircle(i) ? 0.42 : 0.3) * Math.PI * 2; // 151° círculos, 108° objetos
+const DOT_STEP_PX = (i: number) => (isCircle(i) ? 9 : 10); // separación entre puntos sobre la órbita
+const DOT_SIZE = (i: number) => (isCircle(i) ? 2.6 : 2); // diámetro del punto
+const TRAIL_ALPHA = (i: number) => (isCircle(i) ? 0.55 : 0.4);
+const HEAD_GAP = 8; // px libres entre el borde del objeto y el primer punto
+const BUCKETS = 8; // tramos de opacidad, del más viejo al más nuevo
+
+/* punto de una órbita en el ángulo t (misma cuenta que projectOrbit), en px de pantalla */
+const orbitPoint = (o: OrbitItem, t: number, R: number, hx: number) => {
+  const r = o.radiusMultiplier * R;
+  const x0 = r * Math.cos(t);
+  const y0 = r * Math.sin(t);
+  const y1 = y0 * Math.cos(o.tiltX);
+  const z = -y0 * Math.sin(o.tiltX);
+  const cz = Math.cos(o.tiltZ);
+  const sz = Math.sin(o.tiltZ);
+  return { x: (x0 * cz - y1 * sz) * hx, y: -(x0 * sz + y1 * cz), z };
+};
+
+/* cometa: recorridos en radios del planeta (x a la derecha, y hacia abajo) */
+// (el contenedor del planeta recorta a ±1.85 radios en desktop: el cometa nace y
+//  muere adentro, con un fundido, en vez de entrar cortado por el borde)
+const COMET_PATHS = [
+  { from: [-1.8, -1.2], to: [1.8, 0.1] },
+  { from: [1.8, -0.95], to: [-1.8, 0.4] },
+  { from: [-1.75, 1.15], to: [1.75, -0.3] },
+];
+const COMET_MS = 1300;
+const COMET_GAP = () => 9000 + Math.random() * 7000;
 
 const INK_MARK = '#191510';
 
-const TRAJ_SAMPLES = 160;
-const TRAJ_STROKE = 'rgba(25, 21, 16, 0.2)';
-const TRAJ_STROKE_FAINT = 'rgba(25, 21, 16, 0.08)';
-const RING_STROKE = '#2F6F6B';
-const WAKE_STROKE = '25, 21, 16';
-const WAKE_FRAMES = 48; // ~0.8 s a 60 fps
-const WAKE_SEGMENTS = 8;
-const N_LABELS = ORBIT_LABELS.length;
-const N_ORBITS = N_LABELS + CONFIG.circleOrbits.length;
-const N_CIRCLES = N_ORBITS - N_LABELS;
-const CIRCLE_RADIUS_DESKTOP = 45; // w-[90px] en PlanetHero (md+)
-const LABEL_RING_RADIUS = 5;
+const MarkPlus: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg width={12} height={12} viewBox="0 0 12 12" fill="none" aria-hidden="true" className={className}>
+    <path d="M6 1v10M1 6h10" stroke={INK_MARK} strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const MarkX: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg width={11} height={11} viewBox="0 0 12 12" fill="none" aria-hidden="true" className={className}>
+    <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke={INK_MARK} strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+
+const MarkStar: React.FC<{ className?: string }> = ({ className = '' }) => (
+  <svg width={14} height={14} viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className}>
+    <path d="M8 2v12M2 8h12M3.8 3.8l8.4 8.4M3.8 12.2l8.4-8.4" stroke={INK_MARK} strokeWidth="1.1" strokeLinecap="round" />
+  </svg>
+);
 
 /* Blanco del hero → papel en una sola curva (easeOutCubic muestreada; sin escalones). */
 const HERO_FADE = `linear-gradient(to bottom, ${[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
   .map((t) => `rgba(255,255,255,${(1 - (1 - (1 - t) ** 3)).toFixed(3)}) ${(t * 100).toFixed(0)}%`)
   .join(', ')})`;
 
-type TrajGeom = { w: number; h: number; cx: number; cy: number; paths: { id: string; d: string }[] };
+const prefersReduced = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const buildTrajectories = (w: number, h: number, cx: number, cy: number, radius: number): TrajGeom => {
-  const orbits: OrbitItem[] = [...ORBIT_LABELS, ...CONFIG.circleOrbits];
-  const paths: TrajGeom['paths'] = [];
-  for (const orbit of orbits) {
-    let d = '';
-    // projectOrbit toma t en SEGUNDOS: se barre un período completo para cerrar la elipse.
-    for (let k = 0; k < TRAJ_SAMPLES; k++) {
-      const p = projectOrbit(orbit, (k / TRAJ_SAMPLES) * orbit.period, radius);
-      d += `${k === 0 ? 'M' : 'L'}${(cx + p.x).toFixed(1)} ${(cy - p.y).toFixed(1)}`;
-    }
-    paths.push({ id: orbit.id ?? 'orbit', d: `${d}Z` });
-  }
-  return { w, h, cx, cy, paths };
-};
-
-const MarkPlus: React.FC<{ size?: number; className?: string; style?: React.CSSProperties }> = ({
-  size = 12,
-  className = '',
-  style,
-}) => (
-  <svg width={size} height={size} viewBox="0 0 12 12" fill="none" aria-hidden="true" className={className} style={style}>
-    <path d="M6 1v10M1 6h10" stroke={INK_MARK} strokeWidth="1.2" strokeLinecap="round" />
-  </svg>
-);
-
-const MarkX: React.FC<{ size?: number; className?: string; style?: React.CSSProperties }> = ({
-  size = 11,
-  className = '',
-  style,
-}) => (
-  <svg width={size} height={size} viewBox="0 0 12 12" fill="none" aria-hidden="true" className={className} style={style}>
-    <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" stroke={INK_MARK} strokeWidth="1.2" strokeLinecap="round" />
-  </svg>
-);
-
-const MarkStar: React.FC<{ size?: number; className?: string; style?: React.CSSProperties }> = ({
-  size = 14,
-  className = '',
-  style,
-}) => (
-  <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" className={className} style={style}>
-    <path d="M8 2v12M2 8h12M3.8 3.8l8.4 8.4M3.8 12.2l8.4-8.4" stroke={INK_MARK} strokeWidth="1.1" strokeLinecap="round" />
-  </svg>
-);
+type Layer = 0 | 1; // 0 = detrás del globo, 1 = delante
 
 export const PlanetSection: React.FC = () => {
   const heroRef = useRef<PlanetHeroHandle>(null);
-  const canvasWrapRef = useRef<HTMLDivElement>(null);
-  const [traj, setTraj] = useState<TrajGeom | null>(null);
+  const [reduced] = useState(prefersReduced);
 
-  // Refs DOM de la capa dinámica (se escriben directo, sin re-render por frame)
-  const ringRefs = useRef<(SVGCircleElement | null)[]>([]);
-  const wakeRefs = useRef<(SVGPathElement | null)[]>([]); // [circleIdx * WAKE_SEGMENTS + seg]
-  const histRef = useRef<Float32Array>(new Float32Array(N_CIRCLES * WAKE_FRAMES * 2));
-  const histLenRef = useRef(0);
-  const histHeadRef = useRef(0);
-  // Centro de anclaje de los satélites (centro del contenedor de PlanetHero) en coords del wrap
-  const centerRef = useRef({ x: 0, y: 0 });
+  // tamaño del contenedor del planeta: las capas centran su origen ahí
+  const [box, setBox] = useState({ w: 0, h: 0 });
+  const boxRef = useRef(box);
+  boxRef.current = box;
 
-  const computeTrajectories = useCallback(() => {
-    const wrap = canvasWrapRef.current;
-    const anchor = wrap?.querySelector<HTMLElement>('[data-planet-canvas-wrap]');
-    const metrics = heroRef.current?.getPlanetMetrics?.();
-    if (!wrap || !anchor || !metrics) return;
-    const ar = anchor.getBoundingClientRect();
-    const wr = wrap.getBoundingClientRect();
-    const cx = ar.left - wr.left + ar.width / 2;
-    const cy = ar.top - wr.top + ar.height / 2;
-    centerRef.current = { x: cx, y: cy };
-    // Al cambiar el tamaño, la estela vieja quedaría en coordenadas viejas: se reinicia.
-    histLenRef.current = 0;
-    setTraj(buildTrajectories(Math.round(wr.width), Math.round(wr.height), cx, cy, metrics.radius));
-  }, []);
+  // rastros: grupo por [item][layer] (lleva el parallax) y trazos por [item][bucket][layer]
+  const groupRefs = useRef<(SVGGElement | null)[]>([]);
+  const trailRefs = useRef<(SVGPathElement | null)[]>([]);
+  // último punto más nuevo dibujado por objeto (solo se rearma cuando cambia)
+  const lastDot = useRef<number[]>(Array(N_ITEMS).fill(NaN));
+  const lastPara = useRef<string[]>(Array(N_ITEMS).fill(''));
+  // diámetro en reposo de cada objeto (para dejar libre su borde)
+  const sizes = useRef<number[]>(Array(N_ITEMS).fill(0));
+  const dirty = useRef(true);
 
-  // Callback por frame de PlanetHero: mueve anillos y estela. Cero React state.
+  // cometa
+  const cometLine = useRef<SVGLineElement>(null);
+  const cometHead = useRef<SVGCircleElement>(null);
+  const cometGrad = useRef<SVGLinearGradientElement>(null);
+  const comet = useRef({ start: 0, next: 0, path: 0 });
+
   const onOrbitFrame = useCallback((pos: OrbitFramePos[]) => {
-    const { x: cx, y: cy } = centerRef.current;
-    const rings = ringRefs.current;
-    for (let i = 0; i < N_ORBITS; i++) {
-      const r = rings[i];
+    const now = performance.now();
+    const R = heroRef.current?.getPlanetMetrics().radius ?? 0;
+    if (!R) return;
+    const force = dirty.current;
+    dirty.current = false;
+
+    // 1. rastros punteados
+    const segs: string[] = Array(BUCKETS * 2);
+    for (let i = 0; i < N_ITEMS; i++) {
       const p = pos[i];
-      if (!r || !p) continue;
-      const front = (p.zNorm + 1) / 2;
-      r.setAttribute('cx', (cx + p.x).toFixed(1));
-      r.setAttribute('cy', (cy + p.y).toFixed(1));
-      if (i >= N_LABELS) r.setAttribute('r', (CIRCLE_RADIUS_DESKTOP * p.scale + 7).toFixed(1));
-      r.setAttribute('opacity', (0.15 + 0.85 * front).toFixed(2));
-    }
-    // Historial circular de los 4 círculos
-    const hist = histRef.current;
-    const head = histHeadRef.current;
-    const nC = N_CIRCLES;
-    for (let c = 0; c < nC; c++) {
-      const p = pos[N_LABELS + c];
-      const o = (c * WAKE_FRAMES + head) * 2;
-      hist[o] = cx + p.x;
-      hist[o + 1] = cy + p.y;
-    }
-    histHeadRef.current = (head + 1) % WAKE_FRAMES;
-    if (histLenRef.current < WAKE_FRAMES) histLenRef.current++;
-    const len = histLenRef.current;
-    const per = Math.max(2, Math.floor(len / WAKE_SEGMENTS));
-    for (let c = 0; c < nC; c++) {
-      for (let sgm = 0; sgm < WAKE_SEGMENTS; sgm++) {
-        const el = wakeRefs.current[c * WAKE_SEGMENTS + sgm];
-        if (!el) continue;
-        // sgm 0 = tramo más viejo, WAKE_SEGMENTS-1 = más reciente
-        const from = sgm * per;
-        const to = Math.min(len - 1, from + per);
-        if (from >= len - 1) { el.setAttribute('d', ''); continue; }
-        let d = '';
-        for (let k = from; k <= to; k++) {
-          // k=0 es el más viejo: índice circular
-          const idx = (head - len + 1 + k + WAKE_FRAMES * 2) % WAKE_FRAMES;
-          const o = (c * WAKE_FRAMES + idx) * 2;
-          d += `${k === from ? 'M' : 'L'}${hist[o].toFixed(1)} ${hist[o + 1].toFixed(1)}`;
-        }
-        el.setAttribute('d', d);
+      const o = ORBITS[i];
+
+      // el parallax del cursor mueve el rastro junto con su objeto
+      const para = `translate(${p.paraX.toFixed(1)} ${p.paraY.toFixed(1)})`;
+      if (para !== lastPara.current[i]) {
+        lastPara.current[i] = para;
+        groupRefs.current[i * 2]?.setAttribute('transform', para);
+        groupRefs.current[i * 2 + 1]?.setAttribute('transform', para);
+      }
+
+      // los puntos están en ángulos fijos de la órbita: se rearma solo al pasar al siguiente
+      const step = DOT_STEP_PX(i) / (o.radiusMultiplier * R);
+      const dir = o.direction >= 0 ? 1 : -1;
+      const newest = dir > 0 ? Math.floor(p.angle / step) : Math.ceil(p.angle / step);
+      if (!force && newest === lastDot.current[i]) continue;
+      lastDot.current[i] = newest;
+
+      for (let s = 0; s < segs.length; s++) segs[s] = '';
+      const span = TRAIL_SPAN(i);
+      const n = Math.floor(span / step);
+      // centro del objeto sin parallax y radio libre alrededor
+      const ox = p.x - p.paraX;
+      const oy = p.y - p.paraY;
+      const free = (sizes.current[i] * p.scale) / 2 + HEAD_GAP;
+      const free2 = free * free;
+      for (let s = 0; s <= n; s++) {
+        const t = (newest - dir * s) * step;
+        const age = Math.abs(p.angle - t) / span; // 0 = recién dejado, 1 = el más viejo
+        if (age > 1) break;
+        const q = orbitPoint(o, t, R, p.hx);
+        const dx = q.x - ox;
+        const dy = q.y - oy;
+        if (dx * dx + dy * dy < free2) continue;
+        const b = Math.min(BUCKETS - 1, Math.floor((1 - age) * BUCKETS));
+        const layer: Layer = q.z >= 0 ? 1 : 0;
+        segs[b * 2 + layer] += `M${q.x.toFixed(1)} ${q.y.toFixed(1)}h0`;
+      }
+      for (let b = 0; b < BUCKETS; b++) {
+        const base = (i * BUCKETS + b) * 2;
+        trailRefs.current[base]?.setAttribute('d', segs[b * 2]);
+        trailRefs.current[base + 1]?.setAttribute('d', segs[b * 2 + 1]);
       }
     }
+
+    // 2. cometa: cruza por detrás del globo cada 9–16 s
+    const line = cometLine.current;
+    const dot = cometHead.current;
+    const grad = cometGrad.current;
+    if (!line || !dot || !grad) return;
+    const c = comet.current;
+    if (!c.next) c.next = now + 3500;
+    if (!c.start && now >= c.next) {
+      c.start = now;
+      c.path = (c.path + 1) % COMET_PATHS.length;
+    }
+    if (!c.start) return;
+    const t = (now - c.start) / COMET_MS;
+    if (t >= 1) {
+      c.start = 0;
+      c.next = now + COMET_GAP();
+      line.setAttribute('opacity', '0');
+      dot.setAttribute('opacity', '0');
+      return;
+    }
+    const { from, to } = COMET_PATHS[c.path];
+    const x = (from[0] + (to[0] - from[0]) * t) * R;
+    const y = (from[1] + (to[1] - from[1]) * t) * R;
+    const dx = to[0] - from[0];
+    const dy = to[1] - from[1];
+    const m = Math.hypot(dx, dy);
+    const tail = 0.7 * R;
+    const tx = x - (dx / m) * tail;
+    const ty = y - (dy / m) * tail;
+    const op = Math.min(1, t / 0.12, (1 - t) / 0.25).toFixed(2);
+    line.setAttribute('x1', tx.toFixed(1));
+    line.setAttribute('y1', ty.toFixed(1));
+    line.setAttribute('x2', x.toFixed(1));
+    line.setAttribute('y2', y.toFixed(1));
+    grad.setAttribute('x1', tx.toFixed(1));
+    grad.setAttribute('y1', ty.toFixed(1));
+    grad.setAttribute('x2', x.toFixed(1));
+    grad.setAttribute('y2', y.toFixed(1));
+    line.setAttribute('opacity', op);
+    dot.setAttribute('cx', x.toFixed(1));
+    dot.setAttribute('cy', y.toFixed(1));
+    dot.setAttribute('opacity', op);
+  }, []);
+
+  // tamaño del contenedor del planeta (las capas viven adentro) y de cada objeto
+  const measure = useCallback(() => {
+    const el = document.querySelector<HTMLElement>('[data-section="planet"] [data-planet-canvas-wrap]');
+    if (!el) return;
+    const items = [...el.querySelectorAll<HTMLElement>(':scope > .absolute.will-change-transform')];
+    items.forEach((it, i) => {
+      if (i >= N_ITEMS) return;
+      // círculo: el diámetro de la lente (sin la plaquita); objeto: su lado mayor
+      // (offsetWidth no incluye la escala de profundidad: esa se aplica en cada cuadro)
+      const lens = isCircle(i) ? it.querySelector<HTMLElement>('div') : it;
+      sizes.current[i] = lens ? Math.max(lens.offsetWidth, lens.offsetHeight) : 0;
+    });
+    dirty.current = true;
+    const w = el.clientWidth;
+    const h = el.clientHeight;
+    if (w !== boxRef.current.w || h !== boxRef.current.h) setBox({ w, h });
   }, []);
 
   useEffect(() => {
-    computeTrajectories();
-    const wrap = canvasWrapRef.current;
-    if (!wrap || typeof ResizeObserver === 'undefined') return;
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const el = document.querySelector<HTMLElement>('[data-section="planet"] [data-planet-canvas-wrap]');
     let raf = 0;
-    const schedule = () => {
+    const ro = new ResizeObserver(() => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(computeTrajectories);
-    };
-    const ro = new ResizeObserver(schedule);
-    ro.observe(wrap);
-    window.addEventListener('resize', schedule);
+      raf = requestAnimationFrame(measure);
+    });
+    if (el) ro.observe(el);
     return () => {
       ro.disconnect();
-      window.removeEventListener('resize', schedule);
       cancelAnimationFrame(raf);
     };
-  }, [computeTrajectories]);
+  }, [measure]);
+
+  // al re-renderizar las capas, los trazos nuevos arrancan vacíos: rearmar todo
+  useEffect(() => {
+    dirty.current = true;
+  }, [box]);
+
+  const center = `translate(${(box.w / 2).toFixed(1)} ${(box.h / 2).toFixed(1)})`;
+
+  const trails = (layer: Layer) =>
+    Array.from({ length: N_ITEMS }, (_, i) => (
+      <g
+        key={`g-${i}`}
+        ref={(el) => {
+          groupRefs.current[i * 2 + layer] = el;
+        }}
+      >
+        {Array.from({ length: BUCKETS }, (_, b) => {
+          const a = ((b + 1) / BUCKETS) ** 1.3;
+          return (
+            <path
+              key={`t-${b}`}
+              ref={(el) => {
+                trailRefs.current[(i * BUCKETS + b) * 2 + layer] = el;
+              }}
+              fill="none"
+              stroke={`rgba(${INK}, ${(TRAIL_ALPHA(i) * a).toFixed(3)})`}
+              strokeWidth={(DOT_SIZE(i) * (0.7 + 0.3 * a)).toFixed(2)}
+              strokeLinecap="round"
+            />
+          );
+        })}
+      </g>
+    ));
+
+  const under =
+    !reduced && box.w > 0 ? (
+      <svg className="absolute inset-0" width={box.w} height={box.h} style={{ overflow: 'visible' }}>
+        <defs>
+          <linearGradient ref={cometGrad} id="planet-comet" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stopColor="#191510" stopOpacity="0" />
+            <stop offset="1" stopColor="#191510" stopOpacity="0.8" />
+          </linearGradient>
+        </defs>
+        <g transform={center}>
+          <line ref={cometLine} stroke="url(#planet-comet)" strokeWidth="1.8" strokeLinecap="round" opacity="0" />
+          <circle ref={cometHead} r="2.8" fill="#191510" opacity="0" />
+          {trails(0)}
+        </g>
+      </svg>
+    ) : null;
+
+  const over =
+    !reduced && box.w > 0 ? (
+      <svg className="absolute inset-0" width={box.w} height={box.h} style={{ overflow: 'visible' }}>
+        <g transform={center}>{trails(1)}</g>
+      </svg>
+    ) : null;
 
   return (
     <section
       data-section="planet"
       aria-label="Presentación interactiva del portafolio"
-      className="relative w-full overflow-visible pt-[14px] sm:pt-[92px] lg:pt-[100px]"
+      className="relative w-full overflow-visible pt-[128px] pb-[24px] sm:pt-[200px] sm:pb-[56px] lg:pt-[250px] lg:pb-[96px]"
       style={{
         isolation: 'isolate',
         zIndex: 'var(--z-planet, 10)',
       }}
     >
       {/* Neutraliza los márgenes verticales del wrapper interno de PlanetHero (mt-6/sm:mt-8/md:mt-4/lg:mt-10)
-          para controlar el aire hero→globo desde aquí, vía data-attribute estable (agregado en PlanetHero.tsx) */}
-      <style>{`[data-section="planet"] [data-planet-canvas-wrap] { margin-top: 0; }
-@media (prefers-reduced-motion: reduce) { [data-section="planet"] .orbit-traj-svg { display: none; } }
-@media (max-width: 639px) { [data-section="planet"] .orbit-traj-svg { display: none; } }`}</style>
+          para controlar el aire hero→globo desde aquí, vía data-attribute estable */}
+      <style>{`[data-section="planet"] [data-planet-canvas-wrap] { margin-top: 0; }`}</style>
+
       {/* 1. Papel cuadriculado con bordes difuminados en los 4 lados (sin cortes duros) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none select-none"
-        style={{ zIndex: 0 }}
-      >
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none" style={{ zIndex: 0 }}>
         <div
           className="w-full h-full"
           style={{
@@ -222,122 +328,45 @@ export const PlanetSection: React.FC = () => {
         </div>
       </div>
 
-      {/* 1b. Transición hero→papel: el blanco del hero continúa y se disuelve sobre el papel
-             en una sola curva (sin banda ni escalón en el borde del hero). */}
+      {/* 1b. Transición hero→papel: el blanco del hero continúa y se disuelve sobre el papel */}
       <div
         aria-hidden="true"
         className="absolute inset-x-0 top-0 pointer-events-none select-none h-[22svh] sm:h-[34svh]"
         style={{ background: HERO_FADE, zIndex: 0 }}
       />
 
-      {/* 2. Halo suave detrás del globo (~130% del diámetro: 910px desktop · 68.5vw tablet · 97vw mobile;
-             el centro del globo queda pt/2 por debajo del centro de la sección) */}
-      <div
-        aria-hidden="true"
-        className="absolute left-1/2 top-[calc(50%+27px)] sm:top-[calc(50%+46px)] xl:top-[calc(50%+50px)] -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none rounded-full w-[97vw] h-[97vw] sm:w-[68.5vw] sm:h-[68.5vw] xl:w-[910px] xl:h-[910px]"
-        style={{
-          background:
-            'radial-gradient(circle, rgba(255, 255, 255, 0.72) 0%, rgba(254, 251, 240, 0.42) 42%, rgba(239, 236, 225, 0) 72%)',
-          zIndex: 1,
-        }}
-      />
-
-      {/* 3. Marcas decorativas tenues perimetrales (fuera del área del globo y de las órbitas) */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 pointer-events-none select-none overflow-hidden"
-        style={{ zIndex: 2 }}
-      >
-        {/* Flanco izquierdo (fuera del alcance orbital: 1.70×radio desde el centro) */}
-        <MarkStar className="hidden md:block absolute left-[8%] top-[10%] opacity-35" />
-        <MarkPlus className="hidden md:block absolute left-[18%] top-[18%] opacity-35" />
-        <MarkX className="hidden md:block absolute left-[12%] top-[38%] opacity-30" />
+      {/* 2. Marcas tenues perimetrales (fuera del alcance de las órbitas) */}
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none select-none overflow-hidden" style={{ zIndex: 2 }}>
+        <MarkStar className="hidden md:block absolute left-[8%] top-[18%] opacity-35" />
+        <MarkPlus className="hidden md:block absolute left-[18%] top-[24%] opacity-35" />
+        <MarkX className="hidden md:block absolute left-[12%] top-[44%] opacity-30" />
         <MarkPlus className="hidden sm:block absolute left-[9%] bottom-[22%] opacity-35" />
-
-        {/* Centro inferior (bajo el disco, fuera de órbitas) */}
-        <MarkX className="hidden lg:block absolute left-[30%] bottom-[2%] opacity-35" />
-
-        {/* Flanco derecho */}
-        <MarkPlus className="hidden sm:block absolute right-[14%] top-[12%] opacity-35" />
-        <MarkX className="hidden md:block absolute right-[16%] top-[22%] opacity-30" />
-        <span
-          className="hidden md:inline-flex absolute right-[4%] top-[38%] gap-1.5 opacity-35"
-        >
+        <MarkX className="hidden lg:block absolute left-[30%] bottom-[4%] opacity-35" />
+        <MarkPlus className="hidden sm:block absolute right-[14%] top-[20%] opacity-35" />
+        <MarkX className="hidden md:block absolute right-[16%] top-[30%] opacity-30" />
+        <span className="hidden md:inline-flex absolute right-[4%] top-[44%] gap-1.5 opacity-35">
           <span className="w-1 h-1 rounded-full bg-[#191510]" />
           <span className="w-1 h-1 rounded-full bg-[#191510]" />
         </span>
-        <span
-          className="hidden sm:inline-block absolute right-[7%] bottom-[16%] w-1 h-1 rounded-full bg-[#191510] opacity-35"
-        />
+        <span className="hidden sm:inline-block absolute right-[7%] bottom-[16%] w-1 h-1 rounded-full bg-[#191510] opacity-35" />
       </div>
 
-      {/* 4. Planeta con órbitas (PlanetHero intacto) */}
+      {/* 3. Planeta (el globo no se toca) */}
       <div
-        ref={canvasWrapRef}
         className="relative w-full max-w-[1280px] mx-auto px-2 sm:px-4 overflow-visible"
         style={{ isolation: 'isolate', zIndex: 'var(--z-planet, 10)' }}
       >
-        {/* 4a. Trayectorias orbitales estáticas (8 elipses + 3 nodos en anillo).
-            Debajo del canvas: el disco crema del planeta tapa el tramo trasero.
-            En prefers-reduced-motion los elementos usan posiciones fijas ajenas
-            a las órbitas → la capa se oculta para no mostrar un trazado falso.
-            En <640px la capa se oculta (decisión de Claude): PlanetHero comprime
-            y clampa la X de los elementos, el trazado no coincidiría (deuda:
-            órbitas mobile, junto al apiñamiento de labels). */}
-        {traj && (
-          <svg
-            aria-hidden="true"
-            className="absolute left-0 top-0 pointer-events-none select-none orbit-traj-svg"
-            width={traj.w}
-            height={traj.h}
-            style={{ zIndex: 3, overflow: 'visible' }}
-          >
-            {traj.paths.map((p, i) => (
-              <path
-                key={p.id}
-                data-orbit-path={p.id}
-                d={p.d}
-                fill="none"
-                stroke={i < N_LABELS ? TRAJ_STROKE_FAINT : TRAJ_STROKE}
-                strokeWidth="1"
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
-            {Array.from({ length: N_CIRCLES * WAKE_SEGMENTS }, (_, i) => {
-              const seg = i % WAKE_SEGMENTS; // 0 = más viejo
-              const a = ((seg + 1) / WAKE_SEGMENTS) ** 1.6;
-              return (
-                <path
-                  key={`wake-${i}`}
-                  ref={(el) => {
-                    wakeRefs.current[i] = el;
-                  }}
-                  fill="none"
-                  stroke={`rgba(${WAKE_STROKE}, ${(0.55 * a).toFixed(3)})`}
-                  strokeWidth={(0.6 + 1.6 * a).toFixed(2)}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              );
-            })}
-            {Array.from({ length: N_ORBITS }, (_, i) => (
-              <circle
-                key={`ring-${i}`}
-                ref={(el) => {
-                  ringRefs.current[i] = el;
-                }}
-                cx={-100}
-                cy={-100}
-                r={i < N_LABELS ? LABEL_RING_RADIUS : CIRCLE_RADIUS_DESKTOP + 7}
-                fill="none"
-                stroke={RING_STROKE}
-                strokeWidth="1"
-                opacity={0}
-              />
-            ))}
-          </svg>
-        )}
-        <PlanetHero ref={heroRef} onOrbitFrame={onOrbitFrame} />
+        {/* halo suave detrás del globo, centrado en el contenedor del planeta (sin su margen inferior) */}
+        <div
+          aria-hidden="true"
+          className="absolute left-1/2 top-[calc(50%-40px)] md:top-[calc(50%-56px)] -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none rounded-full w-[97vw] h-[97vw] sm:w-[68.5vw] sm:h-[68.5vw] xl:w-[910px] xl:h-[910px]"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(255, 255, 255, 0.72) 0%, rgba(254, 251, 240, 0.42) 42%, rgba(239, 236, 225, 0) 72%)',
+            zIndex: 0,
+          }}
+        />
+        <PlanetHero ref={heroRef} onOrbitFrame={onOrbitFrame} under={under} over={over} />
       </div>
     </section>
   );

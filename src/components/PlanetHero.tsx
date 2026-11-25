@@ -3,6 +3,7 @@ import * as topojson from 'topojson-client';
 import { geoEquirectangular, geoPath } from 'd3-geo';
 import landTopology from 'world-atlas/land-110m.json';
 import { WORKS } from '../data/works.js';
+import { FILTERS } from '../data/display-works';
 
 /**
  * =========================================================================
@@ -218,11 +219,54 @@ export interface OrbitFramePos {
   y: number;
   zNorm: number;
   scale: number;
+  /** ángulo actual sobre la órbita (rad), para dibujar la estela sobre la elipse */
+  angle: number;
+  /** factor horizontal (mobile comprime la X) y parallax del cursor aplicados al objeto */
+  hx: number;
+  paraX: number;
+  paraY: number;
 }
 
 export interface PlanetHeroProps {
   onOrbitFrame?: (positions: OrbitFramePos[]) => void;
+  /** capa entre los objetos de atrás y el globo (el disco la tapa) */
+  under?: React.ReactNode;
+  /** capa entre el globo y los objetos del frente */
+  over?: React.ReactNode;
 }
+
+/* nombre de cada círculo: el mismo del filtro de la galería que abre */
+const CATEGORY_NAME: Record<string, string> = Object.fromEntries(
+  FILTERS.filter((f) => 'planet' in f).map((f) => [(f as { planet: string }).planet, f.label])
+);
+
+/* objetos decorativos en las órbitas libres (antes eran etiquetas sueltas que
+   repetían las categorías de los círculos): dos lunas, un satélite y un planetoide */
+const DecorGlyph: React.FC<{ kind: number }> = ({ kind }) => {
+  if (kind === 0) return <span className="block w-[13px] h-[13px] md:w-[16px] md:h-[16px] rounded-full bg-[#191510]" />;
+  if (kind === 1)
+    return (
+      <svg width="42" height="18" viewBox="0 0 42 18" fill="none" className="block w-[46px] h-auto md:w-[60px]">
+        <rect x="1" y="5" width="13" height="8" fill="#f2efe6" stroke="#191510" strokeWidth="1.2" />
+        <path d="M5.3 5v8M9.6 5v8" stroke="#191510" strokeWidth="0.8" />
+        <path d="M14 9h3.5M24.5 9H28" stroke="#191510" strokeWidth="1.2" />
+        <rect x="17.5" y="4.5" width="7" height="9" rx="1" fill="#191510" />
+        <rect x="28" y="5" width="13" height="8" fill="#f2efe6" stroke="#191510" strokeWidth="1.2" />
+        <path d="M32.3 5v8M36.6 5v8" stroke="#191510" strokeWidth="0.8" />
+        <path d="M21 4.5V1.5" stroke="#191510" strokeWidth="1" />
+        <circle cx="21" cy="1.4" r="1.1" fill="#191510" />
+      </svg>
+    );
+  if (kind === 2)
+    return (
+      <svg width="36" height="20" viewBox="0 0 36 20" fill="none" className="block w-[40px] h-auto md:w-[52px]">
+        <path d="M4.2 13.6C2 15.3 1.6 16.7 3 17.3c2.6 1.1 10.6-1 17.9-4.8 7.3-3.8 12.2-8.1 11-9.5-.6-.7-2.2-.6-4.6.2" stroke="#191510" strokeWidth="1.1" strokeLinecap="round" />
+        <circle cx="18" cy="10" r="6.2" fill="#f2efe6" stroke="#191510" strokeWidth="1.2" />
+        <path d="M11.8 10.7c3.5-.4 8.8-2.2 12.4-4.3" stroke="#191510" strokeWidth="1.1" strokeLinecap="round" />
+      </svg>
+    );
+  return <span className="block w-[10px] h-[10px] md:w-[12px] md:h-[12px] rounded-full border-[1.5px] border-[#191510] bg-[#f2efe6]" />;
+};
 
 export const ORBIT_LABELS: OrbitItem[] = [
   {
@@ -561,7 +605,7 @@ const getEffectiveDpr = (isMobile: boolean): number => {
   return Math.min(rawDpr, isMobile ? 2.0 : 1.5);
 };
 
-export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function PlanetHero({ onOrbitFrame }, ref) {
+export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function PlanetHero({ onOrbitFrame, under, over }, ref) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const debugCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -572,7 +616,16 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
   // Array preasignado y objetos reutilizados: el consumidor no debe retener el array.
   const onOrbitFrameRef = useRef(onOrbitFrame);
   const orbitFramePositionsRef = useRef<OrbitFramePos[]>(
-    Array.from({ length: ORBIT_LABELS.length + CONFIG.circleOrbits.length }, () => ({ x: 0, y: 0, zNorm: 0, scale: 1 }))
+    Array.from({ length: ORBIT_LABELS.length + CONFIG.circleOrbits.length }, () => ({
+      x: 0,
+      y: 0,
+      zNorm: 0,
+      scale: 1,
+      angle: 0,
+      hx: 1,
+      paraX: 0,
+      paraY: 0,
+    }))
   );
   useEffect(() => {
     onOrbitFrameRef.current = onOrbitFrame;
@@ -1981,10 +2034,10 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
 
       const containerW = containerWidthRef.current || 390;
       const maxAllowedLabelHoriz = isMobileRef.current
-        ? Math.max(rad * 0.85, (containerW / 2) - 68)
+        ? Math.max(rad * 0.85, (containerW / 2) - 24)
         : (containerW / 2) - 16;
       const maxAllowedCircleHoriz = isMobileRef.current
-        ? Math.max(rad * 0.90, (containerW / 2) - 40)
+        ? Math.max(rad * 0.90, (containerW / 2) - 74)
         : (containerW / 2) - 16;
 
       const horizClampFactorLabel = isMobileRef.current
@@ -2033,7 +2086,7 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
         }
 
         if (isMobileRef.current) {
-          const halfCardW = 68;
+          const halfCardW = 24; // objetos decorativos chicos (antes, etiquetas de 136px)
           const maxCenter = Math.max(20, (containerW / 2) - halfCardW - 12);
           projX = Math.max(-maxCenter, Math.min(maxCenter, projX));
         }
@@ -2055,6 +2108,11 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
         fp.y = -projY + paraY;
         fp.zNorm = projZNorm;
         fp.scale = projScale;
+        const lo = ORBIT_LABELS[i];
+        fp.angle = lo.initialPhase + ((2 * Math.PI) / lo.period) * lo.direction * orbitTimeRef.current;
+        fp.hx = horizClampFactorLabel;
+        fp.paraX = paraX;
+        fp.paraY = paraY;
       }
 
       // Proyección de Círculos de Previews de Trabajos
@@ -2096,7 +2154,7 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
         }
 
         if (isMobileRef.current) {
-          const halfCircleW = 36;
+          const halfCircleW = 70; // la plaquita del nombre (escalada al frente) es más ancha que el círculo
           const maxCenter = Math.max(20, (containerW / 2) - halfCircleW - 8);
           projX = Math.max(-maxCenter, Math.min(maxCenter, projX));
         }
@@ -2118,6 +2176,11 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
         fp.y = -projY + paraY;
         fp.zNorm = projZNorm;
         fp.scale = projScale;
+        const co = CONFIG.circleOrbits[i];
+        fp.angle = co.initialPhase + ((2 * Math.PI) / co.period) * co.direction * circleTimesRef.current[i];
+        fp.hx = horizClampFactorCircle;
+        fp.paraX = paraX;
+        fp.paraY = paraY;
 
         const isBehind = projZNorm < -0.2;
         el.style.pointerEvents = isBehind ? 'none' : 'auto';
@@ -2654,24 +2717,21 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
           }}
           aria-hidden="true"
         >
-          {/* Tarjeta de papel con pin granate (#7A2E4D) */}
-          <div
-            className="relative flex items-center justify-center rounded-[4px] border border-black/15 shadow-[0_6px_14px_rgba(0,0,0,0.12)]"
-            style={{
-              backgroundColor: '#FBFAF6',
-              padding: '8px 14px',
-            }}
-          >
-            <span
-              className="absolute -top-[5px] -left-[5px] w-[10px] h-[10px] rounded-[1px] shadow-xs pointer-events-none"
-              style={{ backgroundColor: '#7A2E4D' }}
-            />
-            <span className="font-sans text-[14px] md:text-[16px] font-medium text-[#1a1a1a] leading-none whitespace-nowrap tracking-tight">
-              {orbit.text}
-            </span>
-          </div>
+          <DecorGlyph kind={idx} />
         </div>
       ))}
+
+      {/* capas de PlanetSection (estelas, cometa): debajo y encima del globo */}
+      {under && (
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ zIndex: 'var(--z-orbit-back, 5)' }}>
+          {under}
+        </div>
+      )}
+      {over && (
+        <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{ zIndex: 15 }}>
+          {over}
+        </div>
+      )}
 
       {/* Capa A / C: 4 Círculos de Previews de Trabajos en Órbita */}
       {WORKS.map((work, idx) => {
@@ -2680,12 +2740,13 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
         const reduceHover = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const hasUrl = Boolean(work.url && work.url.trim().length > 0);
         const isHash = hasUrl && work.url.startsWith('#');
+        const name = (work.categoryNumber && CATEGORY_NAME[work.categoryNumber]) || work.title;
 
         const commonProps = {
           ref: (el: HTMLElement | null) => {
             circleRefs.current[idx] = el;
           },
-          'aria-label': `Ver trabajos de ${work.title}`,
+          'aria-label': `Ver trabajos de ${name}`,
           // hover solo con mouse: en touch el tap dejaba el círculo agrandado y el
           // título pegado (el tap igual filtra y baja a la grilla)
           onPointerEnter: (e: React.PointerEvent) => e.pointerType === 'mouse' && handleCircleMouseEnter(idx),
@@ -2709,12 +2770,13 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
 
         const innerContent = (
           <>
+            {/* la pieza como una lente: aro de papel, filete de tinta y sombra baja */}
             <div
               className="relative rounded-full overflow-hidden transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] will-change-transform flex items-center justify-center w-[64px] h-[64px] md:w-[90px] md:h-[90px]"
               style={{
-                border: `3px solid ${CONFIG.circleBorderColor}`,
-                boxShadow: '0 6px 16px rgba(0,0,0,0.18)',
-                backgroundColor: '#FBFAF6',
+                border: '3px solid #f2efe6',
+                boxShadow: '0 0 0 1px rgba(25, 21, 16, 0.6), 0 14px 26px -12px rgba(25, 21, 16, 0.5)',
+                backgroundColor: '#f2efe6',
                 transform: isHovered && !reduceHover ? `scale(${CONFIG.hoverScale})` : 'scale(1)',
               }}
             >
@@ -2733,33 +2795,24 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
               />
             </div>
 
-            {/* Tooltip accesible con título del proyecto. Crece desde el círculo
-                (origin-bottom), anima solo opacidad/escala/desplazamiento en 150 ms */}
-            <div
-              className={`absolute bottom-[calc(100%+10px)] left-1/2 -translate-x-1/2 pointer-events-none origin-bottom transition-[opacity,scale,translate] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:transition-opacity motion-reduce:scale-100 motion-reduce:translate-y-0 ${
-                isHovered
-                  ? 'opacity-100 scale-100 translate-y-0'
-                  : 'opacity-0 scale-95 translate-y-1 group-focus-visible:opacity-100 group-focus-visible:scale-100 group-focus-visible:translate-y-0'
+            {/* la plaquita: un hilo y el nombre del filtro que abre (siempre visible:
+                el círculo dice qué es sin tener que pasarle el mouse). Con hover baja
+                lo mismo que crece el círculo y se pinta con el acento. */}
+            <span
+              aria-hidden="true"
+              className={`absolute left-1/2 top-full -translate-x-1/2 flex flex-col items-center pointer-events-none transition-[translate] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+                isHovered && !reduceHover ? 'translate-y-[6px] md:translate-y-[9px]' : 'translate-y-0'
               }`}
-              style={{ zIndex: 100 }}
-              role="tooltip"
             >
-              <div
-                className="relative flex items-center justify-center rounded-[3px] border border-black/15 shadow-[0_4px_12px_rgba(0,0,0,0.12)] whitespace-nowrap"
-                style={{
-                  backgroundColor: '#FBFAF6',
-                  padding: '4px 8px',
-                }}
+              <span className="block w-px h-[9px] md:h-[12px] bg-[#191510]" />
+              <span
+                className={`block whitespace-nowrap rounded-[2px] px-2 pt-[5px] pb-[4px] font-sans text-[14px] font-semibold uppercase leading-none tracking-[0.08em] text-[#f2efe6] transition-colors duration-150 ease-[ease] group-focus-visible:bg-[#2f6f6b] ${
+                  isHovered ? 'bg-[#2f6f6b]' : 'bg-[#191510]'
+                }`}
               >
-                <span
-                  className="absolute -top-[3px] -left-[3px] w-[7px] h-[7px] rounded-[1px] shadow-xs pointer-events-none"
-                  style={{ backgroundColor: '#7A2E4D' }}
-                />
-                <span className="font-sans text-[12px] sm:text-[13px] font-medium text-[#1a1a1a] leading-none tracking-tight">
-                  {work.title}
-                </span>
-              </div>
-            </div>
+                {name}
+              </span>
+            </span>
           </>
         );
 

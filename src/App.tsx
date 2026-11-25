@@ -4,7 +4,9 @@ import { MotionConfig } from 'motion/react';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import WorksPage from './components/WorksPage';
+import NotFound from './components/NotFound';
 import { WorksStateProvider } from './context/WorksStateContext';
+import DevDataToggle from './components/DevDataToggle';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -33,7 +35,9 @@ export default function App() {
             <Route path="/" element={<Home activeTab="works" />} />
             <Route path="/about" element={<Home activeTab="about" />} />
             <Route path="/works" element={<WorksPage />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
+          {import.meta.env.DEV && <DevDataToggle />}
         </div>
       </WorksStateProvider>
     </MotionConfig>

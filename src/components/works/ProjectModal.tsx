@@ -15,6 +15,7 @@ export const ProjectModal: React.FC<{
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
+  const enterRef = useRef<gsap.core.Timeline | null>(null);
 
   /* mount + enter */
   useEffect(() => {
@@ -32,13 +33,13 @@ export const ProjectModal: React.FC<{
     if (prefersReducedMotion()) {
       // sin movimiento: solo un fundido corto
       gsap.set(panelRef.current, { y: 0, scale: 1 });
-      gsap
+      enterRef.current = gsap
         .timeline()
         .fromTo([rootRef.current, panelRef.current], { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.15, ease: EASE.ui })
         .add(focusClose, 0.02);
     } else {
       // entrada ≤ 300 ms con ease-out fuerte; el panel crece desde 0.96 (nunca desde 0)
-      gsap
+      enterRef.current = gsap
         .timeline()
         .fromTo(rootRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2, ease: EASE.ui })
         .fromTo(
@@ -70,6 +71,7 @@ export const ProjectModal: React.FC<{
     // si se cierra mientras todavía entra, la entrada se corta acá y la salida
     // arranca desde donde quedó (si no, las dos pelean y la entrada puede
     // volver a mostrar el panel justo antes de desmontarlo)
+    enterRef.current?.kill();
     gsap.killTweensOf([panelRef.current, rootRef.current]);
     if (prefersReducedMotion()) {
       gsap.to([panelRef.current, rootRef.current], { autoAlpha: 0, duration: 0.12, ease: EASE.ui, onComplete: done });
@@ -112,13 +114,17 @@ export const ProjectModal: React.FC<{
   }, [rendered, close]);
 
   if (!rendered) return null;
+  // datos incompletos: sin título vacío ni separadores huérfanos
+  const title = rendered.title.trim() || 'Sin título';
+  const vertical = rendered.ratio === '9/16';
+  const meta = [rendered.client, rendered.tag, rendered.year].map((s) => (s ?? '').trim()).filter(Boolean);
 
   return (
     <div
       ref={rootRef}
       role="dialog"
       aria-modal="true"
-      aria-label={`Proyecto ${rendered.title}`}
+      aria-label={`Proyecto ${title}`}
       className="fixed inset-0 z-[120] flex items-center justify-center p-4 md:p-8 bg-[#191510]/85 backdrop-blur-xl opacity-0"
       onClick={close}
     >
@@ -137,22 +143,53 @@ export const ProjectModal: React.FC<{
           <X size={18} />
         </button>
 
-        {/* 16:9 entero (antes se recortaba en vertical en mobile) */}
-        <div className="w-full aspect-video max-h-[55vh] relative overflow-hidden bg-[#191510]">
-          <img src={rendered.image} alt={rendered.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#191510] via-transparent to-transparent" />
+        {/* la pieza en su formato: horizontal a todo el ancho, vertical centrada */}
+        <div
+          className="relative mx-auto overflow-hidden bg-[#191510]"
+          style={
+            vertical
+              ? { aspectRatio: '9 / 16', height: 'min(62vh, 760px)', maxWidth: '100%' }
+              : { aspectRatio: '16 / 9', maxHeight: '55vh', width: '100%' }
+          }
+        >
+          <img
+            src={rendered.image}
+            alt={title}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.visibility = 'hidden';
+            }}
+          />
+          {/* el loop corre sobre el póster; con reduced-motion queda el póster quieto */}
+          {rendered.loop && !prefersReducedMotion() && (
+            <video
+              src={rendered.loop}
+              autoPlay
+              muted
+              loop
+              playsInline
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.visibility = 'hidden';
+              }}
+            />
+          )}
+          {!vertical && <div className="absolute inset-0 bg-gradient-to-t from-[#191510] via-transparent to-transparent" />}
         </div>
 
         <div className="p-6 md:p-8 text-white">
           <p className="flex flex-wrap items-center gap-2 mb-3 text-[0.875rem] font-semibold text-[#f2efe6]/70 uppercase tracking-[0.08em]" style={{ fontFamily: 'var(--arch-sans)' }}>
-            <span>{rendered.client}</span>
-            <span aria-hidden="true">•</span>
-            <span>{rendered.tag}</span>
-            <span aria-hidden="true">•</span>
-            <span>{rendered.year}</span>
+            {/* el separador va pegado al final de cada dato: ninguna línea empieza con «•» */}
+            {meta.map((m, i) => (
+              <span key={i} className={i === 0 ? '[overflow-wrap:anywhere]' : 'whitespace-nowrap'}>
+                {m}
+                {i < meta.length - 1 && <span aria-hidden="true" className="ml-2">•</span>}
+              </span>
+            ))}
           </p>
-          <h2 className="text-4xl md:text-5xl leading-none" style={{ fontFamily: 'var(--arch-serif)' }}>
-            {rendered.title}
+          <h2 className="text-4xl md:text-5xl leading-none [overflow-wrap:anywhere]" style={{ fontFamily: 'var(--arch-serif)' }}>
+            {title}
           </h2>
         </div>
       </div>

@@ -4,8 +4,9 @@ import { ProjectModal } from './ProjectModal';
 import { FolderErrorBoundary } from '../FolderErrorBoundary';
 import { PlanetSection } from './PlanetSection';
 import { WorksHub } from './WorksHub';
+import { BlackHole } from './BlackHole';
 import { Clients } from './Clients';
-import { SplatFinale } from './SplatFinale';
+import { Finale } from './Finale';
 import { ProjectItem, workToProject } from '../../data/projects';
 import type { Work } from '../../data/display-works';
 import './works-sections.css';
@@ -15,7 +16,8 @@ export type { ProjectItem };
 /**
  * "Mis trabajos": un recorrido continuo sobre el mismo papel.
  * Hero (aprobado) → planeta (aprobado; sus círculos filtran) → trabajos
- * (pantalla + filtros + grilla) → clientes → cierre con contacto.
+ * → agujero negro (transición) → trabajos (filtros + galería) → clientes →
+ * cierre con contacto.
  */
 export default function Works() {
   const [selectedProject, setSelectedProject] = React.useState<ProjectItem | null>(null);
@@ -31,6 +33,9 @@ export default function Works() {
       {/* 2. Planeta (aprobado) */}
       <PlanetSection />
 
+      {/* 2b. Transición: el agujero negro se traga CREATIVE y las etiquetas del planeta */}
+      <BlackHole />
+
       {/* 3. Trabajos */}
       <FolderErrorBoundary>
         <WorksHub onOpenWork={openWork} />
@@ -40,7 +45,7 @@ export default function Works() {
       <Clients />
 
       {/* 5. Cierre + contacto */}
-      <SplatFinale />
+      <Finale />
 
       {/* Ficha de cada pieza */}
       <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
