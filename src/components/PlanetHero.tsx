@@ -586,10 +586,11 @@ export interface PlanetHeroHandle {
 
 // Posiciones fijas armónicas para prefers-reduced-motion (Bloque 5)
 const REDUCED_MOTION_LABELS = [
-  { xNorm: -1.45, yNorm: 0.15, zNorm: 0.5 },  // Editorial Design (izq)
-  { xNorm: 0.00,  yNorm: 1.35, zNorm: 0.8 },  // Social Media (arr)
-  { xNorm: 1.45,  yNorm: -0.15, zNorm: 0.5 }, // Branding (der)
-  { xNorm: 0.00,  yNorm: -1.35, zNorm: 0.8 }, // Event Graphics (abj)
+  { xNorm: -1.45, yNorm: 0.15, zNorm: 0.5 },  // luna (izq)
+  // satélite (arr-izq): en 1.35 arriba quedaba detrás de la navbar con el planeta centrado
+  { xNorm: -0.62, yNorm: 1.12, zNorm: 0.8 },
+  { xNorm: 1.45,  yNorm: -0.15, zNorm: 0.5 }, // planetoide (der)
+  { xNorm: 0.00,  yNorm: -1.35, zNorm: 0.8 }, // luna chica (abj)
 ];
 
 const REDUCED_MOTION_CIRCLES = [
