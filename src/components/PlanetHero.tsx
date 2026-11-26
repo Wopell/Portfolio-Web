@@ -4,6 +4,7 @@ import { geoEquirectangular, geoPath } from 'd3-geo';
 import landTopology from 'world-atlas/land-110m.json';
 import { WORKS } from '../data/works.js';
 import { FILTERS } from '../data/display-works';
+import { gsap, EASE, ScrollTrigger } from '../lib/gsap';
 
 /**
  * =========================================================================
@@ -2844,7 +2845,32 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
                 const target = document.querySelector(work.url);
                 if (target) {
                   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                  target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+                  // la bajada la hace GSAP (como «volver arriba» en la navbar) y no el scroll
+                  // suave del navegador: si ScrollTrigger se recalcula en el medio (recién
+                  // cargada la página, o en el teléfono cuando cambia el alto de la ventana),
+                  // el nativo se corta y no vuelve a arrancar; el tween sigue escribiendo el
+                  // scroll cuadro a cuadro. Moverse a la vista: ease-in-out; si el usuario
+                  // mueve la rueda, autoKill corta y manda él.
+                  const go = () => {
+                    if (reduce) {
+                      target.scrollIntoView();
+                      return;
+                    }
+                    const dist = Math.abs(target.getBoundingClientRect().top);
+                    gsap.to(window, {
+                      scrollTo: { y: target, autoKill: true },
+                      duration: Math.min(1, 0.45 + dist / 5000),
+                      ease: EASE.move,
+                      overwrite: 'auto',
+                    });
+                  };
+                  go();
+                  // por las dudas, si el recálculo llega igual a cortar el tween
+                  const again = () => {
+                    if (Math.abs(target.getBoundingClientRect().top) > 2 && !gsap.isTweening(window)) go();
+                  };
+                  ScrollTrigger.addEventListener('refresh', again);
+                  window.setTimeout(() => ScrollTrigger.removeEventListener('refresh', again), 2500);
                 }
               }}
               {...commonProps}

@@ -116,6 +116,17 @@
   text-align: right;
 }
 
+/* teléfono: una columna debajo de la otra, sin cortar «Buenos Aires, AR» ni las coordenadas */
+@media (max-width: 479px) {
+  .ab__meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ab__meta p:last-child {
+    text-align: left;
+  }
+}
+
 .ab__title {
   display: flex;
   flex-direction: column;
@@ -430,6 +441,14 @@
   max-width: 640px;
 }
 
+.ab__polas[data-count='1'] {
+  aspect-ratio: 1 / 0.66;
+}
+
+.ab__polas[data-count='2'] {
+  aspect-ratio: 1 / 1.18;
+}
+
 .ab__pola {
   position: absolute;
   padding: 12px 12px 0;
@@ -451,21 +470,43 @@
   background: rgba(214, 200, 172, 0.78);
 }
 
-.ab__pola img {
+/* el cuadro de la foto: si la imagen no carga, queda papel con trama (no el ícono roto) */
+.ab__pola-frame {
+  position: relative;
   display: block;
-  width: 100%;
-  height: auto;
   aspect-ratio: 16 / 9;
-  object-fit: cover;
+  overflow: hidden;
   border-radius: 6px;
+  background: #e4dccb;
 }
 
+.ab__pola-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ab__pola-frame.is-missing img {
+  visibility: hidden;
+}
+
+.ab__pola-frame.is-missing {
+  background:
+    repeating-linear-gradient(135deg, rgba(25, 21, 16, 0.06) 0 10px, transparent 10px 20px),
+    #e4dccb;
+}
+
+/* una sola línea: las polaroids se enciman y un epígrafe largo quedaría tapado */
 .ab__pola figcaption {
+  overflow: hidden;
   padding: 12px 2px 16px;
   font-size: 0.875rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .ab__pola--1 {
@@ -493,8 +534,12 @@
 
 /* escritorio: encimadas en un collage */
 @media (min-width: 700px) {
-  .ab__polas {
+  .ab__polas,
+  .ab__polas[data-count='2'] {
     aspect-ratio: 1 / 0.95;
+  }
+  .ab__polas[data-count='1'] {
+    aspect-ratio: 1 / 0.62;
   }
   .ab__pola--1 {
     top: 6%;
@@ -785,10 +830,22 @@
     transform 240ms var(--ab-ease);
 }
 
+/* un usuario o un mail largo se corta donde haga falta, nunca se sale de la página */
 .ab__channel-detail {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
   font-size: 1rem;
   font-weight: 600;
   color: var(--ab-soft);
+}
+
+@media (min-width: 900px) {
+  .ab__channel-detail {
+    flex: 0 1 auto;
+    max-width: 36%;
+    text-align: right;
+  }
 }
 
 .ab__channel:focus-visible {

@@ -77,7 +77,9 @@ const SocialCard: React.FC<{ c: Channel }> = ({ c }) => (
       </span>
       <span className="card__text">
         <span className="card__name">{c.label}</span>
-        <span className="card__handle">{c.handle}</span>
+        <span className="card__handle" title={c.handle}>
+          {c.handle}
+        </span>
       </span>
     </a>
   </li>
@@ -227,14 +229,30 @@ export const Finale: React.FC = () => {
   useEffect(() => () => window.clearTimeout(copyTimer.current), []);
 
   const copyMail = async () => {
+    let ok = false;
     try {
       await navigator.clipboard.writeText(EMAIL);
-      setCopied(true);
-      window.clearTimeout(copyTimer.current);
-      copyTimer.current = window.setTimeout(() => setCopied(false), 1800);
+      ok = true;
     } catch {
-      /* sin permiso de portapapeles: queda el link del mail */
+      /* sin la API del portapapeles (permiso negado o navegador viejo): el método de
+         siempre, con un campo temporal fuera de la vista */
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = EMAIL;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;pointer-events:none';
+        document.body.appendChild(ta);
+        ta.select();
+        ok = document.execCommand('copy');
+        ta.remove();
+      } catch {
+        ok = false;
+      }
     }
+    if (!ok) return; // queda el link del mail, que abre el correo
+    setCopied(true);
+    window.clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => setCopied(false), 1800);
   };
 
   const clip = CLIPS[now];
@@ -275,7 +293,9 @@ export const Finale: React.FC = () => {
                   </span>
                   <span className="card__text">
                     <span className="card__name">Email</span>
-                    <span className="card__handle">{EMAIL}</span>
+                    <span className="card__handle" title={EMAIL}>
+                      {EMAIL}
+                    </span>
                   </span>
                 </a>
                 <button type="button" className="card__copy" onClick={copyMail} aria-label="Copiar el mail">

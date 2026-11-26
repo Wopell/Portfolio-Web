@@ -177,6 +177,12 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
   y su plaquita baja con él en 200 ms y se pinta con el acento en 150 ms. Al apretar (también
   en el teléfono), la lente cede a 0.97 en 160 ms; con reduced-motion, no.
 - Página 404: el botón cede a 0.97 al apretar (160 ms), el color cambia en 200 ms.
+- Clic en un círculo del planeta: filtra y baja a la grilla con GSAP (ease-in-out, hasta 1 s;
+  la rueda la corta), no con el scroll suave del navegador, que se cortaba si ScrollTrigger se
+  recalculaba en el medio (recién cargada la página). Con reduced-motion, salta.
+- Datos de «Sobre mí» en `src/data/about.ts`; en desarrollo `?data=worst|empty|one` los cambia
+  (mismo selector que /works). Lo vacío no deja títulos sueltos y una foto que no carga deja
+  papel con trama.
 
 ## Nunca
 

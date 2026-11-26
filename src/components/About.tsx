@@ -1,5 +1,6 @@
 import { Fragment, useEffect, useRef, type CSSProperties } from 'react';
 import { ArrowUpRight } from 'lucide-react';
+import { ABOUT, type SoftwareItem } from '../data/about';
 import './about.css';
 
 /**
@@ -16,115 +17,17 @@ import './about.css';
  * software son su propia evaluación (actualizada por él el 26 nov 2026).
  */
 
-interface Item {
-  code: string;
-  name: string;
-  level: number;
-}
+type Item = SoftwareItem;
 
-/* agrupados por nivel: 80 o más es dominio */
-const SOFTWARE: { name: string; items: Item[]; next?: boolean }[] = [
-  {
-    name: 'Dominio',
-    items: [
-      { code: 'Ae', name: 'After Effects', level: 100 },
-      { code: 'Ai', name: 'Illustrator', level: 100 },
-      { code: 'Ps', name: 'Photoshop', level: 100 },
-      { code: 'Bl', name: 'Blender', level: 90 },
-      { code: 'IA', name: 'IA generativa', level: 90 },
-      { code: 'Pr', name: 'Premiere Pro', level: 85 },
-      { code: 'Wb', name: 'Diseño web', level: 85 },
-      { code: 'Pt', name: 'Substance Painter', level: 80 },
-    ],
-  },
-  {
-    name: 'En aprendizaje',
-    items: [
-      { code: 'Dv', name: 'DaVinci Resolve', level: 60 },
-      { code: 'Un', name: 'Unity', level: 40 },
-      { code: 'Cf', name: 'ComfyUI', level: 40 },
-      { code: 'Nk', name: 'Nuke', level: 20 },
-    ],
-  },
-  {
-    name: 'Lo próximo',
-    next: true,
-    items: [
-      { code: 'UE', name: 'Unreal Engine 5', level: 0 },
-      { code: 'Hd', name: 'Houdini', level: 0 },
-    ],
-  },
-];
+/* los datos viven en data/about.ts (y en desarrollo, ?data=worst|empty|one los cambia) */
+const { software: SOFTWARE, technical: TECHNICAL, soft: SOFT, tags: TAGS, polaroids: POLAROIDS, log: LOG, achievements: ACHIEVEMENTS, channels: CHANNELS } = ABOUT;
+
+const SOFTWARE_GROUPS = SOFTWARE.filter((g) => g.items.length > 0);
 
 const SEGMENTS = 10;
 
-const TECHNICAL = ['Motion graphics 2D', 'Modelado y escultura 3D', 'Dirección de arte con IA', 'Edición y diseño sonoro'];
-const SOFT = ['Comunicador visual claro', 'Autodidacta y curioso', 'Proyectos de punta a punta', 'Cómodo en equipo y con clientes'];
-
-/* intereses y hobbies, entre corchetes (del CV y de la versión anterior de la página) */
-const TAGS = [
-  'Animación 2.5D',
-  'Hand painted',
-  'Arte de videojuegos',
-  '3D estilizado',
-  'Arcane',
-  'Fortiche',
-  'League of Legends',
-  'Videojuegos',
-  'Vóley',
-  'CrossFit',
-  'Física',
-  'Computadoras y máquinas',
-];
-
-const POLAROIDS = [
-  { src: '/works/thumbs/salta-promo-0.webp', caption: 'Salta Cautiva · animación', alt: 'Fotograma de la promo animada de Salta Cautiva: una alpaca pintando un cuadro' },
-  { src: '/works/thumbs/south-ia-0.webp', caption: 'South · Cargando IA', alt: 'Fotograma de «Cargando IA» para South: la palabra IA dentro de un anillo de luz' },
-  { src: '/works/thumbs/postpro-0.webp', caption: 'DMN4CV · posproducción', alt: 'Fotograma del collage de los años 50 para DMN4CV: recortes en blanco y negro' },
-];
-
-const LOG = [
-  {
-    when: '2025 — hoy',
-    title: 'XamWell',
-    role: 'Cofundador · 3D & 2D artist',
-    text: 'Modelado y escultura 3D (Blender, ZBrush) de piezas impresas; dirección de arte, identidad y desarrollo comercial del estudio.',
-  },
-  {
-    when: '2023 — 2025',
-    title: 'South',
-    role: 'Animador · investigador y operador de IA',
-    text: 'Flujos de nodos en ComfyUI y dirección de arte con IA (Kling, Seedance 2.0, Nano Banana Pro); motion 2D para Salta Cautiva, Banco Chat y Naldo Sedes.',
-  },
-  {
-    when: '3 años',
-    title: 'Freelance',
-    role: 'Motion grapher y editor de video',
-    text: 'Motion graphics, edición y diseño sonoro para General Motors, Johnnie Walker, Diageo, Guinness y Contagram, entre otras.',
-  },
-  {
-    when: '2022 — 2025',
-    title: 'Escuela Da Vinci',
-    role: 'Diseño Multimedial',
-    text: 'Cursada completa, tesis en desarrollo. Antes, la certificación en Diseño Digital y Producción Audiovisual (2022 — 2023).',
-  },
-];
-
-const ACHIEVEMENTS = [
-  { big: '2022', text: 'Gané la categoría Scaled de CrossFit en el box Orkos.' },
-  { big: '2025', text: 'Cofundé XamWell, un estudio de impresión 3D.' },
-  { big: '30', text: 'marcas en el portfolio, de Diageo a General Motors.' },
-];
-
 /* grupos que entran juntos (polaroids, hitos): escalonado corto y no uniforme */
 const STAGGER = [0, 60, 110];
-
-const CHANNELS = [
-  { label: 'Email', href: 'mailto:tomy.wopell@gmail.com', detail: 'tomy.wopell@gmail.com', external: false },
-  { label: 'Instagram', href: 'https://instagram.com/wopell', detail: '@wopell', external: true },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/tomy-powell', detail: 'tomy-powell', external: true },
-  { label: 'Telegram', href: 'https://t.me/wopell', detail: '@wopell', external: true },
-];
 
 /* entradas al aparecer (una vez); el software llena sus barras */
 function useReveal() {
@@ -251,24 +154,30 @@ export default function About() {
           </h3>
           <p className="ab__char-class">Artista multimedial · cofundador de XamWell</p>
           <p className="ab__char-quote">«Me mueven la belleza, la física y la curiosidad.»</p>
-          <div className="ab__abilities">
-            <div>
-              <p className="ab__sub">Habilidades técnicas</p>
-              <ul>
-                {TECHNICAL.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
+          {(TECHNICAL.length > 0 || SOFT.length > 0) && (
+            <div className="ab__abilities">
+              {TECHNICAL.length > 0 && (
+                <div>
+                  <p className="ab__sub">Habilidades técnicas</p>
+                  <ul>
+                    {TECHNICAL.map((s) => (
+                      <li key={s}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {SOFT.length > 0 && (
+                <div>
+                  <p className="ab__sub">Habilidades blandas</p>
+                  <ul>
+                    {SOFT.map((s) => (
+                      <li key={s}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-            <div>
-              <p className="ab__sub">Habilidades blandas</p>
-              <ul>
-                {SOFT.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          )}
         </div>
 
         <figure className="ab__char-figure">
@@ -283,9 +192,10 @@ export default function About() {
           />
         </figure>
 
+        {SOFTWARE_GROUPS.length > 0 && (
         <div className="ab__inv" data-fill>
           <p className="ab__tag">[ Software ]</p>
-          {SOFTWARE.map((g) => (
+          {SOFTWARE_GROUPS.map((g) => (
             <div key={g.name} className="ab__inv-group">
               <p className="ab__sub">{g.name}</p>
               <ul className="ab__slots">
@@ -299,23 +209,38 @@ export default function About() {
           ))}
           <p className="ab__note">Niveles de 0 a 100, según mi propia evaluación.</p>
         </div>
+        )}
       </section>
 
       {/* ── 3. experiencia ── */}
+      {(LOG.length > 0 || POLAROIDS.length > 0) && (
       <section className="ab__hist" aria-labelledby="ab-hist">
-        <div className="ab__polas">
-          {POLAROIDS.map((p, i) => (
-            <figure
-              key={p.src}
-              className={`ab__pola ab__pola--${i + 1}`}
-              style={{ '--d': `${STAGGER[i] ?? 0}ms` } as CSSProperties}
-              data-reveal
-            >
-              <img src={p.src} width={960} height={540} alt={p.alt} loading="lazy" decoding="async" />
-              <figcaption>{`[ ${p.caption} ]`}</figcaption>
-            </figure>
-          ))}
-        </div>
+        {POLAROIDS.length > 0 && (
+          <div className="ab__polas" data-count={Math.min(POLAROIDS.length, 3)}>
+            {POLAROIDS.slice(0, 3).map((p, i) => (
+              <figure
+                key={p.src}
+                className={`ab__pola ab__pola--${i + 1}`}
+                style={{ '--d': `${STAGGER[i] ?? 0}ms` } as CSSProperties}
+                data-reveal
+              >
+                <span className="ab__pola-frame">
+                  <img
+                    src={p.src}
+                    width={960}
+                    height={540}
+                    alt={p.alt}
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => e.currentTarget.parentElement?.classList.add('is-missing')}
+                  />
+                </span>
+                {/* una línea: las polaroids se enciman; el texto completo queda en el title */}
+                <figcaption title={p.caption}>{`[ ${p.caption} ]`}</figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
         <div className="ab__hist-body">
           <p className="ab__tag">[ Experiencia ]</p>
           <h3 id="ab-hist" className="ab__h">
@@ -323,16 +248,17 @@ export default function About() {
           </h3>
           <ol className="ab__log">
             {LOG.map((e) => (
-              <li key={e.title} className="ab__log-item" data-reveal>
-                <p className="ab__log-when">{e.when}</p>
+              <li key={`${e.when}-${e.title}`} className="ab__log-item" data-reveal>
+                {e.when && <p className="ab__log-when">{e.when}</p>}
                 <p className="ab__log-title">{e.title}</p>
-                <p className="ab__log-role">{e.role}</p>
-                <p className="ab__log-text">{e.text}</p>
+                {e.role && <p className="ab__log-role">{e.role}</p>}
+                {e.text && <p className="ab__log-text">{e.text}</p>}
               </li>
             ))}
           </ol>
         </div>
       </section>
+      )}
 
       {/* ── 4. intereses (banda marrón) ── */}
       <section className="ab__quest" aria-labelledby="ab-quest">
@@ -344,14 +270,17 @@ export default function About() {
           </h3>
         </div>
         <ArcaneLoop />
-        <ul className="ab__tags" aria-label="Intereses y hobbies">
-          {TAGS.map((t) => (
-            <li key={t}>{`[ ${t} ]`}</li>
-          ))}
-        </ul>
+        {TAGS.length > 0 && (
+          <ul className="ab__tags" aria-label="Intereses y hobbies">
+            {TAGS.map((t) => (
+              <li key={t}>{`[ ${t} ]`}</li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* ── 5. logros ── */}
+      {ACHIEVEMENTS.length > 0 && (
       <section className="ab__extras" aria-labelledby="ab-logros">
         <p className="ab__tag">[ Logros ]</p>
         <h3 id="ab-logros" className="ab__h">
@@ -366,6 +295,7 @@ export default function About() {
           ))}
         </ul>
       </section>
+      )}
 
       {/* ── 6. contacto ── */}
       <section className="ab__contact" aria-labelledby="ab-contact">
@@ -383,7 +313,9 @@ export default function About() {
                 <span className="ab__channel-label">{c.label}</span>
                 <ArrowUpRight className="ab__channel-arrow" aria-hidden="true" strokeWidth={2.5} />
               </a>
-              <span className="ab__channel-detail">{c.detail}</span>
+              <span className="ab__channel-detail" title={c.detail}>
+                {c.detail}
+              </span>
             </li>
           ))}
         </ul>
