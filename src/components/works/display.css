@@ -1,5 +1,5 @@
 /**
- * display.css — el cierre (Finale) y la fila de clientes.
+ * display.css — la placa de contacto (Finale) y el footer con los clientes.
  */
 
 .hub,
@@ -9,233 +9,594 @@
   --disp-hi: #ffffff;
 }
 
-/* ── cierre: el papel se funde en tinta; solo texto ───────────────────── */
+/* ── placa de contacto: entra por transición y ocupa la pantalla ───────── */
 
+/* el recorrido: la entrada empieza apenas asoma la sección y termina con la escena
+   ya fija; después, un tramo quieto con el bloque a la vista */
 .finale {
   position: relative;
-  display: block;
-  height: min(88svh, 860px);
-  min-height: 560px;
-  overflow: hidden;
-  background: var(--disp-bg);
+  height: 200vh;
   color: var(--disp-ink);
 }
 
-.finale::before {
-  content: '';
+.finale__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+/* la placa: transparente donde todavía es papel (se ve la cuadrícula de la página) */
+.finale__screen {
   position: absolute;
-  inset: 0 0 auto;
-  z-index: 3;
-  height: 22%;
-  pointer-events: none;
-  background: linear-gradient(to bottom, var(--arch-paper), rgba(242, 239, 230, 0));
+  inset: 0;
+  overflow: hidden;
 }
 
-.finale__inner {
+.finale__gl,
+.finale__poster {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 4;
-  max-width: 1520px;
-  margin-inline: auto;
-  padding: 0 16px 28px;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* sin WebGL o con reduced-motion: el póster quieto con la viñeta en CSS */
+.finale__poster {
+  object-fit: cover;
+  filter: contrast(1.06) saturate(1.1) brightness(0.92);
+}
+
+.finale__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+.finale__center {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 72px 16px;
   pointer-events: none;
 }
 
-@media (min-width: 640px) {
-  .finale__inner {
-    padding: 0 40px 40px;
-  }
+/* el bloque de contacto: vidrio oscuro, todo en blanco y negro.
+   Entra cuando la placa ya llenó la pantalla (opacidad en el propio bloque: en un
+   padre cortaría el desenfoque del fondo) */
+.finale__panel {
+  width: min(1240px, 100%);
+  padding: 44px 48px 48px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 28px;
+  background: rgba(12, 10, 9, 0.46);
+  -webkit-backdrop-filter: blur(26px) saturate(1.1);
+  backdrop-filter: blur(26px) saturate(1.1);
+  color: #fff;
+  opacity: 0;
+  transform: translateY(16px) scale(0.98);
+  transition:
+    opacity 400ms var(--arch-ease),
+    transform 500ms var(--arch-ease);
 }
 
-.finale__inner a {
+.finale__panel > * {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 400ms var(--arch-ease),
+    transform 500ms var(--arch-ease);
+}
+
+.finale__panel > :nth-child(2) { transition-delay: 50ms; }
+.finale__panel > :nth-child(3) { transition-delay: 90ms; }
+.finale__panel > :nth-child(4) { transition-delay: 130ms; }
+
+.finale.is-full .finale__panel,
+.finale__panel:focus-within {
+  opacity: 1;
+  transform: none;
   pointer-events: auto;
 }
 
-.finale__line {
-  font-family: var(--arch-serif);
-  font-size: var(--t-display);
-  line-height: 0.92;
-  letter-spacing: -0.01em;
+.finale.is-full .finale__panel > *,
+.finale__panel:focus-within > * {
+  opacity: 1;
+  transform: none;
 }
 
-.finale__line em {
-  font-style: italic;
-}
-
-.finale__mail {
-  position: relative;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 12px;
-  min-height: 48px;
-  margin-top: 20px;
-  font-family: var(--arch-serif);
-  font-size: clamp(1.75rem, 1.2rem + 1.6vw, 2.75rem);
-  max-width: 100%;
-  overflow-wrap: anywhere; /* un mail largo corta antes que salirse en 320 px */
-  color: var(--disp-ink);
-  transition: color 200ms ease;
-}
-
-/* subrayado que se dibuja: scaleX (compositor) en vez de background-size (repinta) */
-.finale__mail::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 8%;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 240ms var(--arch-ease);
-}
-
-.finale__mail:focus-visible {
-  color: var(--disp-hi);
-}
-
-.finale__mail:focus-visible::after {
-  transform: scaleX(1);
-}
-
-/* hover solo con mouse: en touch el :hover queda pegado después del tap */
-@media (hover: hover) and (pointer: fine) {
-  .finale__mail:hover {
-    color: var(--disp-hi);
+@media (max-width: 639px) {
+  .finale__center {
+    padding: 64px 12px 56px;
   }
-
-  .finale__mail:hover::after {
-    transform: scaleX(1);
+  .finale__panel {
+    padding: 24px 18px 18px;
+    border-radius: 22px;
   }
 }
 
-.finale__social {
+.finale__kicker {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 28px;
-  margin: 8px 0 0;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  font-family: var(--arch-sans);
+  font-size: var(--t-label);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.finale__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
+}
+
+.finale__title {
+  margin: 14px 0 0;
+  font-family: var(--arch-sans);
+  font-size: clamp(2.75rem, 1rem + 4.2vw, 5.25rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.finale__rule {
+  display: block;
+  height: 1px;
+  margin: 32px 0;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 639px) {
+  .finale__rule {
+    margin: 20px 0;
+  }
+}
+
+/* tarjetas: una por canal; el mail, más ancho y con copiar. Donde no entran las
+   cinco en fila, el mail va primero y solo en su fila */
+.finale__cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.finale__social a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-family: var(--arch-sans);
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--disp-ink);
-  opacity: 0.85;
-  transition: opacity 200ms ease;
-}
-
-.finale__social a:hover,
-.finale__social a:focus-visible {
-  opacity: 1;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.finale__inner a:focus-visible {
-  outline: 2px solid var(--disp-hi);
-  outline-offset: 4px;
-}
-
-/* .arch-rule (works-sections.css) pone tinta oscura: sobre el cierre oscuro no se
-   leía. Con dos clases gana el color claro. */
-.arch-rule.finale__rule {
-  margin-top: 36px;
-  color: var(--disp-ink);
-  opacity: 0.85;
-}
-
-.finale__rule .arch-rule__line {
-  background: var(--disp-ink);
-  opacity: 0.25;
-}
-
-/* ── clientes (antes del cierre) ─────────────────────────────────────── */
-
-.clients {
-  padding: 40px 0 96px;
-}
-
-.clients__inner {
-  max-width: 1520px;
-  margin-inline: auto;
-  padding-inline: 16px;
+.card--mail {
+  grid-column: 1 / -1;
+  order: -1;
 }
 
 @media (min-width: 640px) {
-  .clients {
-    padding: 56px 0 128px;
-  }
-  .clients__inner {
-    padding-inline: 40px;
+  .finale__cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 }
 
-.clients__label {
+@media (min-width: 1024px) {
+  .finale__cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .finale__cards {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.9fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .card--mail {
+    grid-column: auto;
+    order: 0;
+  }
+}
+
+.card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  border-radius: 16px;
+  background: #fff;
+  color: var(--arch-ink);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 200ms var(--arch-ease);
+}
+
+.card__link {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 72px;
+  padding: 14px;
+  border-radius: inherit;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card__icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--arch-ink);
+  color: #fff;
+}
+
+.card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.card__glyph {
+  font-family: var(--arch-sans);
+  font-size: 1.125rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.card__name {
+  font-family: var(--arch-sans);
+  font-size: 0.9375rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card__handle {
+  overflow: hidden;
+  font-family: var(--arch-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: rgba(25, 21, 16, 0.62);
+}
+
+@media (max-width: 639px) {
+  .card__link {
+    min-height: 60px;
+    padding: 10px 12px;
+    gap: 12px;
+  }
+  .card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+}
+
+/* copiar el mail: el ícono cambia a un tilde por un momento */
+.card__copy {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-right: 14px;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(25, 21, 16, 0.07);
+  color: var(--arch-ink);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    transform 160ms var(--arch-ease);
+}
+
+.card__ic {
+  grid-area: 1 / 1;
+  width: 20px;
+  height: 20px;
+  transition:
+    opacity 150ms ease,
+    transform 200ms var(--arch-ease);
+}
+
+.card__ic--check,
+.is-copied .card__ic--copy {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.is-copied .card__ic--check {
+  opacity: 1;
+  transform: none;
+}
+
+.card__copy:active {
+  transform: scale(0.94);
+}
+
+@media (max-width: 639px) {
+  .card__copy {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+  }
+}
+
+/* hover solo con mouse: la tarjeta sube 2px; al apretar, 0.98 */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover {
+    transform: translateY(-2px);
+  }
+  .card__copy:hover {
+    background: rgba(25, 21, 16, 0.13);
+  }
+}
+
+.card:has(.card__link:active) {
+  transform: scale(0.98);
+}
+
+.card__link:focus-visible,
+.card__copy:focus-visible {
+  outline: 2px solid var(--arch-accent);
+  outline-offset: 2px;
+}
+
+/* abajo de la placa: qué pieza está en pantalla */
+.finale__now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0 16px 20px;
+  font-family: var(--arch-sans);
+  font-size: var(--t-label);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  text-wrap: balance;
+  color: var(--disp-ink);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.6);
+  opacity: 0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+.finale.is-full .finale__now {
+  opacity: 0.72;
+}
+
+@media (min-width: 640px) {
+  .finale__now {
+    padding-bottom: 28px;
+  }
+}
+
+/* el nombre del cliente no se corta (La Roche-Posay partía en el guion) */
+.finale__keep {
+  white-space: nowrap;
+}
+
+/* reduced-motion: sin recorrido fijo ni transición; la placa quieta y el bloque a la vista */
+.finale--still {
+  height: auto;
+}
+
+.finale--still .finale__stage {
+  position: relative;
+}
+
+/* ── footer: debajo de los trabajos, antes de la placa ─────────────────── */
+
+.foot {
+  position: relative;
+  padding: 56px 0 0;
+  color: var(--arch-ink);
+}
+
+@media (min-width: 640px) {
+  .foot {
+    padding-top: 80px;
+  }
+}
+
+.foot__label {
+  margin: 0;
   font-family: var(--arch-sans);
   font-size: var(--t-label);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  text-align: center;
   color: var(--arch-soft);
 }
 
-.clients__logos {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+/* la tira: de borde a borde, papel liso entre dos filetes, los bordes fundidos.
+   Es la lista repetida dos veces y corre media vuelta, así no tiene costura */
+.logos {
+  --u: 30px; /* unidad de tamaño del logo (ver Clients.tsx) */
+  --gap: 48px;
+  margin-top: 24px;
+  padding: 18px 0;
+  overflow: hidden;
+  border-block: 1px solid rgba(25, 21, 16, 0.14);
+  background: var(--arch-paper);
+}
+
+.logos__belt {
+  display: flex;
+  width: max-content;
+  animation: logos-run 70s linear infinite;
+}
+
+/* bordes fundidos: la máscara va en la tira (quieta), no en la cinta que se mueve */
+.logos {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+.logos__track {
+  display: flex;
+  flex: none;
   align-items: center;
-  gap: 36px 24px;
-  margin: 28px 0 0;
-  padding: 0;
+  gap: var(--gap);
+  margin: 0;
+  padding: 0 calc(var(--gap) / 2);
   list-style: none;
 }
 
-@media (min-width: 640px) {
-  .clients__logos {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 48px 40px;
-  }
-}
-
-@media (min-width: 1100px) {
-  .clients__logos {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-}
-
-.clients__logos li {
+.logos__item {
   display: flex;
+  flex: none;
+  align-items: center;
   justify-content: center;
+  height: 56px;
 }
 
-.clients__logos img {
-  height: 40px;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-  filter: brightness(0);
-  mix-blend-mode: multiply;
-  opacity: 0.85;
+/* ancho por peso visual (--wf) */
+.logos__item img {
+  display: block;
+  width: calc(var(--u) * var(--wf));
+  max-height: 100%;
+  height: auto;
+  opacity: 0.7;
+  user-select: none;
 }
 
-@media (min-width: 640px) {
-  .clients__logos img {
-    height: 56px;
+@keyframes logos-run {
+  to {
+    transform: translateX(-50%);
   }
 }
 
-/* menos movimiento no es cero: el subrayado aparece sin dibujarse; el color
-   y la opacidad siguen cambiando suave */
+/* con mouse, la tira se detiene mientras se la mira */
+@media (hover: hover) and (pointer: fine) {
+  .logos:hover .logos__belt {
+    animation-play-state: paused;
+  }
+}
+
+@media (min-width: 640px) {
+  .logos {
+    --u: 38px;
+    --gap: 72px;
+    margin-top: 28px;
+    padding: 24px 0;
+  }
+  .logos__item {
+    height: 64px;
+  }
+  .logos__belt {
+    animation-duration: 90s;
+  }
+}
+
+/* reduced-motion: la tira no se mueve; los logos bajan a varias filas */
 @media (prefers-reduced-motion: reduce) {
-  .finale__mail::after {
-    transition: none;
+  .logos {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .logos__belt {
+    width: auto;
+    animation: none;
+  }
+  .logos__track {
+    flex: 1;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 40px;
+    max-width: 1520px;
+    margin-inline: auto;
+    padding: 0 16px;
+  }
+  .logos__track[aria-hidden] {
+    display: none;
+  }
+}
+
+.foot__inner {
+  max-width: 1520px;
+  margin-inline: auto;
+  padding: 0 16px;
+}
+
+@media (min-width: 640px) {
+  .foot__inner {
+    padding: 0 40px;
+  }
+}
+
+.foot__bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 0 40px;
+  font-family: var(--arch-sans);
+  font-size: var(--t-label);
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--arch-soft);
+}
+
+/* tres columnas: el lugar queda centrado aunque los extremos midan distinto */
+@media (min-width: 900px) {
+  .foot__bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    padding-bottom: 56px;
+  }
+  .foot__bar > :first-child {
+    justify-self: start;
+  }
+  .foot__bar > :last-child {
+    justify-self: end;
+  }
+}
+
+/* menos movimiento no es cero: los cambios de color siguen; sin desplazamientos */
+@media (prefers-reduced-motion: reduce) {
+  .finale__panel,
+  .finale__panel > *,
+  .card,
+  .card__copy,
+  .card__ic {
+    transform: none !important;
+    transition-property: opacity, background-color;
   }
 }
