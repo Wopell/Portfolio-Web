@@ -1,15 +1,25 @@
 /**
- * about.css — «Sobre mí»: póster + anotaciones.
- * Pocas cosas en mucho espacio: papel, tinta y un acento. Inter en dos pesos
- * extremos para el nombre (contraste de afiche); Instrument Serif solo en el mail.
+ * about.css — «Sobre mí»: revista + ficha de personaje.
+ * Papel beige, tinta, turquesa y marrón. Inter pesada para lo que tiene que pesar (el
+ * nombre, el personaje, los canales), Instrument Serif solo para la misión y la frase.
+ * Cada pantalla tiene una sola cosa que manda; el resto es letra chica entre corchetes.
  */
 
 .ab {
   --ab-paper: #f2efe6;
+  --ab-sand: #e4dccb;
   --ab-ink: #191510;
-  --ab-soft: rgba(25, 21, 16, 0.62);
-  --ab-accent: #2f6f6b;
+  --ab-soft: rgba(25, 21, 16, 0.66);
+  --ab-rule: rgba(25, 21, 16, 0.18);
+  --ab-teal: #2f6f6b;
+  --ab-teal-deep: #234f4c;
+  --ab-teal-soft: #a8d0c9;
+  --ab-brown: #4a3425;
+  --ab-brown-ink: #7a5b42;
   --ab-ease: cubic-bezier(0.23, 1, 0.32, 1);
+  --ab-pad: clamp(16px, 4vw, 72px);
+  --ab-edge: calc(max(0px, (100vw - 1600px) / 2) + var(--ab-pad));
+  --ab-gap: 24px;
   position: relative;
   background: var(--ab-paper);
   color: var(--ab-ink);
@@ -17,70 +27,814 @@
   overflow-x: clip;
 }
 
-/* ── póster ─────────────────────────────────────────────────────────── */
-
-.ab__poster {
-  position: relative;
-  min-height: 100svh;
-  display: grid;
-  place-items: center;
-  padding: 120px 16px 38svh;
-  overflow: hidden;
+.ab ::selection {
+  background: var(--ab-teal);
+  color: var(--ab-paper);
 }
 
-.ab__head {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: stretch;
-  max-width: 100%;
-}
-
-.ab__name {
+:where(.ab) :where(h2, h3, p, ul, ol, figure) {
   margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  font-size: clamp(3.25rem, 1rem + 12vw, 12rem);
-  line-height: 0.86;
-  letter-spacing: -0.035em;
+}
+
+:where(.ab) :where(ul, ol) {
+  padding: 0;
+  list-style: none;
+}
+
+/* la etiqueta entre corchetes: la misma en toda la página */
+.ab__tag {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ab-brown-ink);
+}
+
+.ab__sub {
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.ab__name-strong {
+/* títulos de sección: pesados pero medianos; lo enorme es de cada pantalla */
+.ab__h {
+  margin-top: 10px;
+  font-size: clamp(2rem, 1.4rem + 1.6vw, 3rem);
   font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.035em;
 }
 
-.ab__name-light {
-  font-weight: 200;
+/* ── 1. portada ─────────────────────────────────────────────────────── */
+
+.ab__cover {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 32px;
+  padding: 88px var(--ab-pad) 72px;
 }
 
-.ab__line {
-  margin: 22px 0 0;
-  font-size: 1rem;
-  font-weight: 400;
+/* la foto del CV, cuadrada y entera (con su frase y su círculo amarillo) */
+.ab__cover-photo {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--ab-ink);
+}
+
+.ab__cover-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ab__cover-text {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  container-type: inline-size;
+}
+
+.ab__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  font-size: 0.875rem;
+  font-weight: 600;
   line-height: 1.4;
-  color: var(--ab-ink);
-  text-align: center;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-@media (min-width: 900px) {
-  /* la frase ocupa exactamente el ancho del nombre, como en un afiche */
-  .ab__line {
-    text-align: justify;
-    text-align-last: justify;
-    font-size: 1.0625rem;
+.ab__meta p:last-child {
+  text-align: right;
+}
+
+.ab__title {
+  display: flex;
+  flex-direction: column;
+  font-size: min(24.5cqi, 11rem);
+  font-weight: 800;
+  line-height: 0.84;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.ab__intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.ab__intro-text {
+  max-width: 46ch;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
+@media (min-width: 1100px) {
+  .ab__cover {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--ab-gap);
+    align-content: center;
+    min-height: 100svh;
+    padding: 104px var(--ab-edge) 48px;
+  }
+  /* cuadrada: el ancho de 6 columnas, sin pasarse del alto de la pantalla */
+  .ab__cover-photo {
+    grid-column: 1 / 7;
+    justify-self: start;
+    width: min(100%, calc(100svh - 152px));
+    border-radius: 20px;
+  }
+  .ab__cover-text {
+    grid-column: 8 / 13;
+    justify-content: space-between;
+  }
+  .ab__intro {
+    grid-template-columns: 8.5em minmax(0, 1fr);
+    column-gap: var(--ab-gap);
+    align-items: baseline;
   }
 }
 
-/* el piso: anillos de tinta sobre el papel, vistos en perspectiva */
+/* ── 2. personaje (banda turquesa) ───────────────────────────────────── */
+
+.ab__char {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 56px;
+  padding: 104px var(--ab-pad) 96px;
+  background: var(--ab-teal-deep);
+  color: var(--ab-paper);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ab__char .ab__tag {
+  color: var(--ab-teal-soft);
+}
+
+.ab__char-id {
+  container-type: inline-size;
+}
+
+.ab__char-name {
+  margin-top: 12px;
+  font-size: min(23cqi, 9.5rem);
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.ab__char-class {
+  margin-top: 20px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ab__char-quote {
+  max-width: 18ch;
+  margin-top: 28px;
+  font-family: "Instrument Serif", "Times New Roman", serif;
+  font-size: clamp(1.75rem, 1.3rem + 1vw, 2.375rem);
+  line-height: 1.06;
+  text-wrap: balance;
+}
+
+.ab__abilities {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px var(--ab-gap);
+  margin-top: 40px;
+}
+
+@media (min-width: 560px) {
+  .ab__abilities {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.ab__abilities .ab__sub {
+  color: var(--ab-teal-soft);
+}
+
+.ab__abilities li {
+  padding: 7px 0;
+  border-top: 1px solid rgba(242, 239, 230, 0.18);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+/* el personaje parado sobre los anillos, como en una pantalla de selección */
+.ab__char-figure {
+  position: relative;
+  justify-self: center;
+  width: min(62%, 300px);
+  margin-bottom: 40px;
+}
+
+.ab__char-figure img {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  /* contorno de sticker */
+  filter:
+    drop-shadow(3px 0 0 var(--ab-paper)) drop-shadow(-3px 0 0 var(--ab-paper))
+    drop-shadow(0 3px 0 var(--ab-paper)) drop-shadow(0 -3px 0 var(--ab-paper))
+    drop-shadow(0 22px 28px rgba(10, 20, 19, 0.35));
+}
+
+.ab__pad {
+  position: absolute;
+  z-index: -1;
+  left: 50%;
+  bottom: 0;
+  width: 190%;
+  aspect-ratio: 4 / 1;
+  transform: translate(-50%, 50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(closest-side, var(--ab-teal-deep) 0 10%, transparent 10.2%),
+    repeating-radial-gradient(closest-side, var(--ab-ink) 0 6%, var(--ab-teal-deep) 6.2% 8%, var(--ab-ink) 8.2% 14%);
+}
+
+/* inventario: cada programa es una casilla, con su nivel */
+.ab__inv-group {
+  margin-top: 22px;
+}
+
+.ab__inv .ab__sub {
+  color: var(--ab-teal-soft);
+}
+
+.ab__inv {
+  container-type: inline-size;
+}
+
+.ab__slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+@container (min-width: 400px) {
+  .ab__slots {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.ab__slot {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "code lv"
+    "name name"
+    "bar bar";
+  /* el nombre toma el alto que sobra: las barras quedan alineadas en cada fila */
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+  row-gap: 6px;
+  padding: 12px 12px 12px;
+  border: 1px solid rgba(242, 239, 230, 0.22);
+  border-radius: 10px;
+  background: rgba(242, 239, 230, 0.05);
+}
+
+.ab__slot-code {
+  grid-area: code;
+  font-size: 1.625rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.ab__slot-lv {
+  grid-area: lv;
+  font-size: 0.9375rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.ab__slot-name {
+  grid-area: name;
+  margin-top: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: rgba(242, 239, 230, 0.86);
+}
+
+.ab__slot-bar {
+  grid-area: bar;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 2px;
+  height: 5px;
+  padding: 0 1px;
+}
+
+.ab__slot-bar i {
+  display: block;
+  background: rgba(242, 239, 230, 0.16);
+  transform: skewX(-20deg);
+  transition: background-color 140ms ease;
+  transition-delay: calc(var(--i, 0) * 70ms + var(--k, 0) * 26ms);
+}
+
+.ab__inv.is-in .ab__slot-bar i.is-on {
+  background: var(--ab-paper);
+}
+
+/* lo próximo a aprender: casilla punteada, sin nivel */
+.ab__slot.is-next {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ab__slot.is-next .ab__slot-code,
+.ab__slot.is-next .ab__slot-name {
+  color: rgba(242, 239, 230, 0.66);
+}
+
+.ab__note {
+  margin-top: 18px;
+  font-size: 0.875rem;
+  color: rgba(242, 239, 230, 0.75);
+}
+
+@media (min-width: 700px) {
+  .ab__char-figure {
+    width: min(40%, 300px);
+  }
+}
+
+@media (min-width: 1100px) {
+  .ab__char {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--ab-gap);
+    align-items: start;
+    min-height: 100svh;
+    padding: 112px var(--ab-edge) 96px;
+  }
+  .ab__char-id {
+    grid-column: 1 / 5;
+  }
+  .ab__char-figure {
+    grid-column: 5 / 9;
+    align-self: end;
+    width: auto;
+    margin-bottom: 64px;
+  }
+  .ab__char-figure img {
+    width: auto;
+    height: min(66svh, 640px);
+    margin-inline: auto;
+  }
+  .ab__pad {
+    width: 150%;
+  }
+  .ab__inv {
+    grid-column: 9 / 13;
+  }
+  .ab__inv-group:first-of-type {
+    margin-top: 16px;
+  }
+}
+
+/* ── 3. historial ───────────────────────────────────────────────────── */
+
+.ab__hist {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 56px;
+  padding: clamp(96px, 14vh, 160px) var(--ab-pad) 40px;
+}
+
+/* las polaroids: tres trabajos, encimados y torcidos, con cinta */
+/* teléfono: una columna en escalera, cada epígrafe a la vista */
+.ab__polas {
+  position: relative;
+  aspect-ratio: 1 / 1.78;
+  max-width: 640px;
+}
+
+.ab__pola {
+  position: absolute;
+  padding: 12px 12px 0;
+  border-radius: 10px;
+  background: #fbf9f3;
+  box-shadow:
+    0 2px 6px rgba(25, 21, 16, 0.12),
+    0 22px 40px -14px rgba(25, 21, 16, 0.38);
+}
+
+.ab__pola::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 84px;
+  height: 24px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: rgba(214, 200, 172, 0.78);
+}
+
+.ab__pola img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.ab__pola figcaption {
+  padding: 12px 2px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ab__pola--1 {
+  top: 1%;
+  left: 0;
+  width: 78%;
+  rotate: -4deg;
+}
+
+.ab__pola--2 {
+  top: 36%;
+  right: 0;
+  width: 72%;
+  rotate: 3.5deg;
+  z-index: 1;
+}
+
+.ab__pola--3 {
+  top: 68%;
+  left: 4%;
+  width: 78%;
+  rotate: -1.5deg;
+  z-index: 2;
+}
+
+/* escritorio: encimadas en un collage */
+@media (min-width: 700px) {
+  .ab__polas {
+    aspect-ratio: 1 / 0.95;
+  }
+  .ab__pola--1 {
+    top: 6%;
+    width: 66%;
+    rotate: -5deg;
+  }
+  .ab__pola--2 {
+    top: 0;
+    width: 56%;
+    rotate: 4deg;
+  }
+  .ab__pola--3 {
+    top: auto;
+    bottom: 0;
+    left: 16%;
+    width: 70%;
+  }
+}
+
+.ab__log {
+  margin-top: 36px;
+}
+
+.ab__log-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  padding: 22px 0 24px;
+  border-top: 1px solid var(--ab-rule);
+}
+
+.ab__log-when {
+  font-size: 1.375rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ab-teal);
+}
+
+.ab__log-title {
+  margin-top: 6px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.ab__log-role {
+  margin-top: 2px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--ab-soft);
+}
+
+.ab__log-text {
+  max-width: 60ch;
+  margin-top: 10px;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--ab-soft);
+}
+
+@media (min-width: 1100px) {
+  .ab__hist {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--ab-gap);
+    padding: 160px var(--ab-edge) 40px;
+    align-items: start;
+  }
+  .ab__polas {
+    grid-column: 1 / 7;
+    position: sticky;
+    top: 120px;
+    max-width: none;
+  }
+  .ab__hist-body {
+    grid-column: 8 / 13;
+  }
+  .ab__log-item {
+    grid-template-columns: 9.5em minmax(0, 1fr);
+    column-gap: var(--ab-gap);
+  }
+  .ab__log-when {
+    grid-row: 1 / 5;
+    font-size: 1.25rem;
+    margin-top: 4px;
+  }
+  .ab__log-title {
+    margin-top: 0;
+  }
+}
+
+/* ── 4. misión (banda marrón) ───────────────────────────────────────── */
+
+.ab__quest {
+  margin-top: clamp(96px, 14vh, 160px);
+  padding: clamp(96px, 16vh, 176px) var(--ab-pad);
+  background: var(--ab-brown);
+  color: var(--ab-paper);
+}
+
+.ab__quest .ab__tag {
+  color: var(--ab-sand);
+}
+
+.ab__quest-text {
+  max-width: 17ch;
+  margin-top: 28px;
+  font-family: "Instrument Serif", "Times New Roman", serif;
+  font-size: clamp(2.5rem, 1.2rem + 3.8vw, 6rem);
+  font-weight: 400;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+/* el loop de Arcane: la pieza que más se acerca a la meta */
+.ab__loop {
+  margin-top: 56px;
+}
+
+.ab__loop video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #120d09;
+  box-shadow: 0 30px 60px -24px rgba(0, 0, 0, 0.55);
+}
+
+.ab__loop figcaption {
+  margin-top: 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ab-sand);
+}
+
+/* intereses y hobbies entre corchetes, a todo el ancho */
+.ab__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 26px;
+  margin-top: 64px;
+  padding-top: 36px;
+  border-top: 1px solid rgba(242, 239, 230, 0.18);
+}
+
+.ab__tags li {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ab-sand);
+}
+
+@media (min-width: 1100px) {
+  .ab__quest {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--ab-gap);
+    align-items: center;
+    padding-inline: var(--ab-edge);
+  }
+  .ab__quest-copy {
+    grid-column: 1 / 8;
+  }
+  .ab__loop {
+    grid-column: 8 / 13;
+    margin-top: 0;
+  }
+  .ab__tags {
+    grid-column: 1 / -1;
+    margin-top: 80px;
+  }
+}
+
+/* ── 5. logros ─────────────────────────────────────────────────────── */
+
+.ab__extras {
+  padding: clamp(96px, 14vh, 160px) var(--ab-pad) 0;
+}
+
+.ab__achv {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0 var(--ab-gap);
+  margin-top: 32px;
+}
+
+.ab__achv li {
+  padding: 20px 0 24px;
+  border-top: 1px solid var(--ab-rule);
+}
+
+.ab__achv-big {
+  display: block;
+  font-size: clamp(3.5rem, 2.4rem + 3.6vw, 7rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ab-brown-ink);
+}
+
+.ab__achv-text {
+  display: block;
+  max-width: 28ch;
+  margin-top: 12px;
+  font-size: 1.0625rem;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+@media (min-width: 900px) {
+  .ab__achv {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) {
+  .ab__extras {
+    padding-inline: var(--ab-edge);
+  }
+}
+
+/* ── 6. contacto: los canales en letra enorme ───────────────────────── */
+
+.ab__contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 20px;
+  padding: clamp(112px, 16vh, 184px) var(--ab-pad) 0;
+}
+
+/* teléfono: el usuario debajo del canal; con lugar, a la derecha en la misma base */
+.ab__channels li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  border-top: 1px solid var(--ab-rule);
+}
+
+@media (min-width: 900px) {
+  .ab__channels li {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    column-gap: 20px;
+    padding-bottom: 0;
+  }
+}
+
+.ab__channels li:last-child {
+  border-bottom: 1px solid var(--ab-rule);
+}
+
+.ab__channel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.12em;
+  padding: 0.08em 0;
+  font-size: clamp(3rem, 1rem + 7.4vw, 9rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  color: var(--ab-ink);
+  text-decoration: none;
+  transform-origin: left center;
+  transition:
+    color 180ms ease,
+    transform 160ms var(--ab-ease);
+}
+
+/* al apretar el canal cede apenas, desde su borde izquierdo */
+.ab__channel:active {
+  transform: scale(0.98);
+}
+
+.ab__channel-arrow {
+  width: 0.5em;
+  height: 0.5em;
+  opacity: 0.25;
+  transition:
+    opacity 180ms ease,
+    transform 240ms var(--ab-ease);
+}
+
+.ab__channel-detail {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ab-soft);
+}
+
+.ab__channel:focus-visible {
+  outline: 3px solid var(--ab-teal);
+  outline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ab__channel:hover {
+    color: var(--ab-teal);
+  }
+  .ab__channel:hover .ab__channel-arrow {
+    opacity: 1;
+    transform: translate(0.06em, -0.06em);
+  }
+}
+
+@media (min-width: 1100px) {
+  .ab__contact {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--ab-gap);
+    padding-inline: var(--ab-edge);
+  }
+  .ab__contact > .ab__tag {
+    grid-column: 1 / 4;
+    margin-top: 1.6em;
+  }
+  .ab__channels {
+    grid-column: 4 / 13;
+  }
+}
+
+/* el piso de tinta: la mitad de arriba de los anillos, como un horizonte */
+.ab__end {
+  position: relative;
+  height: clamp(160px, 26svh, 300px);
+  margin-top: clamp(96px, 14vh, 160px);
+  overflow: hidden;
+}
+
 .ab__floor {
   position: absolute;
   left: 50%;
-  bottom: -18svh;
+  top: 0;
   width: max(160vw, 900px);
-  height: 54svh;
+  height: 200%;
   transform: translateX(-50%);
   border-radius: 50%;
   background:
@@ -88,184 +842,37 @@
     repeating-radial-gradient(closest-side, var(--ab-ink) 0 6%, var(--ab-paper) 6.2% 8%, var(--ab-ink) 8.2% 14%);
 }
 
-/* ── anotaciones ────────────────────────────────────────────────────── */
-
-.ab__notes {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 120px 16px 160px;
-}
-
-@media (min-width: 640px) {
-  .ab__notes {
-    padding: 200px 40px 240px;
-  }
-}
-
-.ab__intro {
-  max-width: 22ch;
-  margin: 0 0 120px;
-  font-family: "Instrument Serif", "Times New Roman", serif;
-  font-size: clamp(2rem, 1.2rem + 2.6vw, 3.5rem);
-  line-height: 1.02;
-}
-
-.ab__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 64px;
-}
-
-.ab__note {
-  max-width: 34ch;
-}
-
-/* escritorio: las anotaciones se reparten en diagonal por el espacio vacío */
-@media (min-width: 900px) {
-  .ab__list {
-    gap: 120px;
-  }
-  .ab__note:nth-child(1) { margin-left: 48%; }
-  .ab__note:nth-child(2) { margin-left: 12%; }
-  .ab__note:nth-child(3) { margin-left: 62%; }
-  .ab__note:nth-child(4) { margin-left: 28%; }
-  .ab__note:nth-child(5) { margin-left: 4%; }
-  .ab__note:nth-child(6) { margin-left: 54%; }
-  .ab__note:nth-child(7) { margin-left: 20%; }
-  .ab__note:nth-child(8) { margin-left: 64%; }
-}
-
-.ab__note-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0;
-  font-size: 1.0625rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.ab__bar {
-  flex: none;
-  width: 10px;
-  height: 1.35em;
-  background: var(--ab-ink);
-}
-
-.ab__plus {
-  flex: none;
-  font-size: 1.4em;
-  font-weight: 300;
-  line-height: 1;
-  color: var(--ab-accent);
-}
-
-.ab__note-meta {
-  margin: 10px 0 0;
-  font-size: 0.9375rem;
-  font-weight: 500;
-  color: var(--ab-ink);
-}
-
-.ab__note-text {
-  margin: 6px 0 0;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--ab-soft);
-}
-
-/* contacto */
-.ab__mail {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  min-height: 48px;
-  margin-top: 10px;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  font-family: "Instrument Serif", "Times New Roman", serif;
-  font-size: clamp(1.75rem, 1.3rem + 1.2vw, 2.5rem);
-  color: var(--ab-ink);
-  text-decoration: none;
-}
-
-.ab__mail::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 8px;
-  height: 1px;
-  background: currentColor;
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 240ms var(--ab-ease);
-}
-
-.ab__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 24px;
-  margin: 4px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.ab__links a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--ab-ink);
-  text-decoration: none;
-  transition: color 200ms ease;
-}
-
-.ab__mail:focus-visible,
-.ab__links a:focus-visible {
-  outline: 2px solid var(--ab-accent);
-  outline-offset: 4px;
-}
-
-.ab__mail:focus-visible::after {
-  transform: scaleX(1);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .ab__mail:hover::after {
-    transform: scaleX(1);
-  }
-  .ab__links a:hover {
-    color: var(--ab-accent);
-  }
-}
-
 /* ── entrada ────────────────────────────────────────────────────────── */
 
-[data-reveal] {
+/* las mismas duraciones que la placa de /works; en grupo, escalonadas (--d) */
+.ab [data-reveal] {
   opacity: 0;
-  transform: translateY(12px);
+  translate: 0 12px;
   transition:
-    opacity 600ms var(--ab-ease),
-    transform 600ms var(--ab-ease);
+    opacity 400ms var(--ab-ease),
+    translate 500ms var(--ab-ease);
+  transition-delay: var(--d, 0ms);
 }
 
-[data-reveal].is-in {
+.ab [data-reveal].is-in {
   opacity: 1;
-  transform: none;
+  translate: 0 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
-    transform: none;
+  .ab [data-reveal] {
+    translate: none;
     transition: opacity 300ms ease;
   }
-  .ab__mail::after {
+  .ab__slot-bar i,
+  .ab__channel-arrow {
     transition: none;
+  }
+  /* el color del canal sigue; sin escala al apretar */
+  .ab__channel {
+    transition: color 180ms ease;
+  }
+  .ab__channel:active {
+    transform: none;
   }
 }

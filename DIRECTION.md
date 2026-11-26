@@ -19,6 +19,7 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
 |---|---|---|---|
 | Display | Instrument Serif 400 | 56–96px (máx. 6rem) | «MY WORKS», «PORTFOLIO» |
 | Llamado a contacto | Inter 800, mayúsculas, tracking −0.03em | 44–84px | «Let’s work together» (placa de contacto) |
+| Siglas del software | Inter 800 (sigla 28px), nivel en cifras tabulares 15px | 14–28px | Casillas de software de «Sobre mí» |
 | Título de pieza en pantalla | Instrument Serif | 40–64px | Pieza elegida, título de la ficha |
 | Título de pieza en grilla | Instrument Serif | 24–28px | Cada tarjeta |
 | Etiqueta | Inter 600, mayúsculas, tracking 0.08em | 14px | Cliente, «Clientes», pie |
@@ -37,7 +38,9 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
 | Papel | `#f2efe6` | Fondo de todo el recorrido, marco de la intro |
 | Tinta | `#191510` | Texto, cierre, filtro activo, botón principal |
 | Blanco | `#ffffff` | Hero, resplandor de la intro |
-| Acento único | `#2f6f6b` | Pieza activa, foco, hover del botón principal y de los círculos del planeta, selección |
+| Acento único | `#2f6f6b` | Pieza activa, foco, hover del botón principal y de los círculos del planeta, selección; en «Sobre mí», los años del historial y el hover de los canales |
+| Turquesa profundo | `#234f4c` | Solo la banda del personaje en «Sobre mí» |
+| Marrón | `#4a3425` (banda), `#7a5b42` (texto) | Banda de la misión y números de logros en «Sobre mí» |
 
 ## Layout
 
@@ -95,20 +98,61 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
      Cinco en fila en desktop; donde no entran, el mail primero y solo en su fila. Abajo de la
      placa, qué pieza está en pantalla. Es el único lugar de contacto (además de «Sobre mí»).
      Efecto del video tomado de una referencia; el contenido es solo propio.
-- `/about`: póster (nombre en Inter 800 + 200, una frase, anillos de tinta como piso) y los datos
-  del CV como anotaciones con barra negra en mucho espacio; aparecen al entrar en pantalla.
+- `/about`: revista con algo de pantalla de videojuego en lo visual (el personaje sobre los
+  anillos, las casillas de software), pero con palabras normales en los textos: nada de «misión»,
+  «gremio», «inventario» ni «desbloquear». Solo datos reales de Tomy (el CV y la versión anterior
+  de esta página); nada inventado. Cada pantalla tiene una sola cosa que manda y todo lo demás es
+  letra chica entre corchetes («[ Sobre mí ]», misma etiqueta en toda la página, nunca arriba de
+  un título grande). Papel beige con dos bandas de color: turquesa (`#234f4c`) y marrón
+  (`#4a3425`). Las imágenes van con bordes redondeados (foto 16–20px, video 16px, polaroids 10px,
+  casillas 10px).
+  1. Portada: a la izquierda la foto del CV, cuadrada y entera, tal como está (public/about/
+     portada.webp: blanco y negro con la laptop, círculo amarillo y «This is me right now»); a la
+     derecha, «TOMY POWELL» enorme (Inter 800, del ancho de su columna), arriba los datos chicos
+     (artista multimedial, motion · 3D · IA · post, Buenos Aires y sus coordenadas) y abajo la
+     presentación del CV.
+  2. Alias (banda turquesa): «WOPELL», el personaje dibujado de Tomy (sacado del .ai del CV;
+     public/about/personaje.webp) con contorno de sticker, parado sobre los anillos de tinta; a la
+     izquierda «Artista multimedial · cofundador de XamWell», «Me mueven la belleza, la física y
+     la curiosidad» y las habilidades técnicas y blandas; a la derecha el software: cada programa
+     es una casilla con su sigla (Ae, Ai, Ps…), su nivel y una barra de 10 segmentos, en 4
+     columnas. Dominio (80 o más): After Effects, Illustrator y Photoshop 100; Blender e IA
+     generativa 90; Premiere y Diseño web 85; Substance Painter 80. En aprendizaje: DaVinci 60,
+     Unity 40, ComfyUI 40, Nuke 20. Lo próximo: Unreal Engine 5 y Houdini (casilla punteada).
+     «Niveles de 0 a 100, según mi propia evaluación» (niveles actualizados por Tomy el
+     26 nov 2026).
+  3. Experiencia: tres trabajos como polaroids con cinta (Salta Cautiva, Cargando IA de South y
+     el collage de DMN4CV), encimadas y torcidas (en el teléfono, en escalera); al lado, los años
+     en turquesa y XamWell, South, freelance y Da Vinci.
+  4. Intereses (banda marrón): «Mi meta: trabajar algún día en estudios como Fortiche…» en
+     Instrument Serif grande, el loop de Arcane (proyecto personal, Da Vinci) y abajo, a todo el
+     ancho, los intereses y hobbies entre corchetes: Animación 2.5D, Hand painted, Arte de
+     videojuegos, 3D estilizado, Arcane, Fortiche, League of Legends, Videojuegos, Vóley,
+     CrossFit, Física, Computadoras y máquinas.
+  5. Logros («Hitos»): 2022 · 2025 · 30, números enormes en marrón, en tres columnas.
+  6. Hablemos: Email, Instagram, LinkedIn y Telegram en letra enorme (hover turquesa, flecha) y
+     el usuario de cada uno. Cierra el piso de anillos de tinta, visto como horizonte.
 - Una sola vista de detalle: la ficha (modal). Sin catálogo, sin carpetas en caja.
-- Sin eyebrows, sin numeraciones decorativas, sin notas a mano, sin estadísticas.
+- Sin eyebrows, sin numeraciones decorativas, sin notas a mano. Estadísticas solo en «Sobre mí»
+  y solo las de Tomy.
 
 ## Movimiento
 
 - Momentos: el resplandor de la intro, el planeta, el agujero negro y la placa de contacto (el
   papel que se desarma en cuadritos). Además, solo la tira de clientes (70 s la vuelta en el
-  teléfono, 90 s en pantallas grandes).
-- El bloque de contacto entra cuando la placa llena la pantalla: opacidad y 16 px hacia arriba
-  en 400–500 ms, con sus partes escalonadas 0 · 50 · 90 · 130 ms; vuelve a irse si se sube.
-  Tarjetas: hover sube 2px, press 0.98; copiar el mail cambia el ícono por un tilde 1,8 s.
+  teléfono, 90 s en pantallas grandes) y las barras de stats de «Sobre mí».
+- El bloque de contacto entra cuando la placa llena la pantalla: el vidrio solo funde (400 ms;
+  moverlo obligaría a recalcular su desenfoque en cada cuadro, y el desenfoque no pasa de 20px) y
+  sus partes suben 12 px en 500 ms, escalonadas 0 · 50 · 90 · 130 ms; vuelve a irse si se sube.
+  Tarjetas: hover sube 2px, press 0.98; el botón de copiar, press 0.96; copiar el mail cambia el
+  ícono por un tilde 1,8 s.
 - Los loops de la galería corren solo en pantalla, sin audio; con reduced-motion queda el póster.
+- «Sobre mí»: las barras del software se llenan segmento a segmento al entrar en pantalla
+  (26 ms por segmento, 70 ms entre casillas); polaroids, experiencia y logros entran con opacidad
+  (400 ms) y 12 px (500 ms), como la placa; las tres polaroids y los tres hitos, escalonados
+  0 · 60 · 110 ms. Los canales de «Hablemos» ceden a 0.98 al apretar (160 ms, desde la
+  izquierda). El loop de Arcane corre solo en pantalla. Con reduced-motion, barras llenas, solo
+  fundidos y el póster quieto.
 - Curvas (iguales en CSS y GSAP): entrar/salir `cubic-bezier(0.23, 1, 0.32, 1)` (`--arch-ease`,
   `EASE.ui`); moverse a la vista `cubic-bezier(0.77, 0, 0.175, 1)` (`EASE.move`); color `ease`.
   Nunca `ease-in` en la interfaz.
@@ -130,7 +174,9 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
   quieto, con la viñeta hecha en CSS y el bloque a la vista. En el footer, la tira no se
   mueve: los 30 logos bajan a varias filas.
 - Planeta: el hover de los círculos es solo con mouse (o foco de teclado); el círculo crece 1.2
-  y su plaquita baja con él en 200 ms y se pinta con el acento en 150 ms.
+  y su plaquita baja con él en 200 ms y se pinta con el acento en 150 ms. Al apretar (también
+  en el teléfono), la lente cede a 0.97 en 160 ms; con reduced-motion, no.
+- Página 404: el botón cede a 0.97 al apretar (160 ms), el color cambia en 200 ms.
 
 ## Nunca
 

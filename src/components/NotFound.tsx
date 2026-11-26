@@ -22,7 +22,7 @@ export default function NotFound() {
         </h1>
         <Link
           to="/works"
-          className="mt-8 inline-flex items-center min-h-12 px-[26px] rounded-full bg-[#191510] text-[#f2efe6] text-base font-semibold transition-colors duration-200 ease-[ease] hover:bg-[#2f6f6b] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2f6f6b]"
+          className="mt-8 inline-flex items-center min-h-12 px-[26px] rounded-full bg-[#191510] text-[#f2efe6] text-base font-semibold [transition:background-color_200ms_ease,scale_160ms_cubic-bezier(0.23,1,0.32,1)] motion-safe:active:scale-[0.97] hover:bg-[#2f6f6b] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#2f6f6b]"
           style={{ fontFamily: 'var(--arch-sans, Inter, sans-serif)' }}
         >
           Ver trabajos

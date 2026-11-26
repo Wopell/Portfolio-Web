@@ -77,14 +77,14 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 28px;
   background: rgba(12, 10, 9, 0.46);
-  -webkit-backdrop-filter: blur(26px) saturate(1.1);
-  backdrop-filter: blur(26px) saturate(1.1);
+  /* 20px como tope: el fondo es un WebGL que cambia en cada cuadro */
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  backdrop-filter: blur(20px) saturate(1.1);
   color: #fff;
+  /* el vidrio solo funde: moverlo obligaría a recalcular el desenfoque en cada
+     cuadro; lo que sube 12px son sus partes (abajo) */
   opacity: 0;
-  transform: translateY(16px) scale(0.98);
-  transition:
-    opacity 400ms var(--arch-ease),
-    transform 500ms var(--arch-ease);
+  transition: opacity 400ms var(--arch-ease);
 }
 
 .finale__panel > * {
@@ -102,7 +102,6 @@
 .finale.is-full .finale__panel,
 .finale__panel:focus-within {
   opacity: 1;
-  transform: none;
   pointer-events: auto;
 }
 
@@ -338,7 +337,7 @@
 }
 
 .card__copy:active {
-  transform: scale(0.94);
+  transform: scale(0.96);
 }
 
 @media (max-width: 639px) {

@@ -2771,6 +2771,8 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
 
         const innerContent = (
           <>
+            {/* al apretar la lente cede apenas (también en el teléfono, donde no hay hover) */}
+            <div className="transition-transform duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] motion-safe:group-active:scale-[0.97]">
             {/* la pieza como una lente: aro de papel, filete de tinta y sombra baja */}
             <div
               className="relative rounded-full overflow-hidden transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] will-change-transform flex items-center justify-center w-[64px] h-[64px] md:w-[90px] md:h-[90px]"
@@ -2794,6 +2796,7 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
                 className="w-full h-full object-cover pointer-events-none select-none"
                 loading="eager"
               />
+            </div>
             </div>
 
             {/* la plaquita: un hilo y el nombre del filtro que abre (siempre visible:
