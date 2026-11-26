@@ -154,7 +154,8 @@ export default function Home({ activeTab = "works" }: HomeProps) {
             </h1>
             <div className="mt-3 font-sans text-zinc-950">
               <p className="text-base font-semibold leading-snug">Tomy Powell</p>
-              <p className="text-sm font-medium leading-snug text-zinc-700">Animation · 3D Art · IA · Post Production</p>
+              {/* las mismas palabras que los filtros de /works */}
+              <p className="text-sm font-medium leading-snug text-zinc-700">Animación · 3D · IA · Postproducción</p>
               <p className="mt-3 text-[0.875rem] font-semibold uppercase tracking-[0.08em] text-zinc-600" aria-hidden="true">
                 Deslizá ↓
               </p>

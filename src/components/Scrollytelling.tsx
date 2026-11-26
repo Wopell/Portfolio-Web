@@ -104,8 +104,55 @@ function getHeroTextMaskPath(p: number, isMobile: boolean) {
   `.replace(/\s+/g, " ").trim();
 }
 
-// Module-level persistent frame cache across component lifecycles
-let globalFramesCache: (HTMLImageElement | ImageBitmap)[] | null = null;
+/* Fotogramas: se cargan una sola vez por visita (sobreviven al ir y volver de /works).
+   Primero el 1, con prioridad alta: con él ya se ve la foto y el texto, sin pantalla
+   de carga. Después el resto, en orden y de a 6 a la vez; mientras tanto se dibuja el
+   fotograma cargado más cercano al que pide el scroll. */
+const frameStore = {
+  frames: [] as (HTMLImageElement | undefined)[],
+  started: false,
+  listeners: new Set<(index: number) => void>(),
+};
+
+function startFrameLoading() {
+  if (frameStore.started) return;
+  frameStore.started = true;
+  const load = (i: number) =>
+    new Promise<void>((resolve) => {
+      const img = new Image();
+      img.decoding = "async";
+      if (i === 0) img.setAttribute("fetchpriority", "high");
+      img.src = encodeURI(`/${CONFIG.FOLDER_NAME}/${CONFIG.getFileName(i + 1)}`);
+      img
+        .decode()
+        .then(() => {
+          frameStore.frames[i] = img;
+          frameStore.listeners.forEach((fn) => fn(i));
+        })
+        .catch((e) => console.error(`Error loading frame ${i + 1}:`, e))
+        .finally(resolve);
+    });
+  load(0).then(() => {
+    let next = 1;
+    const worker = async () => {
+      while (next < CONFIG.TOTAL_FRAMES) await load(next++);
+    };
+    for (let k = 0; k < 6; k++) worker();
+  });
+}
+
+/** el fotograma cargado más cercano a `want` (prefiere los anteriores); -1 si no hay */
+function nearestFrame(want: number) {
+  const f = frameStore.frames;
+  if (f[want]) return want;
+  for (let d = 1; d < CONFIG.TOTAL_FRAMES; d++) {
+    if (want - d >= 0 && f[want - d]) return want - d;
+    if (want + d < CONFIG.TOTAL_FRAMES && f[want + d]) return want + d;
+  }
+  return -1;
+}
+
+const anyFrame = () => frameStore.frames.find(Boolean);
 
 export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress, isZoomDisabled = false }: ScrollytellingProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -118,16 +165,8 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   const bloomRef = useRef<HTMLDivElement>(null);
 
 
-  const [loadedPercentage, setLoadedPercentage] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  // el loader se funde (200 ms) en vez de cortar de negro al papel; recién
-  // después se desmonta
-  const [loaderGone, setLoaderGone] = useState(false);
-  useEffect(() => {
-    if (!isLoaded) return;
-    const id = window.setTimeout(() => setLoaderGone(true), 240);
-    return () => window.clearTimeout(id);
-  }, [isLoaded]);
+  // la foto entra (fundido de 600 ms) apenas hay un fotograma; sin pantalla de carga
+  const [ready, setReady] = useState(() => Boolean(anyFrame()));
   const [isMobile, setIsMobile] = useState(false);
   // reduced-motion: intro sin zoom. La imagen queda quieta en su marco (primer
   // fotograma, máscara y escala fijas) y el scroll solo maneja opacidades: el
@@ -153,64 +192,29 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   const frameY = useTransform(scrollY, (y) => (isZoomDisabled ? -y : 0));
 
   // Ref to track last rendered frame index to prevent duplicate canvas draws
+  // (el que pide el scroll; el que se dibujó de verdad puede ser el cargado más cercano)
   const lastRenderedFrameRef = useRef<number>(-1);
-
-  // Store pre-rendered images
-  const framesRef = useRef<(ImageBitmap | HTMLImageElement)[]>([]);
-
-  // Preload and decode images
-  useEffect(() => {
-    if (globalFramesCache && globalFramesCache.length === CONFIG.TOTAL_FRAMES) {
-      framesRef.current = globalFramesCache;
-      setLoadedPercentage(100);
-      setIsLoaded(true);
-      return;
-    }
-
-    let loadedCount = 0;
-    const frames: HTMLImageElement[] = [];
-
-    const onFrameLoad = () => {
-      loadedCount++;
-      setLoadedPercentage(Math.floor((loadedCount / CONFIG.TOTAL_FRAMES) * 100));
-      if (loadedCount === CONFIG.TOTAL_FRAMES) {
-        globalFramesCache = frames;
-        framesRef.current = frames;
-        setIsLoaded(true);
-      }
-    };
-
-    for (let i = 1; i <= CONFIG.TOTAL_FRAMES; i++) {
-      const img = new Image();
-      img.src = encodeURI(`/${CONFIG.FOLDER_NAME}/${CONFIG.getFileName(i)}`);
-      
-      img.decode()
-        .then(() => {
-          frames[i - 1] = img;
-          onFrameLoad();
-        })
-        .catch((e) => {
-          console.error(`Error loading frame ${i}:`, e);
-          frames[i - 1] = img;
-          onFrameLoad();
-        });
-    }
-  }, []);
+  const drawnFrameRef = useRef<number>(-1);
 
   // Draw frame function with object-fit: cover scaling
   const drawFrame = (index: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d", { alpha: false }); 
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    const texture = framesRef.current[index];
-    if (!texture) return; 
+    const at = nearestFrame(index);
+    if (at < 0) return;
+    const texture = frameStore.frames[at]!;
 
-    // Match canvas to window size
-    if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-       canvas.width = window.innerWidth;
-       canvas.height = window.innerHeight;
+    // el lienzo a la resolución real de la pantalla (hasta 2x): a 1x en un teléfono o
+    // una Retina el retrato se veía blando
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.round(window.innerWidth * dpr);
+    const h = Math.round(window.innerHeight * dpr);
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
     }
 
     const scale = Math.max(canvas.width / texture.width, canvas.height / texture.height) * ZOOM_FACTOR;
@@ -219,13 +223,30 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     const offsetX = (canvas.width - scaledWidth) / 2;
     const offsetY = (canvas.height - scaledHeight) / 2;
 
+    ctx.imageSmoothingQuality = "high";
     ctx.drawImage(texture, offsetX, offsetY, scaledWidth, scaledHeight);
+    drawnFrameRef.current = at;
   };
+
+  // carga de fotogramas: cada uno que llega se dibuja si queda más cerca del que
+  // pide el scroll que el que está en pantalla
+  useEffect(() => {
+    const onFrame = (i: number) => {
+      setReady(true);
+      const want = lastRenderedFrameRef.current;
+      if (want < 0) return;
+      const shown = drawnFrameRef.current;
+      if (shown < 0 || Math.abs(i - want) < Math.abs(shown - want)) drawFrame(want);
+    };
+    frameStore.listeners.add(onFrame);
+    startFrameLoading();
+    return () => {
+      frameStore.listeners.delete(onFrame);
+    };
+  }, []);
 
   // Helper function to update canvas, SVG mask, and vignette state based on spring values
   const updateRenderState = (latestScrollY: number, latestProgress: number) => {
-    if (!isLoaded) return;
-
     // progreso que mueve la geometría (fotogramas, máscara, zoom): quieto en reduced-motion
     const geoP = still ? 0 : latestProgress;
     const totalFrames = CONFIG.TOTAL_FRAMES;
@@ -285,7 +306,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
         const vw = window.innerWidth;
         // posición en pantalla de la barra: cover del fotograma + zoom del canvas
         // (desde el centro) + escala 1.05 del contenedor de parallax
-        const tex = framesRef.current[0];
+        const tex = anyFrame();
         const tw = tex ? tex.width : 1920;
         const th = tex ? tex.height : 1080;
         const fit = Math.max(vw / tw, vh / th);
@@ -315,19 +336,16 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
     }
   };
 
-  // Draw frame 0 when assets finish loading or when zoom mode changes
+  // primer dibujo (y cada vez que cambia el modo), con el fotograma que haya; los que
+  // van llegando se dibujan solos (onFrame)
   useEffect(() => {
-    if (isLoaded) {
-      if (isZoomDisabled) {
-        lastRenderedFrameRef.current = -1;
-        updateRenderState(scrollY.get(), 0);
-      } else {
-        lastRenderedFrameRef.current = -1;
-        drawFrame(0);
-        updateRenderState(0, 0);
-      }
+    lastRenderedFrameRef.current = -1;
+    if (isZoomDisabled) {
+      updateRenderState(scrollY.get(), 0);
+    } else {
+      updateRenderState(smoothScrollY.get(), smoothProgress.get());
     }
-  }, [isLoaded, isZoomDisabled]);
+  }, [isZoomDisabled]);
 
   // Subscribe to raw scrollY updates when in About mode to translate canvas wrapper up
   useMotionValueEvent(scrollY, "change", (latestScrollY) => {
@@ -346,15 +364,13 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   // Handle window resizes
   useEffect(() => {
     const handleResize = () => {
-      if (isLoaded) {
-        lastRenderedFrameRef.current = -1; // Force redraw on resize
-        updateRenderState(smoothScrollY.get(), smoothProgress.get());
-      }
+      lastRenderedFrameRef.current = -1; // Force redraw on resize
+      updateRenderState(smoothScrollY.get(), smoothProgress.get());
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [isLoaded, smoothScrollY, smoothProgress]);
+  }, [smoothScrollY, smoothProgress]);
 
   // Parallax del mouse: la imagen sigue al puntero con un retardo suave.
   // quickTo reutiliza un solo tween por eje (antes se creaba uno por cada
@@ -362,7 +378,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
   // que sigue al cursor.
   useEffect(() => {
     const el = parallaxWrapperRef.current;
-    if (!isLoaded || !el || prefersReducedMotion()) return;
+    if (!el || prefersReducedMotion()) return;
 
     gsap.set(el, { scale: 1.05 });
     const toX = gsap.quickTo(el, "x", { duration: 0.8, ease: "power2.out" });
@@ -380,7 +396,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
       window.removeEventListener("mousemove", handleMouseMove);
       gsap.killTweensOf(el);
     };
-  }, [isLoaded]);
+  }, []);
 
   return (
     <div 
@@ -400,26 +416,6 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
         </defs>
       </svg>
 
-      {/* Loading Overlay */}
-      {!loaderGone && (
-        <div
-          aria-hidden={isLoaded || undefined}
-          className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-white transition-opacity duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${isLoaded ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-        >
-          <div className="font-sans text-[0.875rem] font-semibold uppercase tracking-[0.08em] mb-3 text-white/70">Cargando</div>
-          <div className="text-7xl md:text-8xl tabular-nums" style={{ fontFamily: "'Instrument Serif', serif" }}>
-            {loadedPercentage.toString().padStart(3, "0")}%
-          </div>
-          <div className="w-64 h-1 bg-white/20 mt-8 rounded-full overflow-hidden">
-            {/* scaleX en vez de width: no dispara layout en cada paso */}
-            <div
-              className="h-full w-full origin-left bg-white transition-transform duration-200 ease-linear motion-reduce:transition-none"
-              style={{ transform: `scaleX(${loadedPercentage / 100})` }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Light White Outer Frame Background */}
       <motion.div 
         className="fixed top-0 left-0 w-full h-screen pointer-events-none z-0 bg-[#f2efe6]"
@@ -438,7 +434,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
           <canvas
             ref={canvasRef}
             className="w-full h-full object-cover origin-center pointer-events-none"
-            style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 600ms cubic-bezier(0.23, 1, 0.32, 1)" }}
+            style={{ opacity: ready ? 1 : 0, transition: "opacity 600ms cubic-bezier(0.23, 1, 0.32, 1)" }}
           />
         </div>
 
@@ -447,7 +443,7 @@ export default function Scrollytelling({ scrollY, smoothScrollY, smoothProgress,
           ref={vignetteRef}
           className="absolute inset-0 pointer-events-none"
           style={{ 
-            opacity: isLoaded ? 1 : 0,
+            opacity: ready ? 1 : 0,
             transition: "opacity 600ms cubic-bezier(0.23, 1, 0.32, 1)",
             boxShadow: "inset 0 0 150px 80px rgba(0,0,0,1)",
             background: "radial-gradient(circle, transparent 60%, rgba(0,0,0,0.6) 100%)"

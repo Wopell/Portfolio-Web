@@ -42,8 +42,12 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
 ## Layout
 
 - `/`: intro de fotogramas en la máscara escalonada. En el recorte: «PORTFOLIO», tu nombre,
-  la oferta y «Deslizá ↓». Una sola forma de entrar: el scroll (la navbar es navegación, no atajo).
+  la oferta con las mismas palabras que los filtros («Animación · 3D · IA · Postproducción») y
+  «Deslizá ↓». Una sola forma de entrar: el scroll (la navbar es navegación, no atajo).
   Al final, el resplandor blanco y /works en el mismo blanco.
+  Sin pantalla de carga: el papel, el texto y el primer fotograma se ven enseguida (la foto entra
+  con un fundido de 600 ms); los otros 53 cargan atrás, en orden, y mientras tanto se dibuja el
+  fotograma cargado más cercano. El lienzo se dibuja a la resolución real de la pantalla (hasta 2x).
 - `/works`, de corrido sobre el mismo papel:
   1. Hero (congelado).
   2. Planeta: el globo de puntos está congelado (look y giro). Va más abajo, con aire arriba y
@@ -110,7 +114,7 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
   Nunca `ease-in` en la interfaz.
 - Duraciones: press 160 ms; color 150–200 ms; ficha: entra en 300 ms, sale en 180 ms (si se
   cierra mientras entra, sale desde donde quedó); volver arriba < 300 ms; la navbar cambia de
-  página al instante y su indicador se mueve en 250 ms; el loader de la intro se funde en 200 ms.
+  página al instante y su indicador se mueve en 250 ms; la foto de la intro entra en 600 ms.
 - Hover (solo mouse): la miniatura escala 1.03 en 240 ms; botones y tarjetas de contacto suben
   2px. Press: 0.97
   (miniatura 0.98).
