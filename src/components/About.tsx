@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, type CSSProperties } from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { ABOUT, type SoftwareItem } from '../data/about';
+import { asset } from '../lib/asset';
 import './about.css';
 
 /**
@@ -89,8 +90,8 @@ function ArcaneLoop() {
     <figure className="ab__loop">
       <video
         ref={ref}
-        src="/works/loops/arcane.mp4"
-        poster="/works/arcane-0.webp"
+        src={asset('/works/loops/arcane.mp4')}
+        poster={asset('/works/arcane-0.webp')}
         muted
         loop
         playsInline
@@ -110,7 +111,7 @@ export default function About() {
       <header className="ab__cover">
         <figure className="ab__cover-photo">
           <img
-            src="/about/portada.webp"
+            src={asset('/about/portada.webp')}
             width={1024}
             height={1024}
             alt="Tomy Powell en blanco y negro, sentado con la laptop frente a una persiana metálica, con un círculo amarillo detrás de la cabeza y la frase «This is me right now»"
@@ -183,7 +184,7 @@ export default function About() {
         <figure className="ab__char-figure">
           <span className="ab__pad" aria-hidden="true" />
           <img
-            src="/about/personaje.webp"
+            src={asset('/about/personaje.webp')}
             width={749}
             height={1400}
             alt="Wopell, el personaje dibujado de Tomy: anteojos dorados, remera gris, mochila y pantalón negro"
@@ -226,7 +227,7 @@ export default function About() {
               >
                 <span className="ab__pola-frame">
                   <img
-                    src={p.src}
+                    src={asset(p.src)}
                     width={960}
                     height={540}
                     alt={p.alt}

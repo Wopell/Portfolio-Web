@@ -17,6 +17,8 @@
  * =========================================================================
  */
 
+import { asset } from '../lib/asset';
+
 // Escaneo reactivo de Vite para detectar archivos de usuario en /public/previews/
 const userFiles = import.meta.glob('/public/previews/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,WEBP}', {
   eager: true,
@@ -33,10 +35,10 @@ export function resolveWorkSrc(index) {
   for (const ext of extensions) {
     const globKey = `/public/previews/work-${index}.${ext}`;
     if (userFiles[globKey]) {
-      return `/previews/work-${index}.${ext}`;
+      return asset(`/previews/work-${index}.${ext}`);
     }
   }
-  return `/previews/placeholder-${index}.svg`;
+  return asset(`/previews/placeholder-${index}.svg`);
 }
 
 export const WORKS = [
@@ -45,7 +47,7 @@ export const WORKS = [
     categoryNumber: '001',
     title: '001 Animation',
     src: resolveWorkSrc(1),
-    placeholder: '/previews/placeholder-1.svg',
+    placeholder: asset('/previews/placeholder-1.svg'),
     url: '#selected-projects',
   },
   {
@@ -53,7 +55,7 @@ export const WORKS = [
     categoryNumber: '002',
     title: '002 3D Art',
     src: resolveWorkSrc(2),
-    placeholder: '/previews/placeholder-2.svg',
+    placeholder: asset('/previews/placeholder-2.svg'),
     url: '#selected-projects',
   },
   {
@@ -61,7 +63,7 @@ export const WORKS = [
     categoryNumber: '003',
     title: '003 IA',
     src: resolveWorkSrc(3),
-    placeholder: '/previews/placeholder-3.svg',
+    placeholder: asset('/previews/placeholder-3.svg'),
     url: '#selected-projects',
   },
   {
@@ -69,7 +71,7 @@ export const WORKS = [
     categoryNumber: '004',
     title: '004 Post Production',
     src: resolveWorkSrc(4),
-    placeholder: '/previews/placeholder-4.svg',
+    placeholder: asset('/previews/placeholder-4.svg'),
     url: '#selected-projects',
   },
 ];

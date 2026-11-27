@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "../lib/gsap";
+import { asset } from "../lib/asset";
 import { MotionValue, useMotionValueEvent, useTransform, motion } from "motion/react";
 
 
@@ -122,7 +123,7 @@ function startFrameLoading() {
       const img = new Image();
       img.decoding = "async";
       if (i === 0) img.setAttribute("fetchpriority", "high");
-      img.src = encodeURI(`/${CONFIG.FOLDER_NAME}/${CONFIG.getFileName(i + 1)}`);
+      img.src = encodeURI(asset(`/${CONFIG.FOLDER_NAME}/${CONFIG.getFileName(i + 1)}`));
       img
         .decode()
         .then(() => {

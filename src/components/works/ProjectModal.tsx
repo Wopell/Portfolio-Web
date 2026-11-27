@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { X } from 'lucide-react';
+import { ArrowUpRight, Play, X } from 'lucide-react';
 import { gsap, EASE, prefersReducedMotion } from '../../lib/gsap';
 import { ProjectItem } from '../../data/projects';
 
@@ -12,6 +12,8 @@ export const ProjectModal: React.FC<{
   onClose: () => void;
 }> = ({ project, onClose }) => {
   const [rendered, setRendered] = useState<ProjectItem | null>(null);
+  /* el reproductor de YouTube se carga recién al tocar «Reproducir» */
+  const [playing, setPlaying] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const closingRef = useRef(false);
@@ -21,6 +23,7 @@ export const ProjectModal: React.FC<{
   useEffect(() => {
     if (!project || closingRef.current) return;
     setRendered(project);
+    setPlaying(false);
   }, [project]);
 
   useEffect(() => {
@@ -117,6 +120,7 @@ export const ProjectModal: React.FC<{
   // datos incompletos: sin título vacío ni separadores huérfanos
   const title = rendered.title.trim() || 'Sin título';
   const vertical = rendered.ratio === '9/16';
+  const square = rendered.ratio === '1/1';
   const meta = [rendered.client, rendered.tag, rendered.year].map((s) => (s ?? '').trim()).filter(Boolean);
 
   return (
@@ -149,7 +153,9 @@ export const ProjectModal: React.FC<{
           style={
             vertical
               ? { aspectRatio: '9 / 16', height: 'min(62vh, 760px)', maxWidth: '100%' }
-              : { aspectRatio: '16 / 9', maxHeight: '55vh', width: '100%' }
+              : square
+                ? { aspectRatio: '1 / 1', width: 'min(100%, 62vh, 640px)' }
+                : { aspectRatio: '16 / 9', maxHeight: '55vh', width: '100%' }
           }
         >
           <img
@@ -175,7 +181,28 @@ export const ProjectModal: React.FC<{
               }}
             />
           )}
-          {!vertical && <div className="absolute inset-0 bg-gradient-to-t from-[#191510] via-transparent to-transparent" />}
+          {!vertical && !square && <div className="absolute inset-0 bg-gradient-to-t from-[#191510] via-transparent to-transparent" />}
+          {rendered.youtubeId &&
+            (playing ? (
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${rendered.youtubeId}?autoplay=1&rel=0&playsinline=1`}
+                title={`${title} en YouTube`}
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+                className="absolute inset-0 z-20 w-full h-full border-0"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => setPlaying(true)}
+                aria-label={`Reproducir ${title}`}
+                className="group absolute inset-0 z-10 flex items-center justify-center cursor-pointer focus-visible:outline-2 focus-visible:outline-white focus-visible:-outline-offset-4"
+              >
+                <span className="flex items-center justify-center w-16 h-16 rounded-full bg-[#f2efe6] text-[#191510] shadow-lg transition-[scale,background-color] duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:bg-white group-hover:scale-[1.04] group-active:scale-[0.97]">
+                  <Play size={22} className="ml-0.5" fill="currentColor" aria-hidden="true" />
+                </span>
+              </button>
+            ))}
         </div>
 
         <div className="p-6 md:p-8 text-white">
@@ -191,6 +218,18 @@ export const ProjectModal: React.FC<{
           <h2 className="text-4xl md:text-5xl leading-none [overflow-wrap:anywhere]" style={{ fontFamily: 'var(--arch-serif)' }}>
             {title}
           </h2>
+          {rendered.url && (
+            <a
+              href={rendered.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-4 min-h-[44px] text-[0.875rem] font-semibold uppercase tracking-[0.08em] text-[#f2efe6]/70 hover:text-white underline-offset-4 hover:underline transition-colors duration-200 ease-[ease] focus-visible:outline-2 focus-visible:outline-white"
+              style={{ fontFamily: 'var(--arch-sans)' }}
+            >
+              Ver en YouTube
+              <ArrowUpRight size={16} aria-hidden="true" />
+            </a>
+          )}
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import landTopology from 'world-atlas/land-110m.json';
 import { WORKS } from '../data/works.js';
 import { FILTERS } from '../data/display-works';
 import { gsap, EASE, ScrollTrigger } from '../lib/gsap';
+import { asset } from '../lib/asset';
 
 /**
  * =========================================================================
@@ -2789,8 +2790,8 @@ export const PlanetHero = forwardRef<PlanetHeroHandle, PlanetHeroProps>(function
                 alt={work.title}
                 onError={(e) => {
                   const target = e.currentTarget;
-                  const fallback = work.placeholder || `/previews/placeholder-${idx + 1}.svg`;
-                  if (target.src !== fallback) {
+                  const fallback = work.placeholder || asset(`/previews/placeholder-${idx + 1}.svg`);
+                  if (target.getAttribute('src') !== fallback) {
                     target.src = fallback;
                   }
                 }}

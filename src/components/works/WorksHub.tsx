@@ -66,7 +66,7 @@ function distribute(items: Work[], cols: number) {
   items.forEach((work, n) => {
     const c = heights.indexOf(Math.min(...heights));
     columns[c].push({ work, n });
-    heights[c] += (work.ratio === '9/16' ? 16 / 9 : 9 / 16) + 0.22; // + pie de la tarjeta
+    heights[c] += (work.ratio === '9/16' ? 16 / 9 : work.ratio === '1/1' ? 1 : 9 / 16) + 0.22; // + pie de la tarjeta
   });
   return columns;
 }

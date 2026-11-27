@@ -184,6 +184,39 @@ Acción principal: elegir una pieza → ver el proyecto → escribir.
   (mismo selector que /works). Lo vacío no deja títulos sueltos y una foto que no carga deja
   papel con trama.
 
+## Videos de YouTube y publicación
+
+- Los videos del canal (youtube.com/@wopellart) entran solos a la grilla de `/works`, después
+  de las piezas elegidas a mano y del más nuevo al más viejo. Los lee
+  `scripts/sync-youtube.mjs` del feed público del canal (sin claves) y los guarda en
+  `src/data/youtube-works.json`, con el póster en `public/works/yt/` y la miniatura en
+  `public/works/thumbs/yt/` (webp hecho con ffmpeg; nada se carga desde YouTube al abrir la página).
+- Cómo se escribe un video en YouTube para que entre bien:
+  - Título: el de YouTube sin la firma del final («- DV [Wopell]», «- W [Wopell]»,
+    «- [ by Wopell ]»…). Todos entran igual, sin separar DV de W.
+  - Categoría: un hashtag en la descripción o el título: `#animacion`, `#3d`, `#ia` o `#post`
+    (también `#animation`, `#motion`, `#render`, `#blender`, `#ai`, `#postpro`, `#vfx`). Sin
+    hashtag aparece solo en «Todo» y la ficha dice «Video».
+  - Cliente: una línea `Cliente: Nombre` en la descripción; si no está, «Wopell».
+  - `#oculto` en la descripción lo saca del portfolio.
+  - Los Shorts entran verticales (9:16) o cuadrados (1:1) según el original.
+- Si un video del canal ya está entre las piezas elegidas a mano, esa entrada lleva su
+  `youtubeId` en `display-works.ts` y el video no se repite (hoy: Arcane = «Parallax practice»
+  y Collage 50s = «TP2 PostPro»).
+- Ficha: si la pieza tiene video en YouTube, el póster lleva un botón «Reproducir» (círculo beige
+  de 64px, hover 1.04, presión 0.97). Recién al tocarlo se carga el reproductor
+  (youtube-nocookie) en el mismo lugar. Debajo del título va «Ver en YouTube ↗». Las piezas del
+  canal no tienen loop: la tarjeta muestra el póster quieto.
+- El sitio se publica en GitHub Pages con `.github/workflows/pages.yml`: con cada push a `main`,
+  todos los días a las 6:17 (Argentina) y a mano desde Actions. Cada corrida trae los videos
+  nuevos, arma el sitio y lo publica. Los ya bajados se guardan entre corridas, porque el feed
+  solo trae los últimos 15. Un video se quita solo si YouTube confirma que ya no es público.
+- El sitio vive en una subcarpeta (`/Portfolio-Web/`): toda ruta de `public/` escrita en código
+  pasa por `asset()` (`src/lib/asset.ts`) y el router usa esa base. El CSS lo resuelve Vite solo.
+  `/works` y `/about` abiertos directo entran por `404.html`, que es una copia de `index.html`.
+- Instagram (instagram.com/wopell.art) queda para más adelante: necesita un acceso oficial de
+  Meta que tiene que crear Tomy.
+
 ## Nunca
 
 - Corporativo, recargado, stock.

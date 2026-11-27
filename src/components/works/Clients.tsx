@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { asset } from '../../lib/asset';
 import './display.css';
 
 /**
@@ -57,7 +58,7 @@ const Track: React.FC<{ copy?: boolean; near: boolean }> = ({ copy, near }) => (
     {CLIENTS.map((c) => (
       <li key={c.file} className="logos__item">
         <img
-          src={`/logos/ink/${c.file}.webp`}
+          src={asset(`/logos/ink/${c.file}.webp`)}
           alt={copy ? '' : c.name}
           loading={near ? 'eager' : 'lazy'}
           decoding="async"

@@ -15,7 +15,10 @@ export interface ProjectItem {
   image: string;
   /** loop corto del video y su proporción */
   loop?: string;
-  ratio?: '16/9' | '9/16';
+  ratio?: '16/9' | '9/16' | '1/1';
+  /** el video en YouTube: la ficha lo reproduce al tocar «Reproducir» */
+  youtubeId?: string;
+  url?: string;
   /** heredado: solo lo usan componentes viejos sin uso (AsciiWorld) */
   description?: string;
 }
@@ -46,5 +49,7 @@ export function workToProject(w: Work): ProjectItem {
     image: w.image,
     loop: w.loop,
     ratio: w.ratio,
+    youtubeId: w.youtubeId,
+    url: w.url,
   };
 }

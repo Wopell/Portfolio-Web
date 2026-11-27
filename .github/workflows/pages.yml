@@ -1,0 +1,85 @@
+# Publica el sitio en GitHub Pages.
+# Corre con cada push a main, todos los días a las 6:17 (Argentina) para sumar los videos
+# nuevos del canal de YouTube, y a mano desde la pestaña Actions («Run workflow»).
+name: Publicar el sitio
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 9 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
+
+      # el feed de YouTube trae solo los 15 videos más nuevos: lo ya bajado se guarda
+      # entre corridas para que los anteriores no se pierdan
+      - name: Recuperar los videos ya bajados
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            src/data/youtube-works.json
+            public/works/yt
+            public/works/thumbs/yt
+          key: youtube-${{ github.run_id }}
+          restore-keys: youtube-
+
+      # ffmpeg pasa las miniaturas a webp y mide los Shorts
+      - name: Traer los videos del canal
+        run: |
+          command -v ffmpeg || { sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg; }
+          node scripts/sync-youtube.mjs
+
+      - name: Guardar los videos bajados
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            src/data/youtube-works.json
+            public/works/yt
+            public/works/thumbs/yt
+          key: youtube-${{ github.run_id }}
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      # base_path es «/Portfolio-Web» en wopell.github.io y vacío con dominio propio
+      - name: Armar el sitio
+        run: npx vite build --base="${{ steps.pages.outputs.base_path }}/"
+
+      # GitHub Pages no conoce las rutas de la app: /works y /about se abren desde 404.html
+      - name: Rutas directas
+        run: cp dist/index.html dist/404.html
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

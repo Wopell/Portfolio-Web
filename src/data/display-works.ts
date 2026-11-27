@@ -3,11 +3,17 @@
  * «Mis trabajos/motion»). Formato y duración son los del archivo original.
  * Para sumar una pieza: exportá un fotograma a /public/works/<id>.webp y
  * agregá una entrada acá.
+ *
+ * Los videos del canal de YouTube entran solos: scripts/sync-youtube.mjs los guarda en
+ * youtube-works.json y se suman después de estas piezas. Si un video del canal ya está
+ * acá, poné su `youtubeId` en la entrada: no se repite y la ficha lo reproduce.
  */
 
+import { asset } from '../lib/asset';
 import { readDataMode, worksFor, WORST_EMAIL } from './worst-case';
+import YOUTUBE from './youtube-works.json';
 
-export type WorkKind = 'Animación' | '3D' | 'IA' | 'Post' | 'Reel';
+export type WorkKind = 'Animación' | '3D' | 'IA' | 'Post' | 'Reel' | 'Video';
 
 export interface Work {
   id: string;
@@ -18,14 +24,18 @@ export interface Work {
   image: string;
   /** loop corto sin audio (public/works/loops), exportado del video original */
   loop: string;
-  /** proporción del video: horizontal o vertical */
-  ratio: '16/9' | '9/16';
+  /** proporción del video: horizontal, vertical o cuadrado */
+  ratio: '16/9' | '9/16' | '1/1';
   /** encuadre en mobile: punto focal horizontal 0..1 */
   focusX?: number;
   format: string;
   duration: string;
-  /** categoría del archivo (CATEGORIES) a la que pertenece */
+  /** categoría del archivo (CATEGORIES) a la que pertenece; vacía = solo en «Todo» */
   categoryId: string;
+  /** el mismo video en YouTube: la ficha lo puede reproducir */
+  youtubeId?: string;
+  /** dónde verlo completo */
+  url?: string;
 }
 
 const DEMO_WORKS: Work[] = [
@@ -41,6 +51,7 @@ const DEMO_WORKS: Work[] = [
     format: '1920×1080',
     duration: '1:32',
     categoryId: 'category-3d-art',
+    youtubeId: 'PCSUEZ2ZALM', // «Parallax practice» en el canal
   },
   {
     id: 'salta-promo',
@@ -145,6 +156,7 @@ const DEMO_WORKS: Work[] = [
     format: '1920×1080',
     duration: '0:56',
     categoryId: 'category-post-production',
+    youtubeId: '-SEsXhdf4zc', // «TP2 PostPro» en el canal
   },
   {
     id: 'banco-macro',
@@ -215,7 +227,15 @@ const DEMO_WORKS: Work[] = [
 /* En desarrollo, `?data=worst|empty|one|many` cambia las piezas por datos de peor
    caso (worst-case.ts). En producción siempre son las reales. */
 const DEV_MODE = import.meta.env.DEV ? readDataMode() : null;
-export const WORKS: Work[] = DEV_MODE ? worksFor(DEV_MODE, DEMO_WORKS) : DEMO_WORKS;
+
+/* los del canal que no están arriba, del más nuevo al más viejo */
+const fromYoutube = (YOUTUBE as Work[]).filter((y) => !DEMO_WORKS.some((w) => w.youtubeId === y.youtubeId));
+const REAL_WORKS: Work[] = [
+  ...DEMO_WORKS.map((w) => (w.youtubeId ? { ...w, url: `https://www.youtube.com/watch?v=${w.youtubeId}` } : w)),
+  ...fromYoutube,
+].map((w) => ({ ...w, image: asset(w.image), loop: w.loop && asset(w.loop) }));
+
+export const WORKS: Work[] = DEV_MODE ? worksFor(DEV_MODE, REAL_WORKS) : REAL_WORKS;
 
 /** mail de contacto del cierre */
 export const CONTACT_EMAIL = DEV_MODE === 'worst' ? WORST_EMAIL : 'tomy.wopell@gmail.com';
