@@ -66,9 +66,14 @@ jobs:
       - name: Armar el sitio
         run: npx vite build --base="${{ steps.pages.outputs.base_path }}/"
 
-      # GitHub Pages no conoce las rutas de la app: /works y /about se abren desde 404.html
+      # GitHub Pages no conoce las rutas de la app. /works y /about también son carpetas de
+      # public/, así que Pages las abre con barra al final: un index.html en cada una responde
+      # 200 (bueno para buscadores) y cualquier otra ruta cae en 404.html
       - name: Rutas directas
-        run: cp dist/index.html dist/404.html
+        run: |
+          cp dist/index.html dist/404.html
+          cp dist/index.html dist/works/index.html
+          cp dist/index.html dist/about/index.html
 
       - uses: actions/upload-pages-artifact@v4
         with:
